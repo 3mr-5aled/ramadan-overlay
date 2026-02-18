@@ -674,17 +674,10 @@
       <span class="badge">pointer-events: none</span>
     </div>
 
-    <!-- Load from unpkg CDN (falls back to local dist for offline dev) -->
+    <!-- Load library: local dist for dev, unpkg for hosted -->
+    <script src="../dist/ramadan-overlay.min.js" onerror="this.remove();var s=document.createElement('script');s.src='https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js';s.onload=initApp;document.head.appendChild(s)" onload="initApp()"></script>
     <script>
-      (function(){
-        var s = document.createElement('script');
-        // Use local build when served from localhost/file, CDN otherwise
-        var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
-        s.src = isLocal ? '../dist/ramadan-overlay.min.js' : 'https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js';
-        document.head.appendChild(s);
-      })();
-    </script>
-    <script>
+      function initApp() {
       const { init, getRamadanState } = RamadanOverlay;
 
       let currentInstance = null;
@@ -1026,6 +1019,7 @@
         .addEventListener("input", function () {
           document.getElementById("opacityVal").textContent = this.value;
         });
+      } // end initApp
     </script>
   </body>
 </html>
