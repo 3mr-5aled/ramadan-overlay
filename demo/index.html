@@ -892,7 +892,7 @@
             return `<template>\n  <RamadanOverlay\n    ${props}\n  />\n<\/template>\n\n<script setup>\nimport { RamadanOverlay } from 'ramadan-overlay/vue';\n<\/script>`;
           }
           if (activeTab === "cdn") {
-            return `<script src="https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js"><\/script>\n<script>\n  RamadanOverlay.init(${obj});\n<\/script>`;
+            return `<script src="https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js"><\/script>\n<script>\n  RamadanOverlay.init(${obj});\n<\/script>`;
           }
           return "";
         }
@@ -1106,13 +1106,13 @@
           location.hostname === "127.0.0.1";
         s.src = isLocal
           ? "../dist/ramadan-overlay.min.js"
-          : "https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js";
+          : "https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js";
         s.onload = initApp;
         s.onerror = function () {
           // local build missing — fall back to CDN
           var fallback = document.createElement("script");
           fallback.src =
-            "https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js";
+            "https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js";
           fallback.onload = initApp;
           document.head.appendChild(fallback);
         };
