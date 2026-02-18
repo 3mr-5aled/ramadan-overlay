@@ -69,6 +69,38 @@ export const RamadanOverlay = defineComponent({
       type: Object as PropType<RamadanOverlayConfig>,
       default: () => ({}),
     },
+    variant: {
+      type: String as PropType<RamadanOverlayConfig["variant"]>,
+      default: undefined,
+    },
+    position: {
+      type: String as PropType<RamadanOverlayConfig["position"]>,
+      default: undefined,
+    },
+    opacity: { type: Number as PropType<number>, default: undefined },
+    colors: { type: Array as PropType<string[]>, default: undefined },
+    zIndex: { type: Number as PropType<number>, default: undefined },
+    autoTrigger: { type: Boolean as PropType<boolean>, default: undefined },
+    previewMode: { type: Boolean as PropType<boolean>, default: undefined },
+    confetti: { type: Boolean as PropType<boolean>, default: undefined },
+    locale: {
+      type: String as PropType<RamadanOverlayConfig["locale"]>,
+      default: undefined,
+    },
+    lanternStyle: {
+      type: Number as PropType<RamadanOverlayConfig["lanternStyle"]>,
+      default: undefined,
+    },
+    glowColor: { type: String as PropType<string>, default: undefined },
+    region: {
+      type: String as PropType<RamadanOverlayConfig["region"]>,
+      default: undefined,
+    },
+    hijriAdjustment: { type: Number as PropType<number>, default: undefined },
+    density: {
+      type: String as PropType<RamadanOverlayConfig["density"]>,
+      default: undefined,
+    },
   },
   emits: ["ramadan-start", "ramadan-end"],
   setup(props, { emit }) {
@@ -76,18 +108,25 @@ export const RamadanOverlay = defineComponent({
 
     const mount = () => {
       instance?.destroy();
-      const cfg: RamadanOverlayConfig = {
-        ...props.config,
+      // Individual props override the config object
+      const { config, ...individualProps } = props;
+      // Remove undefined entries so they don't overwrite config defaults
+      const overrides = Object.fromEntries(
+        Object.entries(individualProps).filter(([, v]) => v !== undefined),
+      ) as Partial<RamadanOverlayConfig>;
+      const merged: RamadanOverlayConfig = {
+        ...config,
+        ...overrides,
         onRamadanStart: (s) => emit("ramadan-start", s),
         onRamadanEnd: () => emit("ramadan-end"),
       };
-      instance = init(cfg);
+      instance = init(merged);
     };
 
     onMounted(mount);
 
     watch(
-      () => JSON.stringify(props.config),
+      () => JSON.stringify(props),
       () => mount(),
     );
 

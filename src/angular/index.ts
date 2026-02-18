@@ -8,7 +8,14 @@ import {
   SimpleChanges,
 } from "@angular/core";
 import { getRamadanState, init } from "../core/index";
-import type { OverlayInstance, RamadanOverlayConfig } from "../types";
+import type {
+  HijriRegion,
+  LanternStyle,
+  OverlayInstance,
+  OverlayPosition,
+  OverlayVariant,
+  RamadanOverlayConfig,
+} from "../types";
 
 // ─── Directive ────────────────────────────────────────────────────────────────
 
@@ -29,6 +36,19 @@ import type { OverlayInstance, RamadanOverlayConfig } from "../types";
 export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   @Input() ramadanConfig: RamadanOverlayConfig = {};
 
+  // Individual input overrides
+  @Input() variant?: OverlayVariant;
+  @Input() position?: OverlayPosition;
+  @Input() opacity?: number;
+  @Input() colors?: string[];
+  @Input() previewMode?: boolean;
+  @Input() confetti?: boolean;
+  @Input() locale?: "en" | "ar";
+  @Input() glowColor?: string;
+  @Input() region?: HijriRegion;
+  @Input() density?: "low" | "normal" | "high";
+  @Input() lanternStyle?: LanternStyle;
+
   private instance: OverlayInstance | null = null;
 
   ngOnInit(): void {
@@ -46,7 +66,27 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
 
   private mount(): void {
     this.instance?.destroy();
-    this.instance = init(this.ramadanConfig ?? {});
+    // Build individual overrides, skipping undefined values
+    const individualInputs: Partial<RamadanOverlayConfig> = {};
+    if (this.variant !== undefined) individualInputs.variant = this.variant;
+    if (this.position !== undefined) individualInputs.position = this.position;
+    if (this.opacity !== undefined) individualInputs.opacity = this.opacity;
+    if (this.colors !== undefined) individualInputs.colors = this.colors;
+    if (this.previewMode !== undefined)
+      individualInputs.previewMode = this.previewMode;
+    if (this.confetti !== undefined) individualInputs.confetti = this.confetti;
+    if (this.locale !== undefined) individualInputs.locale = this.locale;
+    if (this.glowColor !== undefined)
+      individualInputs.glowColor = this.glowColor;
+    if (this.region !== undefined) individualInputs.region = this.region;
+    if (this.density !== undefined) individualInputs.density = this.density;
+    if (this.lanternStyle !== undefined)
+      individualInputs.lanternStyle = this.lanternStyle;
+    const cfg: RamadanOverlayConfig = {
+      ...this.ramadanConfig,
+      ...individualInputs,
+    };
+    this.instance = init(cfg);
   }
 }
 

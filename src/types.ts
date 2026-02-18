@@ -147,6 +147,13 @@ export interface RamadanOverlayConfig {
    * Called when the overlay is manually destroyed.
    */
   onRamadanEnd?: () => void;
+
+  /**
+   * Override the particle/decoration count. When omitted the library picks
+   * a count automatically based on screen area (mobile gets fewer particles).
+   * @default undefined (auto)
+   */
+  density?: "low" | "normal" | "high";
 }
 
 // ─── State & Instance ─────────────────────────────────────────────────────────

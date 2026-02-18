@@ -394,6 +394,7 @@ export const mountLanterns: VariantMountFn = (
 
     const stringEl = document.createElement("div");
     stringEl.className = "ro-lantern-string";
+    stringEl.style.background = ropeColor;
 
     const svgWrap = document.createElement("div");
     svgWrap.innerHTML = buildLanternSVG(svgIndex, color);

@@ -1,4 +1,5 @@
 import type { VariantMountFn } from "../../types";
+import { scheduleRender } from "../scheduler";
 
 interface SparkleParticle {
   el: HTMLElement;
@@ -13,6 +14,31 @@ interface SparkleParticle {
   color: string;
 }
 
+function buildCrescentSVG(color: string, size: number): string {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M20 3 C8 3 2 11 2 20 C2 29 8 37 20 37 C14 32 11 26 11 20 C11 14 14 8 20 3Z" fill="${color}"/>
+  </svg>`;
+}
+
+function build8StarSVG(color: string, size: number): string {
+  const pts: string[] = [];
+  for (let i = 0; i < 8; i++) {
+    const outerR = 18;
+    const innerR = 9;
+    const outer = (i * Math.PI) / 4;
+    const inner = outer + Math.PI / 8;
+    pts.push(
+      `${20 + outerR * Math.sin(outer)},${20 - outerR * Math.cos(outer)}`,
+    );
+    pts.push(
+      `${20 + innerR * Math.sin(inner)},${20 - innerR * Math.cos(inner)}`,
+    );
+  }
+  return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <polygon points="${pts.join(" ")}" fill="${color}"/>
+  </svg>`;
+}
+
 export const mountSparkles: VariantMountFn = (
   container,
   config,
@@ -20,22 +46,51 @@ export const mountSparkles: VariantMountFn = (
   const colors = config.colors.length
     ? config.colors
     : ["#c9a84c", "#e8c96b", "#fff7cc", "#4a8a3a"];
-  const MAX_PARTICLES = 40;
+  const DENSITY_MAP = { low: 18, normal: 40, high: 70 };
+  const MAX_PARTICLES = DENSITY_MAP[config.density] ?? 40;
   const particles: SparkleParticle[] = [];
-  let rafId: number;
-  let running = true;
 
   function spawnParticle(): SparkleParticle {
     const color = colors[Math.floor(Math.random() * colors.length)];
-    const size = 3 + Math.random() * 7;
+    const roll = Math.random();
     const el = document.createElement("div");
-    el.className = "ro-sparkle";
-    el.style.cssText = `
-      width:${size}px;height:${size}px;
-      background:${color};
-      box-shadow:0 0 ${size * 1.5}px ${color};
-      animation:none;
-    `;
+    let particleSize: number;
+
+    if (roll < 0.18) {
+      // Crescent
+      particleSize = 18 + Math.random() * 14;
+      el.className = "ro-crescent";
+      el.innerHTML = buildCrescentSVG(color, particleSize);
+      el.style.cssText = `
+        position:absolute;
+        width:${particleSize}px;height:${particleSize}px;
+        filter:drop-shadow(0 0 ${particleSize * 0.5}px ${color});
+        animation:none;
+      `;
+    } else if (roll < 0.38) {
+      // 8-pointed star
+      particleSize = 14 + Math.random() * 12;
+      el.className = "ro-star";
+      el.innerHTML = build8StarSVG(color, particleSize);
+      el.style.cssText = `
+        position:absolute;
+        width:${particleSize}px;height:${particleSize}px;
+        filter:drop-shadow(0 0 ${particleSize * 0.5}px ${color});
+        animation:none;
+      `;
+    } else {
+      // Glowing dot
+      particleSize = 3 + Math.random() * 7;
+      el.className = "ro-sparkle";
+      el.style.cssText = `
+        position:absolute;
+        width:${particleSize}px;height:${particleSize}px;
+        background:${color};
+        box-shadow:0 0 ${particleSize * 1.5}px ${color};
+        animation:none;
+      `;
+    }
+
     container.appendChild(el);
 
     let x: number, y: number;
@@ -61,7 +116,7 @@ export const mountSparkles: VariantMountFn = (
       y,
       vx: (Math.random() - 0.5) * 0.06,
       vy: -0.04 - Math.random() * 0.06,
-      size,
+      size: particleSize,
       opacity: 0,
       life: 0,
       maxLife,
@@ -69,9 +124,7 @@ export const mountSparkles: VariantMountFn = (
     };
   }
 
-  function tick() {
-    if (!running) return;
-
+  function tick(_dt: number) {
     // Spawn new particles up to max
     while (particles.length < MAX_PARTICLES) {
       particles.push(spawnParticle());
@@ -98,15 +151,12 @@ export const mountSparkles: VariantMountFn = (
         particles.splice(i, 1);
       }
     }
-
-    rafId = requestAnimationFrame(tick);
   }
 
-  rafId = requestAnimationFrame(tick);
+  const cancelSchedule = scheduleRender(tick);
 
   return () => {
-    running = false;
-    cancelAnimationFrame(rafId);
+    cancelSchedule();
     particles.forEach((p) => p.el.remove());
     particles.length = 0;
   };

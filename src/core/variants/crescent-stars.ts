@@ -2,7 +2,7 @@ import type { VariantMountFn } from "../../types";
 
 function buildCrescentSVG(color: string, size: number): string {
   return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path d="M20 5 A15 15 0 1 0 20 35 A10 10 0 1 1 20 5Z" fill="${color}"/>
+    <path d="M20 3 C8 3 2 11 2 20 C2 29 8 37 20 37 C14 32 11 26 11 20 C11 14 14 8 20 3Z" fill="${color}"/>
   </svg>`;
 }
 
@@ -32,10 +32,8 @@ export const mountCrescentStars: VariantMountFn = (
   const colors = config.colors;
   const elements: HTMLElement[] = [];
 
-  const totalItems = Math.max(
-    8,
-    Math.min(24, Math.round((window.innerWidth * window.innerHeight) / 60000)),
-  );
+  const DENSITY_MAP = { low: 6, normal: 14, high: 24 };
+  const totalItems = DENSITY_MAP[config.density] ?? 14;
 
   for (let i = 0; i < totalItems; i++) {
     const isCrescent = Math.random() < 0.35;

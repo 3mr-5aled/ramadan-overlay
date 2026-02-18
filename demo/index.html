@@ -291,10 +291,7 @@
           <label>Variant</label>
           <select id="variantSelect">
             <option value="lanterns" selected>Lanterns</option>
-            <option value="crescent-stars">Crescent &amp; Stars</option>
-            <option value="geometric">Geometric</option>
             <option value="sparkles">Sparkles</option>
-            <option value="minimal">Minimal</option>
           </select>
         </div>
 
@@ -397,6 +394,16 @@
             <option value="10">Style 10</option>
             <option value="11">Style 11</option>
             <option value="12">Style 12</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Density</label>
+          <select id="densitySelect">
+            <option value="auto" selected>Auto</option>
+            <option value="low">Low</option>
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
           </select>
         </div>
       </div>
@@ -714,6 +721,10 @@
             document.getElementById("lanternStyleSelect").value,
             10,
           );
+        }
+        const densityVal = document.getElementById("densitySelect").value;
+        if (densityVal !== "auto") {
+          cfg.density = densityVal;
         }
         return cfg;
       }

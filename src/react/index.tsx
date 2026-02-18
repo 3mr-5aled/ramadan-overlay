@@ -47,7 +47,8 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export interface RamadanOverlayProps {
+export interface RamadanOverlayProps extends Partial<RamadanOverlayConfig> {
+  /** Alternatively pass all options as a single object */
   config?: RamadanOverlayConfig;
   /** Render prop: receives the current Ramadan state */
   children?: (state: RamadanState) => React.ReactNode;
@@ -71,11 +72,11 @@ export interface RamadanOverlayProps {
  * }
  * ```
  */
-export const RamadanOverlay: FC<RamadanOverlayProps> = ({
-  config = {},
-  children,
-}) => {
-  const { state } = useRamadanOverlay(config);
+export const RamadanOverlay: FC<RamadanOverlayProps> = (props) => {
+  const { config, children, ...rest } = props;
+  // Top-level props override config object fields
+  const mergedConfig: RamadanOverlayConfig = { ...config, ...rest };
+  const { state } = useRamadanOverlay(mergedConfig);
   return children ? <>{children(state)}</> : null;
 };
 
