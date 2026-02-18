@@ -1,4 +1,34 @@
-import type { RamadanState } from "../types";
+import type { HijriRegion, RamadanState } from "../types";
+
+// ─── Region → day offset map ──────────────────────────────────────────────────
+
+/** Maps named region presets to a day offset relative to Umm al-Qura. */
+const REGION_OFFSET: Record<HijriRegion, number> = {
+  standard: 0,
+  saudi: 0,
+  uae: 0,
+  malaysia: 0,
+  egypt: 1,
+  turkey: 1,
+  pakistan: 1,
+  indonesia: 1,
+  morocco: 1,
+  us: 1,
+  uk: 1,
+};
+
+/**
+ * Resolve the effective day offset from region + explicit adjustment.
+ * `hijriAdjustment` takes precedence when provided (not undefined).
+ */
+export function resolveHijriOffset(
+  region?: HijriRegion,
+  hijriAdjustment?: number,
+): number {
+  if (hijriAdjustment !== undefined) return hijriAdjustment;
+  if (region) return REGION_OFFSET[region] ?? 0;
+  return 0;
+}
 
 // ─── Pre-computed fallback table (Gregorian start dates for Ramadan) ──────────
 // Used when Intl.DateTimeFormat with islamic-umalqura is unavailable (e.g. legacy Node).
@@ -100,10 +130,24 @@ function detectViaTable(date: Date): RamadanState {
  * Prefers `Intl.DateTimeFormat` with the Umm al-Qura calendar; falls back to a
  * pre-computed Gregorian date table for SSR / legacy environments.
  *
- * @param date - Date to check (defaults to `new Date()`)
+ * @param date            - Date to check (defaults to `new Date()`)
+ * @param hijriAdjustment - Day offset applied before detection. Positive shifts
+ *                          the effective date forward (later Ramadan start).
+ *                          Use `resolveHijriOffset(region, adjustment)` to
+ *                          convert a region preset into an offset.
  */
-export function getRamadanState(date: Date = new Date()): RamadanState {
-  const hijri = getHijriParts(date);
+export function getRamadanState(
+  date: Date = new Date(),
+  hijriAdjustment = 0,
+): RamadanState {
+  // Apply offset: shift the date backward so that a +1 adjustment effectively
+  // makes the observer see Ramadan one day later than the base calendar.
+  const adjusted =
+    hijriAdjustment === 0
+      ? date
+      : new Date(date.getTime() - hijriAdjustment * 24 * 60 * 60 * 1000);
+
+  const hijri = getHijriParts(adjusted);
 
   if (hijri) {
     const RAMADAN_MONTH = 9;
@@ -117,5 +161,5 @@ export function getRamadanState(date: Date = new Date()): RamadanState {
   }
 
   // Intl not supported — fall back to table
-  return detectViaTable(date);
+  return detectViaTable(adjusted);
 }

@@ -5,7 +5,7 @@ import type {
   VariantMountFn,
 } from "../types";
 import { fireRamadanConfetti, shouldFireConfetti } from "./confetti";
-import { getRamadanState } from "./detector";
+import { getRamadanState, resolveHijriOffset } from "./detector";
 import { mountCrescentStars } from "./variants/crescent-stars";
 import { mountGeometric } from "./variants/geometric";
 import { mountLanterns } from "./variants/lanterns";
@@ -44,6 +44,13 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     previewMode: userConfig.previewMode ?? false,
     confetti: userConfig.confetti ?? true,
     locale: userConfig.locale ?? "en",
+    lanternStyle: userConfig.lanternStyle ?? 0,
+    glowColor: userConfig.glowColor ?? "rgba(201,168,76,0.55)",
+    region: userConfig.region ?? "standard",
+    hijriAdjustment: resolveHijriOffset(
+      userConfig.region,
+      userConfig.hijriAdjustment,
+    ),
     onRamadanStart: userConfig.onRamadanStart,
     onRamadanEnd: userConfig.onRamadanEnd,
   };
@@ -63,7 +70,7 @@ function injectStyles(): void {
 #ramadan-overlay-root{--ro-color-1:#c9a84c;--ro-color-2:#e8c96b;--ro-color-3:#8b4513;--ro-color-4:#2d5a27;--ro-color-5:#1a3a1a;--ro-opacity:0.85;--ro-z:9999;position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:var(--ro-z);overflow:hidden;opacity:var(--ro-opacity);will-change:opacity;contain:strict}
 #ramadan-overlay-root .ro-lantern-row{position:absolute;top:0;left:0;width:100%;display:flex;justify-content:space-around;align-items:flex-start}
 #ramadan-overlay-root .ro-lantern{display:flex;flex-direction:column;align-items:center;transform-origin:top center;animation:ro-swing var(--ro-swing-duration,3s) ease-in-out infinite alternate}
-#ramadan-overlay-root .ro-lantern svg{width:var(--ro-lantern-size,clamp(28px,4vw,60px));height:auto;filter:drop-shadow(0 2px 6px rgba(201,168,76,0.5))}
+#ramadan-overlay-root .ro-lantern svg{width:var(--ro-lantern-size,clamp(18px,2.5vw,38px));height:auto;filter:drop-shadow(0 2px 6px var(--ro-glow,rgba(201,168,76,0.5)))}
 #ramadan-overlay-root .ro-lantern-string{width:1px;height:var(--ro-string-height,clamp(20px,3vw,48px));background:var(--ro-color-1);opacity:.7}
 #ramadan-overlay-root .ro-crescent,#ramadan-overlay-root .ro-star{position:absolute;animation:ro-float var(--ro-float-duration,6s) ease-in-out infinite alternate}
 #ramadan-overlay-root .ro-sparkle{position:absolute;border-radius:50%;background:var(--ro-color-2);opacity:0}
@@ -91,6 +98,7 @@ function applyTokens(root: HTMLElement, config: ResolvedConfig): void {
   const el = root.style;
   el.setProperty("--ro-opacity", String(config.opacity));
   el.setProperty("--ro-z", String(config.zIndex));
+  el.setProperty("--ro-glow", config.glowColor);
   config.colors.forEach((c, i) => {
     el.setProperty(`--ro-color-${i + 1}`, c);
   });
@@ -125,7 +133,7 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
   }
 
   const config = resolveConfig(userConfig);
-  const state = getRamadanState();
+  const state = getRamadanState(new Date(), config.hijriAdjustment);
 
   const shouldMount =
     config.previewMode || !config.autoTrigger || state.isRamadan;

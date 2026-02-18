@@ -21,206 +21,590 @@
         background: #0d1117;
         color: #e6edf3;
         min-height: 100vh;
-        padding: 40px 20px;
+        padding: 40px 20px 80px;
       }
 
+      /* ── Header ── */
       header {
         text-align: center;
-        margin-bottom: 48px;
+        margin-bottom: 40px;
       }
-
       header h1 {
-        font-size: clamp(1.8rem, 5vw, 3rem);
-        margin-bottom: 8px;
+        font-size: clamp(1.8rem, 5vw, 2.8rem);
+        margin-bottom: 6px;
+        letter-spacing: -0.5px;
       }
       header p {
         color: #8b8f98;
-        font-size: 1rem;
+        font-size: 0.95rem;
       }
 
-      .controls {
+      /* ── Panel card ── */
+      .panel {
+        max-width: 860px;
+        margin: 0 auto 24px;
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 20px 24px;
+      }
+      .panel-title {
+        font-size: 0.72rem;
+        color: #8b8f98;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 14px;
+      }
+
+      /* ── Controls grid ── */
+      .controls-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
-        justify-content: center;
-        margin-bottom: 40px;
+        gap: 16px;
+        align-items: flex-end;
       }
 
       .control-group {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 5px;
       }
 
       label {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         color: #8b8f98;
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
 
-      select,
-      input[type="range"],
-      input[type="checkbox"] {
+      select {
         padding: 6px 10px;
         border-radius: 6px;
         border: 1px solid #30363d;
-        background: #161b22;
+        background: #0d1117;
         color: #e6edf3;
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         cursor: pointer;
+        min-width: 140px;
+      }
+      select:focus {
+        outline: none;
+        border-color: #c9a84c;
       }
 
       input[type="range"] {
         padding: 4px 0;
-        width: 140px;
+        width: 130px;
         accent-color: #c9a84c;
+        cursor: pointer;
       }
 
+      /* ── Color swatches ── */
+      .color-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .color-sub-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .color-sub-title {
+        font-size: 0.68rem;
+        color: #8b8f98;
+        letter-spacing: 0.3px;
+      }
+      .color-divider {
+        width: 1px;
+        align-self: stretch;
+        background: #30363d;
+        margin: 0 6px;
+      }
+      .color-swatch-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+      }
+      .color-swatch-wrap span {
+        font-size: 0.65rem;
+        color: #8b8f98;
+      }
+      input[type="color"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 34px;
+        height: 34px;
+        border: 2px solid #30363d;
+        border-radius: 6px;
+        padding: 2px;
+        background: #0d1117;
+        cursor: pointer;
+      }
+      input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+      input[type="color"]::-webkit-color-swatch {
+        border: none;
+        border-radius: 3px;
+      }
+      .btn-reset-colors {
+        padding: 5px 10px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+        background: transparent;
+        color: #8b8f98;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
+        align-self: flex-end;
+        margin-bottom: 2px;
+      }
+      .btn-reset-colors:hover {
+        border-color: #c9a84c;
+        color: #c9a84c;
+      }
+
+      /* ── Action buttons ── */
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
       .btn {
-        padding: 8px 20px;
+        padding: 8px 18px;
         border-radius: 8px;
         border: 1px solid #c9a84c;
         background: transparent;
         color: #c9a84c;
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         cursor: pointer;
         transition:
           background 0.15s,
           color 0.15s;
-        align-self: flex-end;
       }
-      .btn:hover {
-        background: #c9a84c;
-        color: #0d1117;
-      }
+      .btn:hover,
       .btn.active {
         background: #c9a84c;
         color: #0d1117;
       }
 
-      .state-box {
-        max-width: 520px;
-        margin: 0 auto 40px;
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 10px;
-        padding: 16px 20px;
+      /* ── State & code ── */
+      .bottom-grid {
+        max-width: 860px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1.6fr;
+        gap: 20px;
       }
-      .state-box h2 {
-        font-size: 0.85rem;
-        color: #8b8f98;
-        margin-bottom: 10px;
-        text-transform: uppercase;
+      @media (max-width: 600px) {
+        .bottom-grid {
+          grid-template-columns: 1fr;
+        }
       }
+
       .state-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
       }
       .state-item {
-        font-size: 0.9rem;
+        font-size: 0.88rem;
+        color: #8b8f98;
       }
-      .state-item span {
+      .state-item strong {
+        display: block;
         color: #c9a84c;
-        font-weight: 600;
+        font-size: 1rem;
+        margin-top: 2px;
       }
 
       .code-box {
-        max-width: 700px;
-        margin: 0 auto;
-        background: #161b22;
+        background: #0d1117;
         border: 1px solid #30363d;
-        border-radius: 10px;
-        padding: 20px;
-        font-family: "Fira Code", monospace;
-        font-size: 0.83rem;
-        line-height: 1.7;
+        border-radius: 8px;
+        padding: 16px;
+        font-family: "Fira Code", "Cascadia Code", monospace;
+        font-size: 0.78rem;
+        line-height: 1.65;
         color: #e6edf3;
         white-space: pre;
         overflow-x: auto;
+        tab-size: 2;
+      }
+      /* syntax tints */
+      .tok-key {
+        color: #79c0ff;
+      }
+      .tok-str {
+        color: #a5d6ff;
+      }
+      .tok-num {
+        color: #f2cc60;
+      }
+      .tok-bool {
+        color: #ff7b72;
+      }
+      .tok-cmt {
+        color: #8b949e;
       }
 
+      /* ── Site content placeholder ── */
       .site-content {
         max-width: 720px;
-        margin: 60px auto 0;
+        margin: 48px auto 0;
         text-align: center;
+        line-height: 1.8;
+      }
+      .site-content p {
         color: #444d56;
-        font-size: 1.1rem;
+        font-size: 1rem;
+      }
+      .site-content .badge {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid #30363d;
+        font-size: 0.78rem;
+        color: #8b8f98;
       }
     </style>
   </head>
   <body>
     <header>
       <h1>🌙 ramadan-overlay</h1>
-      <p>Interactive demo — all variants run in <code>previewMode</code></p>
+      <p>
+        Interactive playground — all variants run in <code>previewMode</code>
+      </p>
     </header>
 
-    <div class="controls">
-      <div class="control-group">
-        <label>Variant</label>
-        <select id="variantSelect">
-          <option value="lanterns" selected>Lanterns</option>
-          <option value="crescent-stars">Crescent &amp; Stars</option>
-          <option value="geometric">Geometric</option>
-          <option value="sparkles">Sparkles</option>
-          <option value="minimal">Minimal</option>
-        </select>
-      </div>
-
-      <div class="control-group">
-        <label>Position</label>
-        <select id="positionSelect">
-          <option value="both" selected>Both</option>
-          <option value="top">Top</option>
-          <option value="bottom">Bottom</option>
-          <option value="full">Full</option>
-        </select>
-      </div>
-
-      <div class="control-group">
-        <label>Opacity (<span id="opacityVal">0.85</span>)</label>
-        <input
-          type="range"
-          id="opacityRange"
-          min="0.1"
-          max="1"
-          step="0.05"
-          value="0.85"
-        />
-      </div>
-
-      <div class="control-group">
-        <label>Confetti (day 1)</label>
-        <select id="confettiSelect">
-          <option value="true" selected>Enabled</option>
-          <option value="false">Disabled</option>
-        </select>
-      </div>
-
-      <button class="btn active" id="toggleBtn">Overlay ON</button>
-      <button class="btn" id="confettiBtn">🎊 Fire Confetti</button>
-    </div>
-
-    <div class="state-box">
-      <h2>Current Ramadan State</h2>
-      <div class="state-grid">
-        <div class="state-item">isRamadan: <span id="s-isRamadan">—</span></div>
-        <div class="state-item">
-          isFirstDay: <span id="s-isFirstDay">—</span>
+    <!-- ── Main controls ── -->
+    <div class="panel">
+      <div class="panel-title">Overlay Settings</div>
+      <div class="controls-grid">
+        <div class="control-group">
+          <label>Variant</label>
+          <select id="variantSelect">
+            <option value="lanterns" selected>Lanterns</option>
+            <option value="crescent-stars">Crescent &amp; Stars</option>
+            <option value="geometric">Geometric</option>
+            <option value="sparkles">Sparkles</option>
+            <option value="minimal">Minimal</option>
+          </select>
         </div>
-        <div class="state-item">hijriYear: <span id="s-hijriYear">—</span></div>
-        <div class="state-item">dayNumber: <span id="s-dayNumber">—</span></div>
+
+        <div class="control-group">
+          <label>Position</label>
+          <select id="positionSelect">
+            <option value="both" selected>Both</option>
+            <option value="top">Top</option>
+            <option value="bottom">Bottom</option>
+            <option value="full">Full</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Locale</label>
+          <select id="localeSelect">
+            <option value="en" selected>English (en)</option>
+            <option value="ar">Arabic (ar)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label
+            >Opacity &nbsp;<span
+              id="opacityVal"
+              style="color: #c9a84c; font-size: 0.85rem"
+              >0.85</span
+            ></label
+          >
+          <input
+            type="range"
+            id="opacityRange"
+            min="0.1"
+            max="1"
+            step="0.05"
+            value="0.85"
+          />
+        </div>
+
+        <div class="control-group">
+          <label>Confetti</label>
+          <select id="confettiSelect">
+            <option value="true" selected>Enabled</option>
+            <option value="false">Disabled</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Region / Calendar</label>
+          <select id="regionSelect">
+            <option value="standard" selected>Standard (Umm al-Qura)</option>
+            <option value="saudi">Saudi Arabia</option>
+            <option value="uae">UAE</option>
+            <option value="malaysia">Malaysia</option>
+            <option value="egypt">Egypt (+1 day)</option>
+            <option value="turkey">Turkey (+1 day)</option>
+            <option value="pakistan">Pakistan (+1 day)</option>
+            <option value="indonesia">Indonesia (+1 day)</option>
+            <option value="morocco">Morocco (+1 day)</option>
+            <option value="us">USA / ISNA (+1 day)</option>
+            <option value="uk">UK (+1 day)</option>
+            <option value="custom">Custom offset…</option>
+          </select>
+        </div>
+
+        <div class="control-group" id="hijriAdjGroup" style="display: none">
+          <label>Hijri Offset (days)</label>
+          <input
+            type="number"
+            id="hijriAdjustment"
+            value="0"
+            min="-3"
+            max="3"
+            step="1"
+            style="
+              width: 70px;
+              padding: 6px 10px;
+              border-radius: 6px;
+              border: 1px solid #30363d;
+              background: #0d1117;
+              color: #e6edf3;
+              font-size: 0.88rem;
+            "
+          />
+        </div>
+
+        <div class="control-group" id="lanternStyleGroup">
+          <label>Lantern Style</label>
+          <select id="lanternStyleSelect">
+            <option value="0" selected>All (cycle)</option>
+            <option value="1">Style 1</option>
+            <option value="2">Style 2</option>
+            <option value="3">Style 3</option>
+            <option value="4">Style 4</option>
+            <option value="5">Style 5</option>
+            <option value="6">Style 6</option>
+            <option value="7">Style 7</option>
+            <option value="8">Style 8</option>
+            <option value="9">Style 9</option>
+            <option value="10">Style 10</option>
+            <option value="11">Style 11</option>
+            <option value="12">Style 12</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <pre class="code-box" id="codeBox"></pre>
+    <!-- ── Color palette (lanterns) ── -->
+    <div class="panel" id="lanternColorPanel">
+      <div class="panel-title" style="margin-bottom: 12px">
+        Colors
+        <button
+          class="btn-reset-colors"
+          id="resetColorsBtn"
+          style="float: right; margin-top: -2px"
+        >
+          Reset defaults
+        </button>
+      </div>
+      <div
+        style="
+          display: flex;
+          gap: 16px;
+          flex-wrap: wrap;
+          align-items: flex-start;
+        "
+      >
+        <!-- per-lantern swatches -->
+        <div class="color-sub-section">
+          <div class="color-sub-title">Lanterns (1 – 12)</div>
+          <div class="color-row">
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc1" value="#c9a84c" /><span>1</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc2" value="#e8c96b" /><span>2</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc3" value="#8b4513" /><span>3</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc4" value="#2d5a27" /><span>4</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc5" value="#4a8a3a" /><span>5</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc6" value="#8b1a1a" /><span>6</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc7" value="#cc4444" /><span>7</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc8" value="#1a3a6b" /><span>8</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc9" value="#3a6ab8" /><span>9</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc10" value="#6b2fa0" /><span>10</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc11" value="#c44d8a" /><span>11</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="lc12" value="#1a7a6b" /><span>12</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-divider"></div>
+
+        <!-- rope / ceiling swatch -->
+        <div class="color-sub-section">
+          <div class="color-sub-title">Ceiling &amp; Rope</div>
+          <div class="color-row">
+            <div class="color-swatch-wrap">
+              <input type="color" id="ropeColor" value="#c9a84c" /><span
+                >Rope</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="color-divider"></div>
+
+        <!-- glow swatch (lanterns) -->
+        <div class="color-sub-section">
+          <div class="color-sub-title">Glow</div>
+          <div class="color-row">
+            <div class="color-swatch-wrap">
+              <input type="color" id="glowColorLantern" value="#c9a84c" /><span
+                >Glow</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Color palette (other variants) ── -->
+    <div class="panel" id="genericColorPanel" style="display: none">
+      <div class="panel-title" style="margin-bottom: 12px">
+        Colors
+        <button
+          class="btn-reset-colors"
+          id="resetColorsGenericBtn"
+          style="float: right; margin-top: -2px"
+        >
+          Reset defaults
+        </button>
+      </div>
+      <div
+        style="
+          display: flex;
+          gap: 16px;
+          flex-wrap: wrap;
+          align-items: flex-start;
+        "
+      >
+        <div class="color-sub-section">
+          <div class="color-sub-title">Colors</div>
+          <div class="color-row">
+            <div class="color-swatch-wrap">
+              <input type="color" id="gc1" value="#c9a84c" /><span
+                >Color 1</span
+              >
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="gc2" value="#e8c96b" /><span
+                >Color 2</span
+              >
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="gc3" value="#8b4513" /><span
+                >Color 3</span
+              >
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="gc4" value="#2d5a27" /><span
+                >Color 4</span
+              >
+            </div>
+            <div class="color-swatch-wrap">
+              <input type="color" id="gc5" value="#1a3a1a" /><span
+                >Color 5</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="color-divider"></div>
+
+        <div class="color-sub-section">
+          <div class="color-sub-title">Glow</div>
+          <div class="color-row">
+            <div class="color-swatch-wrap">
+              <input type="color" id="glowColorGeneric" value="#c9a84c" /><span
+                >Glow</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Action buttons ── -->
+    <div class="panel" style="padding: 14px 24px">
+      <div class="actions">
+        <button class="btn" id="applyBtn">Apply</button>
+        <button class="btn active" id="toggleBtn">Overlay ON</button>
+        <button class="btn" id="confettiBtn">🎊 Fire Confetti</button>
+      </div>
+    </div>
+
+    <!-- ── State + code ── -->
+    <div class="bottom-grid">
+      <div class="panel" style="margin: 0">
+        <div class="panel-title">Ramadan State</div>
+        <div class="state-grid">
+          <div class="state-item">
+            isRamadan<strong id="s-isRamadan">—</strong>
+          </div>
+          <div class="state-item">
+            isFirstDay<strong id="s-isFirstDay">—</strong>
+          </div>
+          <div class="state-item">
+            hijriYear<strong id="s-hijriYear">—</strong>
+          </div>
+          <div class="state-item">
+            dayNumber<strong id="s-dayNumber">—</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin: 0; padding: 0; overflow: hidden">
+        <pre
+          class="code-box"
+          id="codeBox"
+          style="border: none; border-radius: 12px; margin: 0"
+        ></pre>
+      </div>
+    </div>
 
     <div class="site-content">
       <p>
         Your website content lives here.<br />The overlay floats above without
         blocking any interactions.
       </p>
+      <span class="badge">pointer-events: none</span>
     </div>
 
     <!-- Load the IIFE bundle produced by tsup -->
@@ -231,17 +615,107 @@
       let currentInstance = null;
       let overlayOn = true;
 
+      const DEFAULT_LANTERN_COLORS = [
+        "#c9a84c",
+        "#e8c96b",
+        "#8b4513",
+        "#2d5a27",
+        "#4a8a3a",
+        "#8b1a1a",
+        "#cc4444",
+        "#1a3a6b",
+        "#3a6ab8",
+        "#6b2fa0",
+        "#c44d8a",
+        "#1a7a6b",
+      ];
+      const DEFAULT_GLOW_COLOR = "#c9a84c";
+      const DEFAULT_ROPE_COLOR = "#c9a84c";
+      const DEFAULT_GENERIC_COLORS = [
+        "#c9a84c",
+        "#e8c96b",
+        "#8b4513",
+        "#2d5a27",
+        "#1a3a1a",
+      ];
+
+      function getGlowColor() {
+        const isLanterns =
+          document.getElementById("variantSelect").value === "lanterns";
+        return isLanterns
+          ? document.getElementById("glowColorLantern").value
+          : document.getElementById("glowColorGeneric").value;
+      }
+
+      function getColors() {
+        const isLanterns =
+          document.getElementById("variantSelect").value === "lanterns";
+        if (isLanterns) {
+          const cols = Array.from(
+            { length: 12 },
+            (_, i) => document.getElementById("lc" + (i + 1)).value,
+          );
+          cols.push(document.getElementById("ropeColor").value);
+          return cols;
+        }
+        return [1, 2, 3, 4, 5].map(
+          (i) => document.getElementById("gc" + i).value,
+        );
+      }
+
+      function syncColorPanels() {
+        const isLanterns =
+          document.getElementById("variantSelect").value === "lanterns";
+        document.getElementById("lanternColorPanel").style.display = isLanterns
+          ? ""
+          : "none";
+        document.getElementById("genericColorPanel").style.display = isLanterns
+          ? "none"
+          : "";
+        document.getElementById("lanternStyleGroup").style.display = isLanterns
+          ? ""
+          : "none";
+      }
+
+      function syncHijriAdjGroup() {
+        const isCustom =
+          document.getElementById("regionSelect").value === "custom";
+        document.getElementById("hijriAdjGroup").style.display = isCustom
+          ? ""
+          : "none";
+      }
+
+      function syncLanternStyleVisibility() {
+        syncColorPanels();
+      }
+
       function getConfig() {
-        return {
-          variant: document.getElementById("variantSelect").value,
+        const variant = document.getElementById("variantSelect").value;
+        const cfg = {
+          variant,
           position: document.getElementById("positionSelect").value,
           opacity: parseFloat(document.getElementById("opacityRange").value),
           confetti: document.getElementById("confettiSelect").value === "true",
+          locale: document.getElementById("localeSelect").value,
+          colors: getColors(),
+          glowColor: getGlowColor(),
           previewMode: true,
-          onRamadanStart: (state) => {
-            console.log("Ramadan started!", state);
-          },
+          onRamadanStart: (state) => console.log("Ramadan started!", state),
         };
+        const regionVal = document.getElementById("regionSelect").value;
+        if (regionVal === "custom") {
+          cfg.hijriAdjustment =
+            parseInt(document.getElementById("hijriAdjustment").value, 10) || 0;
+        } else {
+          cfg.region = regionVal;
+        }
+        if (variant === "lanterns") {
+          cfg.lanternStyle = parseInt(
+            document.getElementById("lanternStyleSelect").value,
+            10,
+          );
+        }
+        return cfg;
       }
 
       function updateStateDisplay(state) {
@@ -257,11 +731,32 @@
           state.dayNumber || "—";
       }
 
-      function updateCodeBox(cfg) {
-        document.getElementById("codeBox").textContent =
-          `import { init } from 'ramadan-overlay';
+      function syntaxHighlight(cfg) {
+        // Produce a syntax-highlighted HTML representation of the init call
+        const json = JSON.stringify(cfg, null, 2);
+        const highlighted = json.replace(
+          /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+          (match) => {
+            if (/^"/.test(match)) {
+              if (/:$/.test(match))
+                return `<span class="tok-key">${match}</span>`;
+              return `<span class="tok-str">${match}</span>`;
+            }
+            if (/true|false/.test(match))
+              return `<span class="tok-bool">${match}</span>`;
+            return `<span class="tok-num">${match}</span>`;
+          },
+        );
+        return `<span class="tok-cmt">// ramadan-overlay</span>\n<span class="tok-key">import</span> { init } <span class="tok-key">from</span> <span class="tok-str">'ramadan-overlay'</span>;\n\ninit(${highlighted});`;
+      }
 
-init(${JSON.stringify(cfg, null, 2)});`;
+      function updateCodeBox(cfg) {
+        // Strip the callback from code display
+        const displayCfg = Object.fromEntries(
+          Object.entries(cfg).filter(([k]) => k !== "onRamadanStart"),
+        );
+        document.getElementById("codeBox").innerHTML =
+          syntaxHighlight(displayCfg);
       }
 
       function mount() {
@@ -272,12 +767,13 @@ init(${JSON.stringify(cfg, null, 2)});`;
         updateCodeBox(cfg);
       }
 
-      // Initial mount
-      const initialState = getRamadanState();
-      updateStateDisplay(initialState);
+      // ── Init ──
+      syncColorPanels();
+      syncHijriAdjGroup();
+      updateStateDisplay(getRamadanState());
       mount();
 
-      // Toggle
+      // ── Toggle overlay ──
       document
         .getElementById("toggleBtn")
         .addEventListener("click", function () {
@@ -294,28 +790,55 @@ init(${JSON.stringify(cfg, null, 2)});`;
           }
         });
 
-      // Confetti button
+      // ── Fire confetti ──
       document.getElementById("confettiBtn").addEventListener("click", () => {
         currentInstance?.destroy();
-        const cfg = { ...getConfig(), confetti: true };
-        // Force isFirstDay by using previewMode + day-1 flag trick
-        // We re-init with a matching state
-        currentInstance = init(cfg);
-        // Also directly fire confetti from the IIFE exposed helper
+        currentInstance = init({ ...getConfig(), confetti: true });
+        updateStateDisplay(currentInstance.state);
+        updateCodeBox(getConfig());
       });
 
-      // Live controls
-      ["variantSelect", "positionSelect", "confettiSelect"].forEach((id) => {
-        document
-          .getElementById(id)
-          .addEventListener("change", () => overlayOn && mount());
+      // ── Reset colors ──
+      document
+        .getElementById("resetColorsBtn")
+        .addEventListener("click", () => {
+          DEFAULT_LANTERN_COLORS.forEach((hex, i) => {
+            document.getElementById("lc" + (i + 1)).value = hex;
+          });
+          document.getElementById("ropeColor").value = DEFAULT_ROPE_COLOR;
+          document.getElementById("glowColorLantern").value =
+            DEFAULT_GLOW_COLOR;
+        });
+      document
+        .getElementById("resetColorsGenericBtn")
+        .addEventListener("click", () => {
+          DEFAULT_GENERIC_COLORS.forEach((hex, i) => {
+            document.getElementById("gc" + (i + 1)).value = hex;
+          });
+          document.getElementById("glowColorGeneric").value =
+            DEFAULT_GLOW_COLOR;
+        });
+
+      // ── Apply button ──
+      document.getElementById("applyBtn").addEventListener("click", () => {
+        if (overlayOn) mount();
       });
 
+      // ── Variant selector — sync panels only, do NOT auto-mount ──
+      document
+        .getElementById("variantSelect")
+        .addEventListener("change", syncColorPanels);
+
+      // ── Region selector — sync custom offset visibility ──
+      document
+        .getElementById("regionSelect")
+        .addEventListener("change", syncHijriAdjGroup);
+
+      // ── Opacity range — update label only ──
       document
         .getElementById("opacityRange")
         .addEventListener("input", function () {
           document.getElementById("opacityVal").textContent = this.value;
-          if (overlayOn) mount();
         });
     </script>
   </body>

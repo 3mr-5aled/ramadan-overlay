@@ -7,6 +7,47 @@ export type OverlayVariant =
   | "sparkles"
   | "minimal";
 
+/**
+ * Which of the 12 lantern SVG designs to display.
+ * 1–12 pins a single design; 0 / omitted cycles through all designs.
+ */
+export type LanternStyle = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+
+/**
+ * Named region presets that map to a Hijri calendar day offset.
+ *
+ * Different countries determine the start of Ramadan by different moon-sighting
+ * conventions, which can place them 1–2 days apart:
+ *
+ * | Region | Offset | Notes |
+ * |---|---|---|
+ * | `"standard"` | 0 | Umm al-Qura (Saudi Arabia astronomical) |
+ * | `"saudi"` | 0 | Alias for standard |
+ * | `"uae"` | 0 | Follows Saudi most years |
+ * | `"egypt"` | +1 | Egyptian Dar al-Ifta sighting is often 1 day later |
+ * | `"turkey"` | +1 | Diyanet calculation is typically 1 day after Saudi |
+ * | `"pakistan"` | +1 | Pakistan moon-sighting committee |
+ * | `"indonesia"` | +1 | Indonesian BIMAS calculation |
+ * | `"morocco"` | +1 | Moroccan Ministry of Habous |
+ * | `"malaysia"` | 0 | Follows Saudi / JAKIM |
+ * | `"us"` | +1 | ISNA / Fiqh Council typically follows Egypt/Turkey |
+ * | `"uk"` | +1 | Follows ISNA / local sighting |
+ *
+ * Use `hijriAdjustment` for a custom offset when a preset doesn’t match.
+ */
+export type HijriRegion =
+  | "standard"
+  | "saudi"
+  | "uae"
+  | "malaysia"
+  | "egypt"
+  | "turkey"
+  | "pakistan"
+  | "indonesia"
+  | "morocco"
+  | "us"
+  | "uk";
+
 export type OverlayPosition = "top" | "bottom" | "both" | "full";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -73,6 +114,36 @@ export interface RamadanOverlayConfig {
   onRamadanStart?: (state: RamadanState) => void;
 
   /**
+   * Which of the 12 lantern SVG designs to show (lanterns variant only).
+   * 1–12 pins a single design; 0 or omitted cycles through all designs.
+   * @default 0
+   */
+  lanternStyle?: LanternStyle;
+
+  /**
+   * CSS color used for the glow / drop-shadow effect on decorations.
+   * @default 'rgba(201,168,76,0.55)'
+   */
+  glowColor?: string;
+
+  /**
+   * Named region preset for Hijri calendar start-of-Ramadan convention.
+   * Sets a day offset relative to the Umm al-Qura (Saudi) calendar.
+   * Overridden by `hijriAdjustment` when both are provided.
+   * @example 'turkey' // +1 day offset
+   */
+  region?: HijriRegion;
+
+  /**
+   * Manual day offset applied to the Hijri date before Ramadan detection.
+   * Positive values shift the calendar forward (later start), negative backward.
+   * Typical values: -1, 0, +1, +2.
+   * Takes precedence over `region`.
+   * @default 0
+   */
+  hijriAdjustment?: number;
+
+  /**
    * Called when the overlay is manually destroyed.
    */
   onRamadanEnd?: () => void;
@@ -116,6 +187,10 @@ export type VariantMountFn = (
 export interface ResolvedConfig extends Required<
   Omit<RamadanOverlayConfig, "onRamadanStart" | "onRamadanEnd">
 > {
+  lanternStyle: LanternStyle;
+  glowColor: string;
+  region: HijriRegion;
+  hijriAdjustment: number;
   onRamadanStart: RamadanOverlayConfig["onRamadanStart"];
   onRamadanEnd: RamadanOverlayConfig["onRamadanEnd"];
 }

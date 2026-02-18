@@ -37,7 +37,10 @@ export async function fireRamadanConfetti(
   const crescentShape = confetti.shapeFromText({ text: "🌙", scalar: 2 });
   const starShape = confetti.shapeFromText({ text: "✨", scalar: 2 });
   const yearStr = hijriYear.toString();
-  const yearShape = confetti.shapeFromText({ text: yearStr, scalar: 1.5 });
+
+  // Build a bitmap shape for the year with white fill + black stroke
+  // so it stands out on any background color in the confetti burst.
+  const yearShape = buildYearShape(yearStr);
 
   const baseOptions = {
     particleCount: 60,
@@ -80,6 +83,50 @@ export async function fireRamadanConfetti(
     shapes: [crescentShape, starShape, yearShape],
     scalar: 2,
   });
+}
+
+/**
+ * Renders the Hijri year string onto an OffscreenCanvas with white fill and a
+ * black stroke, then returns a canvas-confetti bitmap shape so it reads clearly
+ * against any confetti particle colour.
+ */
+function buildYearShape(text: string): confetti.Shape {
+  const scalar = 1.5;
+  const fontSize = 10 * scalar; // matches canvas-confetti's own convention
+  const fontFamily =
+    "bold " + fontSize + "px system-ui, -apple-system, sans-serif";
+
+  // Measure on a temporary canvas first
+  let cv = new OffscreenCanvas(1, 1);
+  let ctx = cv.getContext("2d") as OffscreenCanvasRenderingContext2D;
+  ctx.font = fontFamily;
+  const m = ctx.measureText(text);
+  const padding = 3;
+  const w =
+    Math.ceil(m.actualBoundingBoxRight + m.actualBoundingBoxLeft) + padding * 2;
+  const h =
+    Math.ceil(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) +
+    padding * 2;
+  const x = m.actualBoundingBoxLeft + padding;
+  const y = m.actualBoundingBoxAscent + padding;
+
+  // Draw on correctly-sized canvas
+  cv = new OffscreenCanvas(w, h);
+  ctx = cv.getContext("2d") as OffscreenCanvasRenderingContext2D;
+  ctx.font = fontFamily;
+  ctx.lineJoin = "round";
+  ctx.lineWidth = fontSize * 0.28; // thick enough stroke
+  ctx.strokeStyle = "#000000";
+  ctx.strokeText(text, x, y);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(text, x, y);
+
+  const scale = 1 / scalar;
+  return {
+    type: "bitmap",
+    bitmap: cv.transferToImageBitmap(),
+    matrix: [scale, 0, 0, scale, (-w * scale) / 2, (-h * scale) / 2],
+  } as unknown as confetti.Shape;
 }
 
 export function shouldFireConfetti(
