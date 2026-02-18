@@ -5,7 +5,7 @@ export type OverlayVariant =
   | "crescent-stars"
   | "geometric"
   | "sparkles"
-  | "minimal";
+  | "banner";
 
 /**
  * Which of the 12 lantern SVG designs to display.
@@ -97,10 +97,12 @@ export interface RamadanOverlayConfig {
   previewMode?: boolean;
 
   /**
-   * Fire confetti on the first day of Ramadan.
-   * @default true
+   * Controls whether confetti fires:
+   * - `'on'`  — fires every day throughout Ramadan (default)
+   * - `'off'` — disabled
+   * @default 'on'
    */
-  confetti?: boolean;
+  confetti?: "on" | "off";
 
   /**
    * Display locale for any text elements (e.g. crescent greeting).
@@ -166,6 +168,42 @@ export interface RamadanOverlayConfig {
    * @default undefined (auto)
    */
   density?: "low" | "normal" | "high";
+
+  // ─── Banner variant options ──────────────────────────────────────────────
+
+  /**
+   * Background color of the banner bar (banner variant only).
+   * @default 'rgba(15,15,20,0.92)'
+   */
+  bannerBg?: string;
+
+  /**
+   * Color of the greeting text in the banner (banner variant only).
+   * Falls back to `colors[0]` when omitted.
+   */
+  bannerTextColor?: string;
+
+  /**
+   * Custom English greeting text shown in the banner (banner variant only).
+   * When omitted the built-in English greeting is used.
+   * If only one of `bannerTextEn` / `bannerTextAr` is provided, it is used
+   * as a fallback for the other locale.
+   */
+  bannerTextEn?: string;
+
+  /**
+   * Custom Arabic greeting text shown in the banner (banner variant only).
+   * When omitted the built-in Arabic greeting is used.
+   * If only one of `bannerTextEn` / `bannerTextAr` is provided, it is used
+   * as a fallback for the other locale.
+   */
+  bannerTextAr?: string;
+
+  /**
+   * Color of the lantern icon shown beside the banner text (banner variant only).
+   * Falls back to `colors[1]` when omitted.
+   */
+  bannerIconColor?: string;
 }
 
 // ─── State & Instance ─────────────────────────────────────────────────────────
@@ -173,8 +211,6 @@ export interface RamadanOverlayConfig {
 export interface RamadanState {
   /** True when the current date falls within Ramadan (Hijri month 9). */
   isRamadan: boolean;
-  /** True on the exact first day of Ramadan (day 1 of Hijri month 9). */
-  isFirstDay: boolean;
   /** Current Hijri year number. */
   hijriYear: number;
   /** Day number within Ramadan (1–30). */

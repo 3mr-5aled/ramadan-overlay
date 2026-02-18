@@ -42,7 +42,7 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   @Input() opacity?: number;
   @Input() colors?: string[];
   @Input() previewMode?: boolean;
-  @Input() confetti?: boolean;
+  @Input() confetti?: "on" | "off";
   @Input() locale?: "en" | "ar";
   @Input() glowColor?: string;
   @Input() region?: HijriRegion;

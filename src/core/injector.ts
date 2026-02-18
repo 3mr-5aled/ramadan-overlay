@@ -6,10 +6,10 @@ import type {
 } from "../types";
 import { fireRamadanConfetti, shouldFireConfetti } from "./confetti";
 import { getRamadanState, resolveHijriOffset } from "./detector";
+import { mountBanner } from "./variants/banner";
 import { mountCrescentStars } from "./variants/crescent-stars";
 import { mountGeometric } from "./variants/geometric";
 import { mountLanterns } from "./variants/lanterns";
-import { mountMinimal } from "./variants/minimal";
 import { mountSparkles } from "./variants/sparkles";
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -28,7 +28,7 @@ const VARIANT_MAP: Record<string, VariantMountFn> = {
   "crescent-stars": mountCrescentStars,
   geometric: mountGeometric,
   sparkles: mountSparkles,
-  minimal: mountMinimal,
+  banner: mountBanner,
 };
 
 // ─── Config resolution ────────────────────────────────────────────────────────
@@ -42,8 +42,15 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     zIndex: userConfig.zIndex ?? 9999,
     autoTrigger: userConfig.autoTrigger ?? true,
     previewMode: userConfig.previewMode ?? false,
-    confetti: userConfig.confetti ?? true,
+    confetti: userConfig.confetti ?? "on",
     locale: userConfig.locale ?? "en",
+    bannerBg: userConfig.bannerBg ?? "rgba(15,15,20,0.92)",
+    bannerTextColor:
+      userConfig.bannerTextColor ?? userConfig.colors?.[0] ?? DEFAULT_COLORS[0],
+    bannerTextEn: userConfig.bannerTextEn ?? "",
+    bannerTextAr: userConfig.bannerTextAr ?? "",
+    bannerIconColor:
+      userConfig.bannerIconColor ?? userConfig.colors?.[1] ?? DEFAULT_COLORS[1],
     lanternStyle: userConfig.lanternStyle ?? 0,
     glowColor: userConfig.glowColor ?? "rgba(201,168,76,0.55)",
     ceilingColor: userConfig.ceilingColor ?? "#c9a84c",
@@ -77,9 +84,13 @@ function injectStyles(): void {
 #ramadan-overlay-root .ro-lantern-string{width:1px;height:var(--ro-string-height,clamp(20px,3vw,48px));background:var(--ro-color-1);opacity:.7}
 #ramadan-overlay-root .ro-crescent,#ramadan-overlay-root .ro-star{position:absolute;animation:ro-float var(--ro-float-duration,6s) ease-in-out infinite alternate;will-change:transform,opacity}
 #ramadan-overlay-root .ro-sparkle{position:absolute;border-radius:50%;background:var(--ro-color-2);opacity:0;will-change:transform,opacity}
-#ramadan-overlay-root .ro-border-top,#ramadan-overlay-root .ro-border-bottom{position:absolute;left:0;width:100%;overflow:hidden}
-#ramadan-overlay-root .ro-border-top{top:0}
-#ramadan-overlay-root .ro-border-bottom{bottom:0}
+#ramadan-overlay-root .ro-banner{position:absolute;left:0;width:100%;height:52px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#ramadan-overlay-root .ro-banner--top{top:0}
+#ramadan-overlay-root .ro-banner--bottom{bottom:0}
+#ramadan-overlay-root .ro-banner-inner{display:flex;align-items:center;justify-content:center;gap:12px;max-width:960px;width:100%;padding:0 20px}
+#ramadan-overlay-root .ro-banner-icon{flex-shrink:0;display:flex;align-items:center;width:32px;height:32px}
+#ramadan-overlay-root .ro-banner-icon svg{width:100%;height:100%}
+#ramadan-overlay-root .ro-banner-text{font-size:clamp(12px,1.6vw,15px);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;line-height:1.3}
 #ramadan-overlay-root .ro-geo-band{position:absolute;left:0;width:100%;overflow:hidden;opacity:.6}
 #ramadan-overlay-root .ro-geo-band--top{top:0}
 #ramadan-overlay-root .ro-geo-band--bottom{bottom:0}
@@ -129,7 +140,6 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
       container: null,
       state: {
         isRamadan: false,
-        isFirstDay: false,
         hijriYear: 0,
         dayNumber: 0,
       },
@@ -173,11 +183,8 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
     config.onRamadanStart?.(state);
   }
 
-  // Day-1 confetti (runs async, non-blocking)
-  if (
-    shouldFireConfetti(state, config.confetti) ||
-    (config.previewMode && config.confetti)
-  ) {
+  // Confetti — runs async, non-blocking
+  if (shouldFireConfetti(state, config.confetti)) {
     const confettiYear = state.hijriYear || 1447;
     void fireRamadanConfetti(confettiYear, config.colors);
   }

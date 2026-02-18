@@ -171,13 +171,23 @@ function buildYearShape(text: string): confetti.Shape {
   } as unknown as confetti.Shape;
 }
 
+/**
+ * Decide whether confetti should fire.
+ *
+ * Pure function of state + option only — previewMode does not affect this.
+ *
+ * | option  | fires when              |
+ * |---------|-------------------------|
+ * | `'off'` | never                   |
+ * | `'on'`  | isRamadan (every day)   |
+ */
 export function shouldFireConfetti(
   state: RamadanState,
-  enabled: boolean,
+  option: "on" | "off",
 ): boolean {
-  return (
-    enabled && state.isRamadan && state.isFirstDay && !prefersReducedMotion()
-  );
+  if (option === "off") return false;
+  if (prefersReducedMotion()) return false;
+  return state.isRamadan;
 }
 
 function delay(ms: number): Promise<void> {

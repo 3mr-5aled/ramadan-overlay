@@ -98,7 +98,7 @@ function detectViaTable(date: Date): RamadanState {
   }
 
   if (!closestStart) {
-    return { isRamadan: false, isFirstDay: false, hijriYear: 0, dayNumber: 0 };
+    return { isRamadan: false, hijriYear: 0, dayNumber: 0 };
   }
 
   // Ramadan is 29 or 30 days — use 30 as safe upper bound
@@ -106,7 +106,6 @@ function detectViaTable(date: Date): RamadanState {
   if (now > endDate.getTime()) {
     return {
       isRamadan: false,
-      isFirstDay: false,
       hijriYear: closestYear,
       dayNumber: 0,
     };
@@ -117,7 +116,6 @@ function detectViaTable(date: Date): RamadanState {
 
   return {
     isRamadan: true,
-    isFirstDay: dayNumber === 1,
     hijriYear: closestYear,
     dayNumber,
   };
@@ -154,7 +152,6 @@ export function getRamadanState(
     const isRamadan = hijri.month === RAMADAN_MONTH;
     return {
       isRamadan,
-      isFirstDay: isRamadan && hijri.day === 1,
       hijriYear: hijri.year,
       dayNumber: isRamadan ? hijri.day : 0,
     };

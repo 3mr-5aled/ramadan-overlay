@@ -350,7 +350,9 @@ export const mountLanterns: VariantMountFn = (
     "#c44d8a",
     "#1a7a6b",
   ];
-  const palette: string[] = DEFAULTS.map((d, i) => colors[i] ?? d);
+  const palette: string[] = DEFAULTS.map((d, i) =>
+    colors && colors.length > 0 ? colors[i % colors.length] : d,
+  );
   const ceilingColor = config.ceilingColor;
   const ropeColor = config.ropeColor;
 

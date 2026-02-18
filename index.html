@@ -735,7 +735,7 @@
             <div class="feature-icon">🎨</div>
             <div class="feature-label">5 Variants</div>
             <div class="feature-desc">
-              Lanterns, Sparkles, Crescent &amp; Stars, Geometric, and Minimal
+              Lanterns, Sparkles, Crescent &amp; Stars, Geometric, and Banner
               styles to suit any site.
             </div>
           </div>
@@ -779,7 +779,7 @@
             <option value="sparkles">Sparkles</option>
             <option value="crescent-stars">Crescent &amp; Stars</option>
             <option value="geometric">Geometric</option>
-            <option value="minimal">Minimal</option>
+            <option value="banner">Banner</option>
           </select>
         </div>
 
@@ -822,8 +822,8 @@
         <div class="control-group">
           <label>Confetti</label>
           <select id="confettiSelect">
-            <option value="true" selected>Enabled</option>
-            <option value="false">Disabled</option>
+            <option value="on" selected>🎊 Enabled</option>
+            <option value="off">Disabled</option>
           </select>
         </div>
 
@@ -1061,6 +1061,91 @@
       </div>
     </div>
 
+    <!-- ── Color palette (banner variant) ── -->
+    <div class="panel" id="bannerColorPanel" style="display: none">
+      <div class="panel-title" style="margin-bottom: 12px">Banner Colors</div>
+      <div
+        style="
+          display: flex;
+          gap: 16px;
+          flex-wrap: wrap;
+          align-items: flex-start;
+        "
+      >
+        <div class="color-sub-section">
+          <div class="color-sub-title">Appearance</div>
+          <div class="color-row">
+            <div class="color-swatch-wrap">
+              <input type="color" id="bannerBgColor" value="#0f0f14" /><span
+                >Background</span
+              >
+            </div>
+            <div class="color-swatch-wrap">
+              <input
+                type="color"
+                id="bannerTextColorInput"
+                value="#c9a84c"
+              /><span>Text</span>
+            </div>
+            <div class="color-swatch-wrap">
+              <input
+                type="color"
+                id="bannerIconColorInput"
+                value="#c9a84c"
+              /><span>Icon</span>
+            </div>
+          </div>
+        </div>
+        <div class="color-sub-section" style="width: 100%">
+          <div class="color-sub-title">Custom Text — English</div>
+          <input
+            type="text"
+            id="bannerTextEn"
+            placeholder="Leave blank for default English greeting"
+            style="
+              width: 100%;
+              padding: 6px 10px;
+              background: #1a1a24;
+              border: 1px solid #3a3a5a;
+              border-radius: 6px;
+              color: #e0e0f0;
+              font-size: 13px;
+              box-sizing: border-box;
+            "
+          />
+        </div>
+        <div class="color-sub-section" style="width: 100%">
+          <div class="color-sub-title">Custom Text — Arabic</div>
+          <input
+            type="text"
+            id="bannerTextAr"
+            placeholder="اتركه فارغًا للتهنئة العربية الافتراضية"
+            dir="rtl"
+            style="
+              width: 100%;
+              padding: 6px 10px;
+              background: #1a1a24;
+              border: 1px solid #3a3a5a;
+              border-radius: 6px;
+              color: #e0e0f0;
+              font-size: 13px;
+              box-sizing: border-box;
+              text-align: right;
+            "
+          />
+        </div>
+        <div style="display: flex; justify-content: flex-end; padding-top: 4px">
+          <button
+            class="btn"
+            id="bannerApplyBtn"
+            style="padding: 6px 18px; font-size: 13px"
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Action buttons ── -->
     <div class="panel" style="padding: 14px 24px">
       <div class="actions">
@@ -1078,9 +1163,6 @@
             isRamadan<strong id="s-isRamadan">—</strong>
           </div>
           <div class="state-item">
-            isFirstDay<strong id="s-isFirstDay">—</strong>
-          </div>
-          <div class="state-item">
             hijriYear<strong id="s-hijriYear">—</strong>
           </div>
           <div class="state-item">
@@ -1094,6 +1176,8 @@
           <button class="code-tab active" data-tab="esm">ESM</button>
           <button class="code-tab" data-tab="react">React</button>
           <button class="code-tab" data-tab="vue">Vue</button>
+          <button class="code-tab" data-tab="angular">Angular</button>
+          <button class="code-tab" data-tab="svelte">Svelte</button>
           <button class="code-tab" data-tab="cdn">Script tag</button>
         </div>
         <pre
@@ -1255,12 +1339,16 @@
         }
 
         function syncColorPanels() {
-          const isLanterns =
-            document.getElementById("variantSelect").value === "lanterns";
+          const variant = document.getElementById("variantSelect").value;
+          const isLanterns = variant === "lanterns";
+          const isBanner = variant === "banner";
           document.getElementById("lanternColorPanel").style.display =
             isLanterns ? "" : "none";
           document.getElementById("genericColorPanel").style.display =
-            isLanterns ? "none" : "";
+            !isLanterns && !isBanner ? "" : "none";
+          document.getElementById("bannerColorPanel").style.display = isBanner
+            ? ""
+            : "none";
           document.getElementById("lanternStyleGroup").style.display =
             isLanterns ? "" : "none";
         }
@@ -1283,8 +1371,7 @@
             variant,
             position: document.getElementById("positionSelect").value,
             opacity: parseFloat(document.getElementById("opacityRange").value),
-            confetti:
-              document.getElementById("confettiSelect").value === "true",
+            confetti: document.getElementById("confettiSelect").value,
             locale: document.getElementById("localeSelect").value,
             colors: getColors(),
             glowColor: getGlowColor(),
@@ -1293,6 +1380,24 @@
             previewMode: true,
             onRamadanStart: (state) => console.log("Ramadan started!", state),
           };
+          if (variant === "banner") {
+            cfg.bannerBg = document.getElementById("bannerBgColor").value;
+            cfg.bannerTextColor = document.getElementById(
+              "bannerTextColorInput",
+            ).value;
+            cfg.bannerIconColor = document.getElementById(
+              "bannerIconColorInput",
+            ).value;
+            // Pass both texts; banner.ts picks by locale with fallback
+            const _enText = document
+              .getElementById("bannerTextEn")
+              .value.trim();
+            const _arText = document
+              .getElementById("bannerTextAr")
+              .value.trim();
+            if (_enText) cfg.bannerTextEn = _enText;
+            if (_arText) cfg.bannerTextAr = _arText;
+          }
           const regionVal = document.getElementById("regionSelect").value;
           if (regionVal === "custom") {
             cfg.hijriAdjustment =
@@ -1318,9 +1423,6 @@
           document.getElementById("s-isRamadan").textContent = String(
             state.isRamadan,
           );
-          document.getElementById("s-isFirstDay").textContent = String(
-            state.isFirstDay,
-          );
           document.getElementById("s-hijriYear").textContent =
             state.hijriYear || "—";
           document.getElementById("s-dayNumber").textContent =
@@ -1332,18 +1434,21 @@
         let activeTab = "esm";
 
         function syntaxHighlight(code) {
+          // IMPORTANT: strings and comments must be replaced BEFORE keywords so
+          // that the injected class="tok-key" attribute values are never
+          // re-matched by the string regex (which would corrupt the HTML).
           return code
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(
-              /(import|from|export|const|return|function|default)(?=[\s({])/g,
-              '<span class="tok-key">$1</span>',
+              /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
+              '<span class="tok-str">$1</span>',
             )
             .replace(/\/\/[^\n]*/g, '<span class="tok-cmt">$&</span>')
             .replace(
-              /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
-              '<span class="tok-str">$1</span>',
+              /(import|from|export|const|return|function|default)(?=[\s({])/g,
+              '<span class="tok-key">$1</span>',
             )
             .replace(/\b(true|false)\b/g, '<span class="tok-bool">$1</span>')
             .replace(/\b(\d+\.?\d*)\b/g, '<span class="tok-num">$1</span>');
@@ -1366,7 +1471,8 @@
         function getDisplayCfg(cfg) {
           return Object.fromEntries(
             Object.entries(cfg).filter(
-              ([k]) => !["onRamadanStart", "onRamadanEnd"].includes(k),
+              ([k]) =>
+                !["onRamadanStart", "onRamadanEnd", "previewMode"].includes(k),
             ),
           );
         }
@@ -1389,15 +1495,14 @@
             return `import { RamadanOverlay } from 'ramadan-overlay/react';\n\nfunction App() {\n  return (\n    <>\n      <RamadanOverlay\n        ${props}\n      />\n      {/* your app */}\n    </>\n  );\n}`;
           }
           if (activeTab === "vue") {
-            const props = Object.entries(d)
-              .map(([k, v]) => {
-                if (typeof v === "boolean")
-                  return v ? `:${k}="true"` : `:${k}="false"`;
-                if (typeof v === "string") return `${k}="${v}"`;
-                return `:${k}="${JSON.stringify(v).replace(/"/g, "'")}"`;
-              })
-              .join("\n    ");
-            return `<template>\n  <RamadanOverlay\n    ${props}\n  />\n<\/template>\n\n<script setup>\nimport { RamadanOverlay } from 'ramadan-overlay/vue';\n<\/script>`;
+            const objSingleQuote = cfgToObjLiteral(d).replace(/"/g, "'");
+            return `<template>\n  <RamadanOverlay :config="overlayConfig" />\n<\/template>\n\n<script setup>\nimport { RamadanOverlay } from 'ramadan-overlay/vue';\n\nconst overlayConfig = ${objSingleQuote};\n<\/script>`;
+          }
+          if (activeTab === "angular") {
+            return `import { Component } from '@angular/core';\nimport { RamadanOverlayModule } from 'ramadan-overlay/angular';\n\n@Component({\n  selector: 'app-root',\n  imports: [RamadanOverlayModule],\n  template: \`\n    <ng-container ramadanOverlay [ramadanConfig]="overlayConfig"></ng-container>\n  \`\n})\nexport class AppComponent {\n  overlayConfig = ${obj};\n}`;
+          }
+          if (activeTab === "svelte") {
+            return `<script>\n  import { ramadanOverlay } from 'ramadan-overlay/svelte';\n\n  const config = ${obj};\n<\/script>\n\n<div use:ramadanOverlay={config}></div>`;
           }
           if (activeTab === "cdn") {
             return `<script src="https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js"><\/script>\n<script>\n  RamadanOverlay.init(${obj});\n<\/script>`;
@@ -1411,13 +1516,19 @@
           document.getElementById("codeBox").dataset.raw = raw;
         }
 
-        function mount() {
+        function mount(withConfetti = false) {
           currentInstance?.destroy();
           const cfg = getConfig();
-          currentInstance = init(cfg);
-          updateStateDisplay(currentInstance.state);
           updateCodeBox(cfg);
           saveHash(cfg);
+          try {
+            // Pass cfg.confetti only when explicitly requested (confetti select changed).
+            // All other re-mounts (color, variant, opacity...) stay silent.
+            currentInstance = init({ ...cfg, confetti: withConfetti ? cfg.confetti : "off" });
+            updateStateDisplay(currentInstance.state);
+          } catch (e) {
+            console.warn("[ramadan-overlay] init error:", e);
+          }
         }
 
         // ── URL hash state ───────────────────────────────────────────────────
@@ -1480,6 +1591,18 @@
               document.getElementById("ceilingColor").value = cfg.ceilingColor;
             if (cfg.ropeColor)
               document.getElementById("ropeColor").value = cfg.ropeColor;
+            if (cfg.bannerBg)
+              document.getElementById("bannerBgColor").value = cfg.bannerBg;
+            if (cfg.bannerTextColor)
+              document.getElementById("bannerTextColorInput").value =
+                cfg.bannerTextColor;
+            if (cfg.bannerIconColor)
+              document.getElementById("bannerIconColorInput").value =
+                cfg.bannerIconColor;
+            if (cfg.bannerTextEn)
+              document.getElementById("bannerTextEn").value = cfg.bannerTextEn;
+            if (cfg.bannerTextAr)
+              document.getElementById("bannerTextAr").value = cfg.bannerTextAr;
           } catch (_) {}
         }
 
@@ -1488,7 +1611,7 @@
         syncColorPanels();
         syncHijriAdjGroup();
         updateStateDisplay(getRamadanState());
-        mount();
+        mount(true);
 
         // ── Toggle overlay ──
         document
@@ -1498,7 +1621,7 @@
             if (overlayOn) {
               this.textContent = "Overlay ON";
               this.classList.add("active");
-              mount();
+              mount(); // no auto-confetti on toggle — use the 🎊 button
             } else {
               this.textContent = "Overlay OFF";
               this.classList.remove("active");
@@ -1508,12 +1631,29 @@
           });
 
         // ── Fire confetti ──
+        // Explicitly fires the animation. Respects "off" — silent if disabled.
         document.getElementById("confettiBtn").addEventListener("click", () => {
+          const cfg = getConfig();
+          if (cfg.confetti === "off") return;
           currentInstance?.destroy();
-          currentInstance = init({ ...getConfig(), confetti: true });
+          currentInstance = init({ ...cfg, confetti: "on" });
           updateStateDisplay(currentInstance.state);
-          updateCodeBox(getConfig());
+          updateCodeBox(cfg);
         });
+
+        // ── Banner apply ──
+        document
+          .getElementById("bannerApplyBtn")
+          .addEventListener("click", () => {
+            // Always remount — if the overlay was off, turn it back on
+            if (!overlayOn) {
+              overlayOn = true;
+              const btn = document.getElementById("toggleBtn");
+              btn.textContent = "Overlay ON";
+              btn.classList.add("active");
+            }
+            mount();
+          });
 
         // ── Reset colors ──
         document
@@ -1540,7 +1680,7 @@
 
         // ── Auto-apply on any control change ──
         document
-          .querySelectorAll('select, input[type="range"], input[type="number"]')
+          .querySelectorAll('select:not(#confettiSelect), input[type="range"], input[type="number"]')
           .forEach((el) => {
             el.addEventListener("change", () => {
               syncColorPanels();
@@ -1548,9 +1688,20 @@
               if (overlayOn) mount();
             });
           });
+        // Confetti select controls both code output AND live demo behaviour
+        document.getElementById("confettiSelect").addEventListener("change", () => {
+          if (overlayOn) mount(true);
+          else updateCodeBox(getConfig());
+        });
         document.querySelectorAll('input[type="color"]').forEach((el) => {
           el.addEventListener("input", () => {
             if (overlayOn) mount();
+          });
+        });
+        // Banner text inputs are not color pickers — wire them up separately
+        ["bannerTextEn", "bannerTextAr"].forEach((id) => {
+          document.getElementById(id)?.addEventListener("input", () => {
+            updateCodeBox(getConfig());
           });
         });
         // Keep variant/region selectors syncing panels immediately

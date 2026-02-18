@@ -87,25 +87,6 @@
   will-change: transform, opacity;
 }
 
-/* ─── Minimal variant ──────────────────────────────────────────────────────── */
-
-#ramadan-overlay-root .ro-border-top,
-#ramadan-overlay-root .ro-border-bottom {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: clamp(12px, 1.5vw, 24px);
-  overflow: hidden;
-}
-
-#ramadan-overlay-root .ro-border-top {
-  top: 0;
-}
-
-#ramadan-overlay-root .ro-border-bottom {
-  bottom: 0;
-}
-
 /* ─── Geometric variant ────────────────────────────────────────────────────── */
 
 #ramadan-overlay-root .ro-geo-band {
