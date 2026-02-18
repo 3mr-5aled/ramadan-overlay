@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/3mr-5aled/ramadan-overlay"
+    "url": "git+https://github.com/3mr-5aled/ramadan-overlay.git"
   },
   "keywords": [
     "ramadan",
