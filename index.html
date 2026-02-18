@@ -3,12 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ramadan-overlay — Config Generator</title>
+    <title>ramadan-overlay — Beautiful Ramadan Overlay for Any Website</title>
     <meta
       name="description"
       content="Interactive config generator for ramadan-overlay — pick a variant, customise colours and copy the ready-to-use code."
     />
+    <!-- <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='80'>🌙</text></svg>" /> -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
     <style>
+      html {
+        scroll-behavior: smooth;
+      }
+
       *,
       *::before,
       *::after {
@@ -25,7 +31,7 @@
         background: #0d1117;
         color: #e6edf3;
         min-height: 100vh;
-        padding: 40px 20px 80px;
+        padding: 0 20px 80px;
       }
 
       /* ── Header ── */
@@ -338,16 +344,429 @@
         font-size: 0.78rem;
         color: #8b8f98;
       }
+
+      /* ── Navbar ── */
+      .nav-bar {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 56px;
+        margin: 0 -20px;
+        padding: 0 28px;
+        background: rgba(13, 17, 23, 0.88);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid #30363d;
+      }
+      .nav-logo {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #c9a84c;
+        letter-spacing: -0.3px;
+        text-decoration: none;
+      }
+      .nav-links {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+      }
+      .nav-links a {
+        font-size: 0.84rem;
+        color: #8b8f98;
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .nav-links a:hover {
+        color: #e6edf3;
+      }
+      .nav-links .nav-btn {
+        padding: 5px 14px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+        color: #e6edf3;
+        font-size: 0.82rem;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
+      }
+      .nav-links .nav-btn:hover {
+        border-color: #c9a84c;
+        color: #c9a84c;
+      }
+
+      /* ── Hero ── */
+      .hero {
+        position: relative;
+        min-height: calc(100vh - 56px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 72px 20px 80px;
+        margin: 0 -20px;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse 80% 55% at 50% -10%,
+          rgba(201, 168, 76, 0.14) 0%,
+          transparent 68%
+        );
+        pointer-events: none;
+      }
+      .hero-inner {
+        position: relative;
+        max-width: 740px;
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+      .hero-eyebrow {
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 20px;
+        border: 1px solid #30363d;
+        font-size: 0.74rem;
+        color: #8b8f98;
+        margin-bottom: 22px;
+        letter-spacing: 0.4px;
+      }
+      .hero-title {
+        font-size: clamp(2.4rem, 7vw, 4rem);
+        letter-spacing: -1.5px;
+        line-height: 1.08;
+        margin-bottom: 20px;
+        background: linear-gradient(
+          135deg,
+          #f0d87a 0%,
+          #c9a84c 50%,
+          #e8c96b 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .hero-sub {
+        font-size: 1.05rem;
+        color: #8b8f98;
+        line-height: 1.75;
+        max-width: 580px;
+        margin: 0 auto 30px;
+      }
+      .install-cmd {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 18px;
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        margin-bottom: 24px;
+      }
+      .install-cmd code {
+        font-family: "Fira Code", "Cascadia Code", monospace;
+        font-size: 0.9rem;
+        color: #c9a84c;
+        white-space: nowrap;
+      }
+      .btn-copy-install {
+        padding: 3px 10px;
+        border-radius: 5px;
+        border: 1px solid #30363d;
+        background: transparent;
+        color: #8b8f98;
+        font-size: 0.74rem;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
+        white-space: nowrap;
+      }
+      .btn-copy-install:hover {
+        border-color: #c9a84c;
+        color: #c9a84c;
+      }
+      .hero-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 30px;
+      }
+      .badge-pill {
+        padding: 4px 13px;
+        border-radius: 20px;
+        font-size: 0.76rem;
+        background: rgba(201, 168, 76, 0.08);
+        border: 1px solid rgba(201, 168, 76, 0.22);
+        color: #c9a84c;
+      }
+      .hero-cta {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 52px;
+      }
+      .btn-hero-primary {
+        padding: 11px 26px;
+        border-radius: 8px;
+        background: #c9a84c;
+        color: #0d1117;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: opacity 0.15s;
+      }
+      .btn-hero-primary:hover {
+        opacity: 0.87;
+      }
+      .btn-hero-secondary {
+        padding: 11px 26px;
+        border-radius: 8px;
+        border: 1px solid #c9a84c;
+        color: #c9a84c;
+        font-size: 0.92rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.15s;
+      }
+      .btn-hero-secondary:hover {
+        background: rgba(201, 168, 76, 0.1);
+      }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+        gap: 16px;
+        text-align: left;
+      }
+      .feature-card {
+        padding: 18px 16px;
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        transition: border-color 0.2s;
+      }
+      .feature-card:hover {
+        border-color: rgba(201, 168, 76, 0.4);
+      }
+      .feature-icon {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+      }
+      .feature-label {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #e6edf3;
+        margin-bottom: 5px;
+      }
+      .feature-desc {
+        font-size: 0.76rem;
+        color: #8b8f98;
+        line-height: 1.55;
+      }
+
+      /* ── Section heading ── */
+      .section-heading {
+        text-align: center;
+        max-width: 860px;
+        margin: 64px auto 28px;
+        padding: 0 4px;
+      }
+      .section-heading h2 {
+        font-size: clamp(1.4rem, 4vw, 1.9rem);
+        letter-spacing: -0.5px;
+        margin-bottom: 6px;
+      }
+      .section-heading p {
+        color: #8b8f98;
+        font-size: 0.9rem;
+      }
+
+      /* ── Contact ── */
+      .contact-section {
+        max-width: 860px;
+        margin: 60px auto 0;
+        padding: 48px 4px 40px;
+        text-align: center;
+        border-top: 1px solid #30363d;
+      }
+      .contact-title {
+        font-size: clamp(1.3rem, 4vw, 1.9rem);
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+      }
+      .contact-sub {
+        color: #8b8f98;
+        font-size: 0.9rem;
+        margin-bottom: 32px;
+      }
+      .contact-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        justify-content: center;
+      }
+      .contact-card {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 14px 22px;
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        color: #e6edf3;
+        text-decoration: none;
+        font-size: 0.86rem;
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+        min-width: 210px;
+        justify-content: center;
+      }
+      .contact-card:hover {
+        border-color: #c9a84c;
+        color: #c9a84c;
+      }
+      .contact-card svg {
+        flex-shrink: 0;
+      }
+      .contact-footer {
+        margin-top: 40px;
+        font-size: 0.76rem;
+        color: #444d56;
+      }
+      .contact-footer a {
+        color: #8b8f98;
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .contact-footer a:hover {
+        color: #c9a84c;
+      }
     </style>
   </head>
   <body>
-    <header>
-      <h1>🌙 ramadan-overlay</h1>
+    <!-- ── Navbar ── -->
+    <nav class="nav-bar">
+      <a class="nav-logo" href="#">🌙 ramadan-overlay</a>
+      <div class="nav-links">
+        <a href="#config">Config Generator</a>
+        <a
+          href="https://www.npmjs.com/package/ramadan-overlay"
+          target="_blank"
+          rel="noopener"
+          >npm</a
+        >
+        <a
+          href="https://github.com/3mr-5aled/ramadan-overlay"
+          target="_blank"
+          rel="noopener"
+          class="nav-btn"
+          >GitHub ↗</a
+        >
+      </div>
+    </nav>
+
+    <!-- ── Hero ── -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-eyebrow">
+          Open Source &nbsp;·&nbsp; MIT License &nbsp;·&nbsp; v0.1.1
+        </div>
+
+        <h1 class="hero-title">🌙 ramadan-overlay</h1>
+
+        <p class="hero-sub">
+          Add beautiful Ramadan celebration overlays to any website in seconds.
+          Auto-detects Ramadan dates, five visual variants, and works with every
+          major framework — zero dependencies.
+        </p>
+
+        <div class="install-cmd">
+          <code>npm install ramadan-overlay</code>
+          <button
+            class="btn-copy-install"
+            onclick="
+              this.textContent = '✓ Copied!';
+              navigator.clipboard.writeText('npm install ramadan-overlay');
+              setTimeout(() => (this.textContent = 'Copy'), 2000);
+            "
+          >
+            Copy
+          </button>
+        </div>
+
+        <div class="hero-badges">
+          <span class="badge-pill">React</span>
+          <span class="badge-pill">Vue</span>
+          <span class="badge-pill">Angular</span>
+          <span class="badge-pill">Svelte</span>
+          <span class="badge-pill">Vanilla JS</span>
+          <span class="badge-pill">CDN</span>
+        </div>
+
+        <div class="hero-cta">
+          <a href="#config" class="btn-hero-primary">Try the configurator ↓</a>
+          <a
+            href="https://github.com/3mr-5aled/ramadan-overlay"
+            class="btn-hero-secondary"
+            target="_blank"
+            rel="noopener"
+            >View on GitHub ↗</a
+          >
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🗓️</div>
+            <div class="feature-label">Auto-detection</div>
+            <div class="feature-desc">
+              Automatically activates during Ramadan using Hijri calendar
+              calculation — no manual dates needed.
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <div class="feature-label">5 Variants</div>
+            <div class="feature-desc">
+              Lanterns, Sparkles, Crescent &amp; Stars, Geometric, and Minimal
+              styles to suit any site.
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-label">Lightweight</div>
+            <div class="feature-desc">
+              Zero runtime dependencies, tree-shakeable, and works with any
+              front-end stack or plain HTML.
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🌍</div>
+            <div class="feature-label">Region-aware</div>
+            <div class="feature-desc">
+              Supports 10+ regional Ramadan start-date calendars with a
+              configurable Hijri offset.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Config section heading ── -->
+    <div class="section-heading" id="config">
+      <h2>⚙️ Config Generator</h2>
       <p>
-        Config generator &amp; live preview — copy the generated code straight
-        into your project
+        Customise the overlay live and copy the ready-to-use code for your
+        project
       </p>
-    </header>
+    </div>
 
     <!-- ── Main controls ── -->
     <div class="panel">
@@ -543,13 +962,18 @@
 
         <div class="color-divider"></div>
 
-        <!-- rope / ceiling swatch -->
+        <!-- ceiling / rope swatches -->
         <div class="color-sub-section">
           <div class="color-sub-title">Ceiling &amp; Rope</div>
           <div class="color-row">
             <div class="color-swatch-wrap">
+              <input type="color" id="ceilingColor" value="#c9a84c" /><span
+                >Ceiling</span
+              >
+            </div>
+            <div class="color-swatch-wrap">
               <input type="color" id="ropeColor" value="#c9a84c" /><span
-                >Rope</span
+                >String</span
               >
             </div>
           </div>
@@ -684,13 +1108,96 @@
       </div>
     </div>
 
-    <div class="site-content">
-      <p>
-        Your website content lives here.<br />The overlay floats above without
-        blocking any interactions.
+    <!-- ── Contact ── -->
+    <section class="contact-section">
+      <h2 class="contact-title">Get in Touch</h2>
+      <p class="contact-sub">
+        Have questions, ideas, or want to contribute? Reach out!
       </p>
-      <span class="badge">pointer-events: none</span>
-    </div>
+      <div class="contact-cards">
+        <!-- GitHub -->
+        <a
+          href="https://github.com/3mr-5aled/"
+          class="contact-card"
+          target="_blank"
+          rel="noopener"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.184 6.839 9.505.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.112-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.254-.446-1.273.098-2.653 0 0 .84-.269 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.338c1.909-1.295 2.748-1.026 2.748-1.026.546 1.38.202 2.399.1 2.653.64.7 1.028 1.595 1.028 2.688 0 3.848-2.338 4.695-4.566 4.944.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.578.688.48C19.138 20.2 22 16.447 22 12.021 22 6.484 17.523 2 12 2z"
+            />
+          </svg>
+          <span>3mr-5aled</span>
+        </a>
+
+        <!-- LinkedIn -->
+        <a
+          href="https://www.linkedin.com/in/3mr5aled/"
+          class="contact-card"
+          target="_blank"
+          rel="noopener"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+            />
+          </svg>
+          <span>3mr5aled</span>
+        </a>
+
+        <!-- Email -->
+        <a href="mailto:3mr5aled.contact@gmail.com" class="contact-card">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+          </svg>
+          <span>3mr5aled.contact@gmail.com</span>
+        </a>
+      </div>
+
+      <p class="contact-footer">
+        Built with ❤️ by
+        <a href="https://github.com/3mr-5aled/" target="_blank" rel="noopener"
+          >3mr-5aled</a
+        >
+        &nbsp;·&nbsp;
+        <a
+          href="https://github.com/3mr-5aled/ramadan-overlay"
+          target="_blank"
+          rel="noopener"
+          >View source on GitHub</a
+        >
+        &nbsp;·&nbsp;
+        <a
+          href="https://www.npmjs.com/package/ramadan-overlay"
+          target="_blank"
+          rel="noopener"
+          >npm package</a
+        >
+      </p>
+    </section>
 
     <!-- initApp must be defined before the script tag's onload fires -->
     <script>
@@ -715,6 +1222,7 @@
           "#1a7a6b",
         ];
         const DEFAULT_GLOW_COLOR = "#c9a84c";
+        const DEFAULT_CEILING_COLOR = "#c9a84c";
         const DEFAULT_ROPE_COLOR = "#c9a84c";
         const DEFAULT_GENERIC_COLORS = [
           "#c9a84c",
@@ -736,12 +1244,10 @@
           const isLanterns =
             document.getElementById("variantSelect").value === "lanterns";
           if (isLanterns) {
-            const cols = Array.from(
+            return Array.from(
               { length: 12 },
               (_, i) => document.getElementById("lc" + (i + 1)).value,
             );
-            cols.push(document.getElementById("ropeColor").value);
-            return cols;
           }
           return [1, 2, 3, 4, 5].map(
             (i) => document.getElementById("gc" + i).value,
@@ -782,6 +1288,8 @@
             locale: document.getElementById("localeSelect").value,
             colors: getColors(),
             glowColor: getGlowColor(),
+            ceilingColor: document.getElementById("ceilingColor").value,
+            ropeColor: document.getElementById("ropeColor").value,
             previewMode: true,
             onRamadanStart: (state) => console.log("Ramadan started!", state),
           };
@@ -962,14 +1470,16 @@
                 cfg.colors.slice(0, 12).forEach((c, i) => {
                   document.getElementById("lc" + (i + 1)).value = c;
                 });
-                if (cfg.colors[12])
-                  document.getElementById("ropeColor").value = cfg.colors[12];
               } else {
                 cfg.colors.slice(0, 5).forEach((c, i) => {
                   document.getElementById("gc" + (i + 1)).value = c;
                 });
               }
             }
+            if (cfg.ceilingColor)
+              document.getElementById("ceilingColor").value = cfg.ceilingColor;
+            if (cfg.ropeColor)
+              document.getElementById("ropeColor").value = cfg.ropeColor;
           } catch (_) {}
         }
 
@@ -1012,6 +1522,8 @@
             DEFAULT_LANTERN_COLORS.forEach((hex, i) => {
               document.getElementById("lc" + (i + 1)).value = hex;
             });
+            document.getElementById("ceilingColor").value =
+              DEFAULT_CEILING_COLOR;
             document.getElementById("ropeColor").value = DEFAULT_ROPE_COLOR;
             document.getElementById("glowColorLantern").value =
               DEFAULT_GLOW_COLOR;

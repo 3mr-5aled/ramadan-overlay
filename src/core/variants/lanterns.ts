@@ -336,7 +336,6 @@ export const mountLanterns: VariantMountFn = (
   const colors = config.colors;
 
   // Default Ramadan palette — each entry maps 1-to-1 with the 12 lantern slots.
-  // colors[0..11] override per-lantern color; colors[12] overrides the rope.
   const DEFAULTS = [
     "#c9a84c",
     "#e8c96b",
@@ -352,7 +351,8 @@ export const mountLanterns: VariantMountFn = (
     "#1a7a6b",
   ];
   const palette: string[] = DEFAULTS.map((d, i) => colors[i] ?? d);
-  const ropeColor = colors[12] ?? colors[0] ?? "#c9a84c";
+  const ceilingColor = config.ceilingColor;
+  const ropeColor = config.ropeColor;
 
   function buildLanternSVG(svgIndex: number, color: string): string {
     const { viewBox, gContent } = LANTERN_SVG_DATA[svgIndex];
@@ -370,7 +370,7 @@ export const mountLanterns: VariantMountFn = (
   const rope = document.createElement("div");
   rope.style.cssText = `
     position:absolute;top:0;left:0;width:100%;height:3px;
-    background:linear-gradient(90deg,transparent 0%,${ropeColor} 10%,${ropeColor} 90%,transparent 100%);
+    background:linear-gradient(90deg,transparent 0%,${ceilingColor} 10%,${ceilingColor} 90%,transparent 100%);
     opacity:0.6;
   `;
   container.appendChild(rope);

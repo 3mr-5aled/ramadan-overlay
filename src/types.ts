@@ -121,6 +121,18 @@ export interface RamadanOverlayConfig {
   lanternStyle?: LanternStyle;
 
   /**
+   * CSS color for the horizontal ceiling bar at the top of the lanterns row (lanterns variant only).
+   * @default '#c9a84c'
+   */
+  ceilingColor?: string;
+
+  /**
+   * CSS color for the individual strings connecting each lantern to the ceiling bar (lanterns variant only).
+   * @default '#c9a84c'
+   */
+  ropeColor?: string;
+
+  /**
    * CSS color used for the glow / drop-shadow effect on decorations.
    * @default 'rgba(201,168,76,0.55)'
    */

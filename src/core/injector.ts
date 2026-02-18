@@ -46,6 +46,8 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     locale: userConfig.locale ?? "en",
     lanternStyle: userConfig.lanternStyle ?? 0,
     glowColor: userConfig.glowColor ?? "rgba(201,168,76,0.55)",
+    ceilingColor: userConfig.ceilingColor ?? "#c9a84c",
+    ropeColor: userConfig.ropeColor ?? "#c9a84c",
     region: userConfig.region ?? "standard",
     hijriAdjustment: resolveHijriOffset(
       userConfig.region,
