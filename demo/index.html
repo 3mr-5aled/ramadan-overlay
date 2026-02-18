@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ramadan-overlay — Config Generator</title>
-    <meta name="description" content="Interactive config generator for ramadan-overlay — pick a variant, customise colours and copy the ready-to-use code." />
+    <meta
+      name="description"
+      content="Interactive config generator for ramadan-overlay — pick a variant, customise colours and copy the ready-to-use code."
+    />
     <style>
       *,
       *::before,
@@ -218,7 +221,9 @@
         letter-spacing: 0.3px;
         transition: color 0.15s;
       }
-      .code-tab:hover { color: #e6edf3; }
+      .code-tab:hover {
+        color: #e6edf3;
+      }
       .code-tab.active {
         color: #c9a84c;
         border-bottom: 2px solid #c9a84c;
@@ -240,10 +245,18 @@
         color: #8b8f98;
         font-size: 0.75rem;
         cursor: pointer;
-        transition: border-color 0.15s, color 0.15s;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
       }
-      .btn-sm:hover { border-color: #c9a84c; color: #c9a84c; }
-      .btn-sm.copied { border-color: #3fb950; color: #3fb950; }
+      .btn-sm:hover {
+        border-color: #c9a84c;
+        color: #c9a84c;
+      }
+      .btn-sm.copied {
+        border-color: #3fb950;
+        color: #3fb950;
+      }
 
       /* ── State & code ── */
       .bottom-grid {
@@ -331,7 +344,8 @@
     <header>
       <h1>🌙 ramadan-overlay</h1>
       <p>
-        Config generator &amp; live preview — copy the generated code straight into your project
+        Config generator &amp; live preview — copy the generated code straight
+        into your project
       </p>
     </header>
 
@@ -658,7 +672,11 @@
           <button class="code-tab" data-tab="vue">Vue</button>
           <button class="code-tab" data-tab="cdn">Script tag</button>
         </div>
-        <pre class="code-box" id="codeBox" style="border:none;border-radius:0;margin:0;min-height:120px"></pre>
+        <pre
+          class="code-box"
+          id="codeBox"
+          style="border: none; border-radius: 0; margin: 0; min-height: 120px"
+        ></pre>
         <div class="code-actions">
           <button class="btn-sm" id="shareBtn">🔗 Share link</button>
           <button class="btn-sm" id="copyBtn">📋 Copy code</button>
@@ -677,351 +695,419 @@
     <!-- initApp must be defined before the script tag's onload fires -->
     <script>
       function initApp() {
-      const { init, getRamadanState } = RamadanOverlay;
+        const { init, getRamadanState } = RamadanOverlay;
 
-      let currentInstance = null;
-      let overlayOn = true;
+        let currentInstance = null;
+        let overlayOn = true;
 
-      const DEFAULT_LANTERN_COLORS = [
-        "#c9a84c",
-        "#e8c96b",
-        "#8b4513",
-        "#2d5a27",
-        "#4a8a3a",
-        "#8b1a1a",
-        "#cc4444",
-        "#1a3a6b",
-        "#3a6ab8",
-        "#6b2fa0",
-        "#c44d8a",
-        "#1a7a6b",
-      ];
-      const DEFAULT_GLOW_COLOR = "#c9a84c";
-      const DEFAULT_ROPE_COLOR = "#c9a84c";
-      const DEFAULT_GENERIC_COLORS = [
-        "#c9a84c",
-        "#e8c96b",
-        "#8b4513",
-        "#2d5a27",
-        "#1a3a1a",
-      ];
+        const DEFAULT_LANTERN_COLORS = [
+          "#c9a84c",
+          "#e8c96b",
+          "#8b4513",
+          "#2d5a27",
+          "#4a8a3a",
+          "#8b1a1a",
+          "#cc4444",
+          "#1a3a6b",
+          "#3a6ab8",
+          "#6b2fa0",
+          "#c44d8a",
+          "#1a7a6b",
+        ];
+        const DEFAULT_GLOW_COLOR = "#c9a84c";
+        const DEFAULT_ROPE_COLOR = "#c9a84c";
+        const DEFAULT_GENERIC_COLORS = [
+          "#c9a84c",
+          "#e8c96b",
+          "#8b4513",
+          "#2d5a27",
+          "#1a3a1a",
+        ];
 
-      function getGlowColor() {
-        const isLanterns =
-          document.getElementById("variantSelect").value === "lanterns";
-        return isLanterns
-          ? document.getElementById("glowColorLantern").value
-          : document.getElementById("glowColorGeneric").value;
-      }
-
-      function getColors() {
-        const isLanterns =
-          document.getElementById("variantSelect").value === "lanterns";
-        if (isLanterns) {
-          const cols = Array.from(
-            { length: 12 },
-            (_, i) => document.getElementById("lc" + (i + 1)).value,
-          );
-          cols.push(document.getElementById("ropeColor").value);
-          return cols;
+        function getGlowColor() {
+          const isLanterns =
+            document.getElementById("variantSelect").value === "lanterns";
+          return isLanterns
+            ? document.getElementById("glowColorLantern").value
+            : document.getElementById("glowColorGeneric").value;
         }
-        return [1, 2, 3, 4, 5].map(
-          (i) => document.getElementById("gc" + i).value,
-        );
-      }
 
-      function syncColorPanels() {
-        const isLanterns =
-          document.getElementById("variantSelect").value === "lanterns";
-        document.getElementById("lanternColorPanel").style.display = isLanterns
-          ? ""
-          : "none";
-        document.getElementById("genericColorPanel").style.display = isLanterns
-          ? "none"
-          : "";
-        document.getElementById("lanternStyleGroup").style.display = isLanterns
-          ? ""
-          : "none";
-      }
-
-      function syncHijriAdjGroup() {
-        const isCustom =
-          document.getElementById("regionSelect").value === "custom";
-        document.getElementById("hijriAdjGroup").style.display = isCustom
-          ? ""
-          : "none";
-      }
-
-      function syncLanternStyleVisibility() {
-        syncColorPanels();
-      }
-
-      function getConfig() {
-        const variant = document.getElementById("variantSelect").value;
-        const cfg = {
-          variant,
-          position: document.getElementById("positionSelect").value,
-          opacity: parseFloat(document.getElementById("opacityRange").value),
-          confetti: document.getElementById("confettiSelect").value === "true",
-          locale: document.getElementById("localeSelect").value,
-          colors: getColors(),
-          glowColor: getGlowColor(),
-          previewMode: true,
-          onRamadanStart: (state) => console.log("Ramadan started!", state),
-        };
-        const regionVal = document.getElementById("regionSelect").value;
-        if (regionVal === "custom") {
-          cfg.hijriAdjustment =
-            parseInt(document.getElementById("hijriAdjustment").value, 10) || 0;
-        } else {
-          cfg.region = regionVal;
-        }
-        if (variant === "lanterns") {
-          cfg.lanternStyle = parseInt(
-            document.getElementById("lanternStyleSelect").value,
-            10,
+        function getColors() {
+          const isLanterns =
+            document.getElementById("variantSelect").value === "lanterns";
+          if (isLanterns) {
+            const cols = Array.from(
+              { length: 12 },
+              (_, i) => document.getElementById("lc" + (i + 1)).value,
+            );
+            cols.push(document.getElementById("ropeColor").value);
+            return cols;
+          }
+          return [1, 2, 3, 4, 5].map(
+            (i) => document.getElementById("gc" + i).value,
           );
         }
-        const densityVal = document.getElementById("densitySelect").value;
-        if (densityVal !== "auto") {
-          cfg.density = densityVal;
+
+        function syncColorPanels() {
+          const isLanterns =
+            document.getElementById("variantSelect").value === "lanterns";
+          document.getElementById("lanternColorPanel").style.display =
+            isLanterns ? "" : "none";
+          document.getElementById("genericColorPanel").style.display =
+            isLanterns ? "none" : "";
+          document.getElementById("lanternStyleGroup").style.display =
+            isLanterns ? "" : "none";
         }
-        return cfg;
-      }
 
-      function updateStateDisplay(state) {
-        document.getElementById("s-isRamadan").textContent = String(
-          state.isRamadan,
-        );
-        document.getElementById("s-isFirstDay").textContent = String(
-          state.isFirstDay,
-        );
-        document.getElementById("s-hijriYear").textContent =
-          state.hijriYear || "—";
-        document.getElementById("s-dayNumber").textContent =
-          state.dayNumber || "—";
-      }
+        function syncHijriAdjGroup() {
+          const isCustom =
+            document.getElementById("regionSelect").value === "custom";
+          document.getElementById("hijriAdjGroup").style.display = isCustom
+            ? ""
+            : "none";
+        }
 
-      // ── Code generation ────────────────────────────────────────────────
+        function syncLanternStyleVisibility() {
+          syncColorPanels();
+        }
 
-      let activeTab = 'esm';
-
-      function syntaxHighlight(code) {
-        return code
-          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-          .replace(/(import|from|export|const|return|function|default)(?=[\s({])/g, '<span class="tok-key">$1</span>')
-          .replace(/\/\/[^\n]*/g, '<span class="tok-cmt">$&</span>')
-          .replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, '<span class="tok-str">$1</span>')
-          .replace(/\b(true|false)\b/g, '<span class="tok-bool">$1</span>')
-          .replace(/\b(\d+\.?\d*)\b/g, '<span class="tok-num">$1</span>');
-      }
-
-      function cfgToObjLiteral(cfg) {
-        const lines = [];
-        for (const [k, v] of Object.entries(cfg)) {
-          if (Array.isArray(v)) {
-            lines.push(`  ${k}: [${v.map(x => JSON.stringify(x)).join(', ')}]`);
+        function getConfig() {
+          const variant = document.getElementById("variantSelect").value;
+          const cfg = {
+            variant,
+            position: document.getElementById("positionSelect").value,
+            opacity: parseFloat(document.getElementById("opacityRange").value),
+            confetti:
+              document.getElementById("confettiSelect").value === "true",
+            locale: document.getElementById("localeSelect").value,
+            colors: getColors(),
+            glowColor: getGlowColor(),
+            previewMode: true,
+            onRamadanStart: (state) => console.log("Ramadan started!", state),
+          };
+          const regionVal = document.getElementById("regionSelect").value;
+          if (regionVal === "custom") {
+            cfg.hijriAdjustment =
+              parseInt(document.getElementById("hijriAdjustment").value, 10) ||
+              0;
           } else {
-            lines.push(`  ${k}: ${JSON.stringify(v)}`);
+            cfg.region = regionVal;
           }
-        }
-        return `{\n${lines.join(',\n')}\n}`;
-      }
-
-      function getDisplayCfg(cfg) {
-        return Object.fromEntries(
-          Object.entries(cfg).filter(([k]) => !['onRamadanStart','onRamadanEnd'].includes(k))
-        );
-      }
-
-      function buildCode(cfg) {
-        const d = getDisplayCfg(cfg);
-        const obj = cfgToObjLiteral(d);
-        if (activeTab === 'esm') {
-          return `import { init } from 'ramadan-overlay';\n\nconst overlay = init(${obj});\n\n// to remove:\n// overlay.destroy();`;
-        }
-        if (activeTab === 'react') {
-          const props = Object.entries(d).map(([k,v]) => {
-            if (typeof v === 'boolean') return v ? k : `${k}={false}`;
-            if (typeof v === 'number') return `${k}={${v}}`;
-            if (Array.isArray(v)) return `${k}={${JSON.stringify(v)}}`;
-            return `${k}=${JSON.stringify(v)}`;
-          }).join('\n  ');
-          return `import { RamadanOverlay } from 'ramadan-overlay/react';\n\nfunction App() {\n  return (\n    <>\n      <RamadanOverlay\n        ${props}\n      />\n      {/* your app */}\n    </>\n  );\n}`;
-        }
-        if (activeTab === 'vue') {
-          const props = Object.entries(d).map(([k,v]) => {
-            if (typeof v === 'boolean') return v ? `:${k}="true"` : `:${k}="false"`;
-            if (typeof v === 'string') return `${k}="${v}"`;
-            return `:${k}="${JSON.stringify(v).replace(/"/g, "'")}"`;
-          }).join('\n    ');
-          return `<template>\n  <RamadanOverlay\n    ${props}\n  />\n</template>\n\n<script setup>\nimport { RamadanOverlay } from 'ramadan-overlay/vue';\n</script>`;
-        }
-        if (activeTab === 'cdn') {
-          return `<script src="https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js"><\/script>\n<script>\n  RamadanOverlay.init(${obj});\n<\/script>`;
-        }
-        return '';
-      }
-
-      function updateCodeBox(cfg) {
-        const raw = buildCode(cfg);
-        document.getElementById('codeBox').innerHTML = syntaxHighlight(raw);
-        document.getElementById('codeBox').dataset.raw = raw;
-      }
-
-      function mount() {
-        currentInstance?.destroy();
-        const cfg = getConfig();
-        currentInstance = init(cfg);
-        updateStateDisplay(currentInstance.state);
-        updateCodeBox(cfg);
-        saveHash(cfg);
-      }
-
-      // ── URL hash state ───────────────────────────────────────────────────
-      function saveHash(cfg) {
-        const d = getDisplayCfg(cfg);
-        try {
-          location.replace('#' + btoa(JSON.stringify(d)));
-        } catch(_) {}
-      }
-
-      function loadHash() {
-        try {
-          const hash = location.hash.slice(1);
-          if (!hash) return;
-          const cfg = JSON.parse(atob(hash));
-          // Restore controls
-          if (cfg.variant) document.getElementById('variantSelect').value = cfg.variant;
-          if (cfg.position) document.getElementById('positionSelect').value = cfg.position;
-          if (cfg.opacity != null) { document.getElementById('opacityRange').value = cfg.opacity; document.getElementById('opacityVal').textContent = cfg.opacity; }
-          if (cfg.confetti != null) document.getElementById('confettiSelect').value = String(cfg.confetti);
-          if (cfg.locale) document.getElementById('localeSelect').value = cfg.locale;
-          if (cfg.region && cfg.region !== 'standard') document.getElementById('regionSelect').value = cfg.region;
-          if (cfg.density) document.getElementById('densitySelect').value = cfg.density;
-          if (cfg.lanternStyle != null) document.getElementById('lanternStyleSelect').value = cfg.lanternStyle;
-          if (cfg.glowColor) {
-            const isLanterns = cfg.variant === 'lanterns' || !cfg.variant;
-            if (isLanterns) document.getElementById('glowColorLantern').value = cfg.glowColor;
-            else document.getElementById('glowColorGeneric').value = cfg.glowColor;
+          if (variant === "lanterns") {
+            cfg.lanternStyle = parseInt(
+              document.getElementById("lanternStyleSelect").value,
+              10,
+            );
           }
-          if (Array.isArray(cfg.colors)) {
-            const isLanterns = cfg.variant === 'lanterns' || !cfg.variant;
-            if (isLanterns) {
-              cfg.colors.slice(0, 12).forEach((c, i) => { document.getElementById('lc' + (i + 1)).value = c; });
-              if (cfg.colors[12]) document.getElementById('ropeColor').value = cfg.colors[12];
+          const densityVal = document.getElementById("densitySelect").value;
+          if (densityVal !== "auto") {
+            cfg.density = densityVal;
+          }
+          return cfg;
+        }
+
+        function updateStateDisplay(state) {
+          document.getElementById("s-isRamadan").textContent = String(
+            state.isRamadan,
+          );
+          document.getElementById("s-isFirstDay").textContent = String(
+            state.isFirstDay,
+          );
+          document.getElementById("s-hijriYear").textContent =
+            state.hijriYear || "—";
+          document.getElementById("s-dayNumber").textContent =
+            state.dayNumber || "—";
+        }
+
+        // ── Code generation ────────────────────────────────────────────────
+
+        let activeTab = "esm";
+
+        function syntaxHighlight(code) {
+          return code
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(
+              /(import|from|export|const|return|function|default)(?=[\s({])/g,
+              '<span class="tok-key">$1</span>',
+            )
+            .replace(/\/\/[^\n]*/g, '<span class="tok-cmt">$&</span>')
+            .replace(
+              /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
+              '<span class="tok-str">$1</span>',
+            )
+            .replace(/\b(true|false)\b/g, '<span class="tok-bool">$1</span>')
+            .replace(/\b(\d+\.?\d*)\b/g, '<span class="tok-num">$1</span>');
+        }
+
+        function cfgToObjLiteral(cfg) {
+          const lines = [];
+          for (const [k, v] of Object.entries(cfg)) {
+            if (Array.isArray(v)) {
+              lines.push(
+                `  ${k}: [${v.map((x) => JSON.stringify(x)).join(", ")}]`,
+              );
             } else {
-              cfg.colors.slice(0, 5).forEach((c, i) => { document.getElementById('gc' + (i + 1)).value = c; });
+              lines.push(`  ${k}: ${JSON.stringify(v)}`);
             }
           }
-        } catch(_) {}
-      }
+          return `{\n${lines.join(",\n")}\n}`;
+        }
 
-      // ── Init ──
-      loadHash();
-      syncColorPanels();
-      syncHijriAdjGroup();
-      updateStateDisplay(getRamadanState());
-      mount();
+        function getDisplayCfg(cfg) {
+          return Object.fromEntries(
+            Object.entries(cfg).filter(
+              ([k]) => !["onRamadanStart", "onRamadanEnd"].includes(k),
+            ),
+          );
+        }
 
-      // ── Toggle overlay ──
-      document
-        .getElementById("toggleBtn")
-        .addEventListener("click", function () {
-          overlayOn = !overlayOn;
-          if (overlayOn) {
-            this.textContent = "Overlay ON";
-            this.classList.add("active");
-            mount();
-          } else {
-            this.textContent = "Overlay OFF";
-            this.classList.remove("active");
-            currentInstance?.destroy();
-            currentInstance = null;
+        function buildCode(cfg) {
+          const d = getDisplayCfg(cfg);
+          const obj = cfgToObjLiteral(d);
+          if (activeTab === "esm") {
+            return `import { init } from 'ramadan-overlay';\n\nconst overlay = init(${obj});\n\n// to remove:\n// overlay.destroy();`;
           }
-        });
+          if (activeTab === "react") {
+            const props = Object.entries(d)
+              .map(([k, v]) => {
+                if (typeof v === "boolean") return v ? k : `${k}={false}`;
+                if (typeof v === "number") return `${k}={${v}}`;
+                if (Array.isArray(v)) return `${k}={${JSON.stringify(v)}}`;
+                return `${k}=${JSON.stringify(v)}`;
+              })
+              .join("\n  ");
+            return `import { RamadanOverlay } from 'ramadan-overlay/react';\n\nfunction App() {\n  return (\n    <>\n      <RamadanOverlay\n        ${props}\n      />\n      {/* your app */}\n    </>\n  );\n}`;
+          }
+          if (activeTab === "vue") {
+            const props = Object.entries(d)
+              .map(([k, v]) => {
+                if (typeof v === "boolean")
+                  return v ? `:${k}="true"` : `:${k}="false"`;
+                if (typeof v === "string") return `${k}="${v}"`;
+                return `:${k}="${JSON.stringify(v).replace(/"/g, "'")}"`;
+              })
+              .join("\n    ");
+            return `<template>\n  <RamadanOverlay\n    ${props}\n  />\n<\/template>\n\n<script setup>\nimport { RamadanOverlay } from 'ramadan-overlay/vue';\n<\/script>`;
+          }
+          if (activeTab === "cdn") {
+            return `<script src="https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js"><\/script>\n<script>\n  RamadanOverlay.init(${obj});\n<\/script>`;
+          }
+          return "";
+        }
 
-      // ── Fire confetti ──
-      document.getElementById("confettiBtn").addEventListener("click", () => {
-        currentInstance?.destroy();
-        currentInstance = init({ ...getConfig(), confetti: true });
-        updateStateDisplay(currentInstance.state);
-        updateCodeBox(getConfig());
-      });
+        function updateCodeBox(cfg) {
+          const raw = buildCode(cfg);
+          document.getElementById("codeBox").innerHTML = syntaxHighlight(raw);
+          document.getElementById("codeBox").dataset.raw = raw;
+        }
 
-      // ── Reset colors ──
-      document
-        .getElementById("resetColorsBtn")
-        .addEventListener("click", () => {
-          DEFAULT_LANTERN_COLORS.forEach((hex, i) => {
-            document.getElementById("lc" + (i + 1)).value = hex;
+        function mount() {
+          currentInstance?.destroy();
+          const cfg = getConfig();
+          currentInstance = init(cfg);
+          updateStateDisplay(currentInstance.state);
+          updateCodeBox(cfg);
+          saveHash(cfg);
+        }
+
+        // ── URL hash state ───────────────────────────────────────────────────
+        function saveHash(cfg) {
+          const d = getDisplayCfg(cfg);
+          try {
+            location.replace("#" + btoa(JSON.stringify(d)));
+          } catch (_) {}
+        }
+
+        function loadHash() {
+          try {
+            const hash = location.hash.slice(1);
+            if (!hash) return;
+            const cfg = JSON.parse(atob(hash));
+            // Restore controls
+            if (cfg.variant)
+              document.getElementById("variantSelect").value = cfg.variant;
+            if (cfg.position)
+              document.getElementById("positionSelect").value = cfg.position;
+            if (cfg.opacity != null) {
+              document.getElementById("opacityRange").value = cfg.opacity;
+              document.getElementById("opacityVal").textContent = cfg.opacity;
+            }
+            if (cfg.confetti != null)
+              document.getElementById("confettiSelect").value = String(
+                cfg.confetti,
+              );
+            if (cfg.locale)
+              document.getElementById("localeSelect").value = cfg.locale;
+            if (cfg.region && cfg.region !== "standard")
+              document.getElementById("regionSelect").value = cfg.region;
+            if (cfg.density)
+              document.getElementById("densitySelect").value = cfg.density;
+            if (cfg.lanternStyle != null)
+              document.getElementById("lanternStyleSelect").value =
+                cfg.lanternStyle;
+            if (cfg.glowColor) {
+              const isLanterns = cfg.variant === "lanterns" || !cfg.variant;
+              if (isLanterns)
+                document.getElementById("glowColorLantern").value =
+                  cfg.glowColor;
+              else
+                document.getElementById("glowColorGeneric").value =
+                  cfg.glowColor;
+            }
+            if (Array.isArray(cfg.colors)) {
+              const isLanterns = cfg.variant === "lanterns" || !cfg.variant;
+              if (isLanterns) {
+                cfg.colors.slice(0, 12).forEach((c, i) => {
+                  document.getElementById("lc" + (i + 1)).value = c;
+                });
+                if (cfg.colors[12])
+                  document.getElementById("ropeColor").value = cfg.colors[12];
+              } else {
+                cfg.colors.slice(0, 5).forEach((c, i) => {
+                  document.getElementById("gc" + (i + 1)).value = c;
+                });
+              }
+            }
+          } catch (_) {}
+        }
+
+        // ── Init ──
+        loadHash();
+        syncColorPanels();
+        syncHijriAdjGroup();
+        updateStateDisplay(getRamadanState());
+        mount();
+
+        // ── Toggle overlay ──
+        document
+          .getElementById("toggleBtn")
+          .addEventListener("click", function () {
+            overlayOn = !overlayOn;
+            if (overlayOn) {
+              this.textContent = "Overlay ON";
+              this.classList.add("active");
+              mount();
+            } else {
+              this.textContent = "Overlay OFF";
+              this.classList.remove("active");
+              currentInstance?.destroy();
+              currentInstance = null;
+            }
           });
-          document.getElementById("ropeColor").value = DEFAULT_ROPE_COLOR;
-          document.getElementById("glowColorLantern").value =
-            DEFAULT_GLOW_COLOR;
-        });
-      document
-        .getElementById("resetColorsGenericBtn")
-        .addEventListener("click", () => {
-          DEFAULT_GENERIC_COLORS.forEach((hex, i) => {
-            document.getElementById("gc" + (i + 1)).value = hex;
-          });
-          document.getElementById("glowColorGeneric").value =
-            DEFAULT_GLOW_COLOR;
-        });
 
-      // ── Auto-apply on any control change ──
-      document.querySelectorAll('select, input[type="range"], input[type="number"]').forEach(el => {
-        el.addEventListener('change', () => { syncColorPanels(); syncHijriAdjGroup(); if (overlayOn) mount(); });
-      });
-      document.querySelectorAll('input[type="color"]').forEach(el => {
-        el.addEventListener('input', () => { if (overlayOn) mount(); });
-      });
-      // Keep variant/region selectors syncing panels immediately
-      document.getElementById('variantSelect').addEventListener('change', syncColorPanels);
-      document.getElementById('regionSelect').addEventListener('change', syncHijriAdjGroup);
-
-      // ── Code tabs ──
-      document.querySelectorAll('.code-tab').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.code-tab').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          activeTab = btn.dataset.tab;
+        // ── Fire confetti ──
+        document.getElementById("confettiBtn").addEventListener("click", () => {
+          currentInstance?.destroy();
+          currentInstance = init({ ...getConfig(), confetti: true });
+          updateStateDisplay(currentInstance.state);
           updateCodeBox(getConfig());
         });
-      });
 
-      // ── Copy code ──
-      document.getElementById('copyBtn').addEventListener('click', () => {
-        const raw = document.getElementById('codeBox').dataset.raw || '';
-        navigator.clipboard.writeText(raw).then(() => {
-          const btn = document.getElementById('copyBtn');
-          btn.textContent = '✅ Copied!';
-          btn.classList.add('copied');
-          setTimeout(() => { btn.textContent = '📋 Copy code'; btn.classList.remove('copied'); }, 2000);
-        });
-      });
+        // ── Reset colors ──
+        document
+          .getElementById("resetColorsBtn")
+          .addEventListener("click", () => {
+            DEFAULT_LANTERN_COLORS.forEach((hex, i) => {
+              document.getElementById("lc" + (i + 1)).value = hex;
+            });
+            document.getElementById("ropeColor").value = DEFAULT_ROPE_COLOR;
+            document.getElementById("glowColorLantern").value =
+              DEFAULT_GLOW_COLOR;
+          });
+        document
+          .getElementById("resetColorsGenericBtn")
+          .addEventListener("click", () => {
+            DEFAULT_GENERIC_COLORS.forEach((hex, i) => {
+              document.getElementById("gc" + (i + 1)).value = hex;
+            });
+            document.getElementById("glowColorGeneric").value =
+              DEFAULT_GLOW_COLOR;
+          });
 
-      // ── Share link ──
-      document.getElementById('shareBtn').addEventListener('click', () => {
-        navigator.clipboard.writeText(location.href).then(() => {
-          const btn = document.getElementById('shareBtn');
-          btn.textContent = '✅ Link copied!';
-          btn.classList.add('copied');
-          setTimeout(() => { btn.textContent = '🔗 Share link'; btn.classList.remove('copied'); }, 2000);
+        // ── Auto-apply on any control change ──
+        document
+          .querySelectorAll('select, input[type="range"], input[type="number"]')
+          .forEach((el) => {
+            el.addEventListener("change", () => {
+              syncColorPanels();
+              syncHijriAdjGroup();
+              if (overlayOn) mount();
+            });
+          });
+        document.querySelectorAll('input[type="color"]').forEach((el) => {
+          el.addEventListener("input", () => {
+            if (overlayOn) mount();
+          });
         });
-      });
+        // Keep variant/region selectors syncing panels immediately
+        document
+          .getElementById("variantSelect")
+          .addEventListener("change", syncColorPanels);
+        document
+          .getElementById("regionSelect")
+          .addEventListener("change", syncHijriAdjGroup);
 
-      // ── Opacity range — update label only ──
-      document
-        .getElementById("opacityRange")
-        .addEventListener("input", function () {
-          document.getElementById("opacityVal").textContent = this.value;
+        // ── Code tabs ──
+        document.querySelectorAll(".code-tab").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document
+              .querySelectorAll(".code-tab")
+              .forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            activeTab = btn.dataset.tab;
+            updateCodeBox(getConfig());
+          });
         });
+
+        // ── Copy code ──
+        document.getElementById("copyBtn").addEventListener("click", () => {
+          const raw = document.getElementById("codeBox").dataset.raw || "";
+          navigator.clipboard.writeText(raw).then(() => {
+            const btn = document.getElementById("copyBtn");
+            btn.textContent = "✅ Copied!";
+            btn.classList.add("copied");
+            setTimeout(() => {
+              btn.textContent = "📋 Copy code";
+              btn.classList.remove("copied");
+            }, 2000);
+          });
+        });
+
+        // ── Share link ──
+        document.getElementById("shareBtn").addEventListener("click", () => {
+          navigator.clipboard.writeText(location.href).then(() => {
+            const btn = document.getElementById("shareBtn");
+            btn.textContent = "✅ Link copied!";
+            btn.classList.add("copied");
+            setTimeout(() => {
+              btn.textContent = "🔗 Share link";
+              btn.classList.remove("copied");
+            }, 2000);
+          });
+        });
+
+        // ── Opacity range — update label only ──
+        document
+          .getElementById("opacityRange")
+          .addEventListener("input", function () {
+            document.getElementById("opacityVal").textContent = this.value;
+          });
       } // end initApp
     </script>
 
     <!-- Load library: local dist for dev, unpkg CDN for hosted (onerror fallback) -->
-    <script src="../dist/ramadan-overlay.min.js" onload="initApp()" onerror="this.remove();var s=document.createElement('script');s.src='https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js';s.onload=initApp;document.head.appendChild(s)"></script>
+    <script
+      src="../dist/ramadan-overlay.min.js"
+      onload="initApp()"
+      onerror="
+        this.remove();
+        var s = document.createElement('script');
+        s.src = 'https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js';
+        s.onload = initApp;
+        document.head.appendChild(s);
+      "
+    ></script>
   </body>
 </html>
