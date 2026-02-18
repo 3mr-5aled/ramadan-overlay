@@ -674,8 +674,7 @@
       <span class="badge">pointer-events: none</span>
     </div>
 
-    <!-- Load library: local dist for dev, unpkg for hosted -->
-    <script src="../dist/ramadan-overlay.min.js" onerror="this.remove();var s=document.createElement('script');s.src='https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js';s.onload=initApp;document.head.appendChild(s)" onload="initApp()"></script>
+    <!-- initApp must be defined before the script tag's onload fires -->
     <script>
       function initApp() {
       const { init, getRamadanState } = RamadanOverlay;
@@ -1021,5 +1020,8 @@
         });
       } // end initApp
     </script>
+
+    <!-- Load library: local dist for dev, unpkg CDN for hosted (onerror fallback) -->
+    <script src="../dist/ramadan-overlay.min.js" onload="initApp()" onerror="this.remove();var s=document.createElement('script');s.src='https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js';s.onload=initApp;document.head.appendChild(s)"></script>
   </body>
 </html>
