@@ -33,9 +33,10 @@ export async function fireRamadanConfetti(
         "#ffffff",
       ];
 
-  // Emoji shapes for cultural flair
-  const crescentShape = confetti.shapeFromText({ text: "🌙", scalar: 2 });
-  const starShape = confetti.shapeFromText({ text: "✨", scalar: 2 });
+  // Emoji shapes for cultural flair — rendered with a dark stroke so they
+  // stand out against both light and coloured confetti particles.
+  const crescentShape = buildEmojiShape("🌙");
+  const starShape = buildEmojiShape("✨");
   const yearStr = hijriYear.toString();
 
   // Build a bitmap shape for the year with white fill + black stroke
@@ -83,6 +84,47 @@ export async function fireRamadanConfetti(
     shapes: [crescentShape, starShape, yearShape],
     scalar: 2,
   });
+}
+
+/**
+ * Renders an emoji onto an OffscreenCanvas with a dark stroke behind it so it
+ * reads clearly on any background colour in the confetti burst.
+ */
+function buildEmojiShape(emoji: string): confetti.Shape {
+  const scalar = 2;
+  const fontSize = 10 * scalar;
+  const font = fontSize + "px serif";
+  const strokeWidth = fontSize * 0.15;
+
+  // Measure
+  let cv = new OffscreenCanvas(1, 1);
+  let ctx = cv.getContext("2d") as OffscreenCanvasRenderingContext2D;
+  ctx.font = font;
+  const m = ctx.measureText(emoji);
+  const pad = strokeWidth + 2;
+  const w =
+    Math.ceil(m.actualBoundingBoxRight + m.actualBoundingBoxLeft) + pad * 2;
+  const h =
+    Math.ceil(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) + pad * 2;
+  const x = m.actualBoundingBoxLeft + pad;
+  const y = m.actualBoundingBoxAscent + pad;
+
+  // Draw with stroke then fill
+  cv = new OffscreenCanvas(w, h);
+  ctx = cv.getContext("2d") as OffscreenCanvasRenderingContext2D;
+  ctx.font = font;
+  ctx.lineJoin = "round";
+  ctx.lineWidth = strokeWidth * 2; // paint behind fill
+  ctx.strokeStyle = "rgba(0,0,0,0.55)";
+  ctx.strokeText(emoji, x, y);
+  ctx.fillText(emoji, x, y);
+
+  const scale = 1 / scalar;
+  return {
+    type: "bitmap",
+    bitmap: cv.transferToImageBitmap(),
+    matrix: [scale, 0, 0, scale, (-w * scale) / 2, (-h * scale) / 2],
+  } as unknown as confetti.Shape;
 }
 
 /**
