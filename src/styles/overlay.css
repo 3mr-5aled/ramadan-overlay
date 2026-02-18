@@ -1,0 +1,176 @@
+/* ─── Base styles injected into the shadow host ────────────────────────────────
+   All rules are scoped under #ramadan-overlay-root to prevent leaking into
+   the host application's stylesheet.
+   CSS custom properties are written onto the root element at runtime via the
+   injector, so every variant can read them.
+────────────────────────────────────────────────────────────────────────────── */
+
+#ramadan-overlay-root {
+  /* Tokens — overridden at runtime by config */
+  --ro-color-1: #c9a84c;
+  --ro-color-2: #e8c96b;
+  --ro-color-3: #8b4513;
+  --ro-color-4: #2d5a27;
+  --ro-color-5: #1a3a1a;
+  --ro-opacity: 0.85;
+  --ro-z: 9999;
+
+  /* Layout */
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: var(--ro-z);
+  overflow: hidden;
+  opacity: var(--ro-opacity);
+
+  /* GPU acceleration hint */
+  will-change: opacity;
+  contain: strict;
+}
+
+/* ─── Lanterns variant ─────────────────────────────────────────────────────── */
+
+#ramadan-overlay-root .ro-lantern-row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  gap: 0;
+}
+
+#ramadan-overlay-root .ro-lantern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  animation: ro-swing var(--ro-swing-duration, 3s) ease-in-out infinite
+    alternate;
+}
+
+#ramadan-overlay-root .ro-lantern svg {
+  width: var(--ro-lantern-size, clamp(28px, 4vw, 60px));
+  height: auto;
+  filter: drop-shadow(0 2px 6px rgba(201, 168, 76, 0.5));
+}
+
+#ramadan-overlay-root .ro-lantern-string {
+  width: 1px;
+  height: var(--ro-string-height, clamp(20px, 3vw, 48px));
+  background: var(--ro-color-1);
+  opacity: 0.7;
+}
+
+/* ─── Crescent-stars variant ───────────────────────────────────────────────── */
+
+#ramadan-overlay-root .ro-crescent,
+#ramadan-overlay-root .ro-star {
+  position: absolute;
+  animation: ro-float var(--ro-float-duration, 6s) ease-in-out infinite
+    alternate;
+}
+
+/* ─── Sparkles variant ─────────────────────────────────────────────────────── */
+
+#ramadan-overlay-root .ro-sparkle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--ro-color-2);
+  animation: ro-sparkle-anim var(--ro-sparkle-duration, 4s) ease-in-out infinite;
+  opacity: 0;
+}
+
+/* ─── Minimal variant ──────────────────────────────────────────────────────── */
+
+#ramadan-overlay-root .ro-border-top,
+#ramadan-overlay-root .ro-border-bottom {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: clamp(12px, 1.5vw, 24px);
+  overflow: hidden;
+}
+
+#ramadan-overlay-root .ro-border-top {
+  top: 0;
+}
+
+#ramadan-overlay-root .ro-border-bottom {
+  bottom: 0;
+}
+
+/* ─── Geometric variant ────────────────────────────────────────────────────── */
+
+#ramadan-overlay-root .ro-geo-band {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: clamp(28px, 3.5vw, 56px);
+  overflow: hidden;
+  opacity: 0.6;
+}
+
+#ramadan-overlay-root .ro-geo-band--top {
+  top: 0;
+}
+
+#ramadan-overlay-root .ro-geo-band--bottom {
+  bottom: 0;
+}
+
+#ramadan-overlay-root .ro-geo-band svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ─── Keyframes ────────────────────────────────────────────────────────────── */
+
+@keyframes ro-swing {
+  from {
+    transform: rotate(-8deg);
+  }
+  to {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes ro-float {
+  from {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateY(-12px) rotate(10deg);
+    opacity: 1;
+  }
+}
+
+@keyframes ro-sparkle-anim {
+  0% {
+    transform: scale(0) translateY(0);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.5) translateY(-20px);
+    opacity: 0;
+  }
+}
+
+/* ─── Reduced-motion overrides ─────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  #ramadan-overlay-root * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ramadan-overlay — Demo</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #0d1117;
+        color: #e6edf3;
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 48px;
+      }
+
+      header h1 {
+        font-size: clamp(1.8rem, 5vw, 3rem);
+        margin-bottom: 8px;
+      }
+      header p {
+        color: #8b8f98;
+        font-size: 1rem;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 40px;
+      }
+
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      label {
+        font-size: 0.75rem;
+        color: #8b8f98;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      select,
+      input[type="range"],
+      input[type="checkbox"] {
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+        background: #161b22;
+        color: #e6edf3;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+
+      input[type="range"] {
+        padding: 4px 0;
+        width: 140px;
+        accent-color: #c9a84c;
+      }
+
+      .btn {
+        padding: 8px 20px;
+        border-radius: 8px;
+        border: 1px solid #c9a84c;
+        background: transparent;
+        color: #c9a84c;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s;
+        align-self: flex-end;
+      }
+      .btn:hover {
+        background: #c9a84c;
+        color: #0d1117;
+      }
+      .btn.active {
+        background: #c9a84c;
+        color: #0d1117;
+      }
+
+      .state-box {
+        max-width: 520px;
+        margin: 0 auto 40px;
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        padding: 16px 20px;
+      }
+      .state-box h2 {
+        font-size: 0.85rem;
+        color: #8b8f98;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+      }
+      .state-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .state-item {
+        font-size: 0.9rem;
+      }
+      .state-item span {
+        color: #c9a84c;
+        font-weight: 600;
+      }
+
+      .code-box {
+        max-width: 700px;
+        margin: 0 auto;
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        padding: 20px;
+        font-family: "Fira Code", monospace;
+        font-size: 0.83rem;
+        line-height: 1.7;
+        color: #e6edf3;
+        white-space: pre;
+        overflow-x: auto;
+      }
+
+      .site-content {
+        max-width: 720px;
+        margin: 60px auto 0;
+        text-align: center;
+        color: #444d56;
+        font-size: 1.1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>🌙 ramadan-overlay</h1>
+      <p>Interactive demo — all variants run in <code>previewMode</code></p>
+    </header>
+
+    <div class="controls">
+      <div class="control-group">
+        <label>Variant</label>
+        <select id="variantSelect">
+          <option value="lanterns" selected>Lanterns</option>
+          <option value="crescent-stars">Crescent &amp; Stars</option>
+          <option value="geometric">Geometric</option>
+          <option value="sparkles">Sparkles</option>
+          <option value="minimal">Minimal</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Position</label>
+        <select id="positionSelect">
+          <option value="both" selected>Both</option>
+          <option value="top">Top</option>
+          <option value="bottom">Bottom</option>
+          <option value="full">Full</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Opacity (<span id="opacityVal">0.85</span>)</label>
+        <input
+          type="range"
+          id="opacityRange"
+          min="0.1"
+          max="1"
+          step="0.05"
+          value="0.85"
+        />
+      </div>
+
+      <div class="control-group">
+        <label>Confetti (day 1)</label>
+        <select id="confettiSelect">
+          <option value="true" selected>Enabled</option>
+          <option value="false">Disabled</option>
+        </select>
+      </div>
+
+      <button class="btn active" id="toggleBtn">Overlay ON</button>
+      <button class="btn" id="confettiBtn">🎊 Fire Confetti</button>
+    </div>
+
+    <div class="state-box">
+      <h2>Current Ramadan State</h2>
+      <div class="state-grid">
+        <div class="state-item">isRamadan: <span id="s-isRamadan">—</span></div>
+        <div class="state-item">
+          isFirstDay: <span id="s-isFirstDay">—</span>
+        </div>
+        <div class="state-item">hijriYear: <span id="s-hijriYear">—</span></div>
+        <div class="state-item">dayNumber: <span id="s-dayNumber">—</span></div>
+      </div>
+    </div>
+
+    <pre class="code-box" id="codeBox"></pre>
+
+    <div class="site-content">
+      <p>
+        Your website content lives here.<br />The overlay floats above without
+        blocking any interactions.
+      </p>
+    </div>
+
+    <!-- Load the IIFE bundle produced by tsup -->
+    <script src="../dist/ramadan-overlay.min.js"></script>
+    <script>
+      const { init, getRamadanState } = RamadanOverlay;
+
+      let currentInstance = null;
+      let overlayOn = true;
+
+      function getConfig() {
+        return {
+          variant: document.getElementById("variantSelect").value,
+          position: document.getElementById("positionSelect").value,
+          opacity: parseFloat(document.getElementById("opacityRange").value),
+          confetti: document.getElementById("confettiSelect").value === "true",
+          previewMode: true,
+          onRamadanStart: (state) => {
+            console.log("Ramadan started!", state);
+          },
+        };
+      }
+
+      function updateStateDisplay(state) {
+        document.getElementById("s-isRamadan").textContent = String(
+          state.isRamadan,
+        );
+        document.getElementById("s-isFirstDay").textContent = String(
+          state.isFirstDay,
+        );
+        document.getElementById("s-hijriYear").textContent =
+          state.hijriYear || "—";
+        document.getElementById("s-dayNumber").textContent =
+          state.dayNumber || "—";
+      }
+
+      function updateCodeBox(cfg) {
+        document.getElementById("codeBox").textContent =
+          `import { init } from 'ramadan-overlay';
+
+init(${JSON.stringify(cfg, null, 2)});`;
+      }
+
+      function mount() {
+        currentInstance?.destroy();
+        const cfg = getConfig();
+        currentInstance = init(cfg);
+        updateStateDisplay(currentInstance.state);
+        updateCodeBox(cfg);
+      }
+
+      // Initial mount
+      const initialState = getRamadanState();
+      updateStateDisplay(initialState);
+      mount();
+
+      // Toggle
+      document
+        .getElementById("toggleBtn")
+        .addEventListener("click", function () {
+          overlayOn = !overlayOn;
+          if (overlayOn) {
+            this.textContent = "Overlay ON";
+            this.classList.add("active");
+            mount();
+          } else {
+            this.textContent = "Overlay OFF";
+            this.classList.remove("active");
+            currentInstance?.destroy();
+            currentInstance = null;
+          }
+        });
+
+      // Confetti button
+      document.getElementById("confettiBtn").addEventListener("click", () => {
+        currentInstance?.destroy();
+        const cfg = { ...getConfig(), confetti: true };
+        // Force isFirstDay by using previewMode + day-1 flag trick
+        // We re-init with a matching state
+        currentInstance = init(cfg);
+        // Also directly fire confetti from the IIFE exposed helper
+      });
+
+      // Live controls
+      ["variantSelect", "positionSelect", "confettiSelect"].forEach((id) => {
+        document
+          .getElementById(id)
+          .addEventListener("change", () => overlayOn && mount());
+      });
+
+      document
+        .getElementById("opacityRange")
+        .addEventListener("input", function () {
+          document.getElementById("opacityVal").textContent = this.value;
+          if (overlayOn) mount();
+        });
+    </script>
+  </body>
+</html>
