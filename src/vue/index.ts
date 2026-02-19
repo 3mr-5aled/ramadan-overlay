@@ -82,7 +82,10 @@ export const RamadanOverlay = defineComponent({
     zIndex: { type: Number as PropType<number>, default: undefined },
     autoTrigger: { type: Boolean as PropType<boolean>, default: undefined },
     previewMode: { type: Boolean as PropType<boolean>, default: undefined },
-    confetti: { type: String as PropType<RamadanOverlayConfig["confetti"]>, default: undefined },
+    confetti: {
+      type: String as PropType<RamadanOverlayConfig["confetti"]>,
+      default: undefined,
+    },
     locale: {
       type: String as PropType<RamadanOverlayConfig["locale"]>,
       default: undefined,
