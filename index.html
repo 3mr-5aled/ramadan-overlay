@@ -677,7 +677,7 @@
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-eyebrow">
-          Open Source &nbsp;·&nbsp; MIT License &nbsp;·&nbsp; v0.1.1
+          Open Source &nbsp;·&nbsp; MIT License &nbsp;·&nbsp; v0.1.3
         </div>
 
         <h1 class="hero-title">🌙 ramadan-overlay</h1>
@@ -1768,14 +1768,14 @@
           location.hostname === "localhost" ||
           location.hostname === "127.0.0.1";
         s.src = isLocal
-          ? "../dist/ramadan-overlay.min.js"
-          : "https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js";
+          ? "dist/ramadan-overlay.min.js"
+          : "https://cdn.jsdelivr.net/npm/ramadan-overlay@0.1.3/dist/ramadan-overlay.min.js";
         s.onload = initApp;
         s.onerror = function () {
           // local build missing — fall back to CDN
           var fallback = document.createElement("script");
           fallback.src =
-            "https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js";
+            "https://cdn.jsdelivr.net/npm/ramadan-overlay@0.1.3/dist/ramadan-overlay.min.js";
           fallback.onload = initApp;
           document.head.appendChild(fallback);
         };
