@@ -11,118 +11,74 @@ permissions:
 jobs:
   create-issue:
     runs-on: ubuntu-latest
-    steps:
-      - name: Create issue for error handling
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Check if the issue already exists
-          EXISTING=$(gh issue list --repo ${{ github.repository }} --search "Error handling for the library for Development and Production" --json number --jq '.[0].number' 2>/dev/null || echo "")
-          if [ -n "$EXISTING" ]; then
-            echo "Issue #$EXISTING already exists, skipping creation."
-            exit 0
-          fi
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ISSUE_BODY: |
+        ## Overview
 
+        The library currently lacks structured error handling that differentiates between **development** and **production** environments. Proper error handling improves developer experience (DX) during development and ensures graceful degradation in production without breaking the host application.
+
+        ## Current State
+
+        - `init()` has no validation of user-supplied config values (e.g. invalid `variant`, `opacity` out of `0-1` range, `lanternStyle` outside `0-12`, non-string colors)
+        - Variant mount functions (`mountLanterns`, `mountSparkles`, etc.) are not wrapped in try/catch -- a DOM exception or SVG error would bubble up and crash the caller
+        - The confetti async call (`fireRamadanConfetti`) uses `void` but any rejection is silently swallowed with no notice to the developer
+        - Framework wrappers (React hook, Vue composable, Angular directive, Svelte action) each call `init()` without catching exceptions -- an unexpected error would crash the whole component tree
+        - No mechanism to surface warnings (e.g. unknown `variant` string, deprecated option) in development mode
+
+        ## Proposed Solution
+
+        ### 1 - Input validation (dev-only warnings)
+
+        Validate config at the top of `init()` and emit `console.warn` messages only when `NODE_ENV !== 'production'` (or a `debug` flag).
+
+        ### 2 - Safe `init()` wrapper (production resilience)
+
+        Wrap the entire `init()` body in a try/catch that rethrows in development and returns the no-op instance in production.
+
+        ### 3 - Variant mount error isolation
+
+        Wrap each `mountFn(root, config)` call so a broken variant does not prevent the overlay container from being returned.
+
+        ### 4 - Confetti error surface
+
+        Replace the silent `void` with a `.catch()` that logs in development.
+
+        ### 5 - Framework wrapper safety
+
+        Each framework wrapper (React, Vue, Angular, Svelte) should catch init errors and emit them via the framework's error reporting mechanism.
+
+        ## Suggested API Addition (optional)
+
+        Add a `debug` config flag so library consumers can explicitly opt into verbose logging regardless of build environment.
+
+        ## Acceptance Criteria
+
+        - [ ] Config values are validated and invalid values emit `console.warn` in development
+        - [ ] `init()` never throws in production; always returns a valid `OverlayInstance`
+        - [ ] Variant mount errors are isolated -- they do not crash the overlay container setup
+        - [ ] Confetti promise rejections are caught and logged in development
+        - [ ] Framework wrappers catch and forward errors via framework-native error handling
+        - [ ] A `debug` option (or `NODE_ENV`-based detection) controls verbosity
+        - [ ] Existing tests continue to pass; new tests cover validation and error paths
+    steps:
+      - name: Check for existing issue
+        id: check
+        run: |
+          EXISTING=$(gh issue list --repo "${{ github.repository }}" \
+            --search "Error handling for the library for Development and Production in:title" \
+            --json number --jq '.[0].number' 2>/dev/null || echo "")
+          echo "existing=$EXISTING" >> "$GITHUB_OUTPUT"
+
+      - name: Create issue for error handling
+        if: steps.check.outputs.existing == ''
+        run: |
+          echo "$ISSUE_BODY" > /tmp/issue-body.md
           gh issue create \
             --repo "${{ github.repository }}" \
             --title "Error handling for the library for Development and Production" \
-            --body "## Overview
+            --body-file /tmp/issue-body.md
 
-The library currently lacks structured error handling that differentiates between **development** and **production** environments. Proper error handling improves developer experience (DX) during development and ensures graceful degradation in production without breaking the host application.
-
----
-
-## Current State
-
-- \`init()\` has no validation of user-supplied config values (e.g. invalid \`variant\`, \`opacity\` out of \`0–1\` range, \`lanternStyle\` outside \`0–12\`, non-string colors)
-- Variant mount functions (\`mountLanterns\`, \`mountSparkles\`, etc.) are not wrapped in try/catch — a DOM exception or SVG error would bubble up and crash the caller
-- The confetti async call (\`fireRamadanConfetti\`) uses \`void\` but any rejection is silently swallowed with no notice to the developer
-- Framework wrappers (React hook, Vue composable, Angular directive, Svelte action) each call \`init()\` without catching exceptions — an unexpected error would crash the whole component tree
-- No mechanism to surface warnings (e.g. unknown \`variant\` string, deprecated option) in development mode
-
----
-
-## Proposed Solution
-
-### 1 — Input validation (dev-only warnings)
-
-Validate config at the top of \`init()\` and emit \`console.warn\` messages only when \`NODE_ENV !== 'production'\` (or a \`debug\` flag):
-
-\`\`\`ts
-// Example validations
-if (config.opacity < 0 || config.opacity > 1)
-  warn('opacity must be between 0 and 1');
-
-if (config.lanternStyle < 0 || config.lanternStyle > 12)
-  warn('lanternStyle must be 0–12');
-
-if (!VARIANT_MAP[config.variant])
-  warn(\`Unknown variant \"\${config.variant}\" — falling back to \"lanterns\"\`);
-\`\`\`
-
-### 2 — Safe \`init()\` wrapper (production resilience)
-
-Wrap the entire \`init()\` body in a try/catch that:
-- In **development**: rethrows the error (or logs it with full stack) so developers notice immediately
-- In **production**: logs a minimal \`console.error\` and returns the no-op instance, preventing the host app from crashing
-
-\`\`\`ts
-try {
-  // ... existing init logic
-} catch (err) {
-  if (isDev) throw err;
-  console.error('[ramadan-overlay] Unexpected error during init:', err);
-  return NO_OP_INSTANCE;
-}
-\`\`\`
-
-### 3 — Variant mount error isolation
-
-Wrap each \`mountFn(root, config)\` call similarly so a broken variant does not prevent the overlay container from being returned:
-
-\`\`\`ts
-let cleanupVariant = () => {};
-try {
-  cleanupVariant = mountFn(root, config);
-} catch (err) {
-  if (isDev) throw err;
-  console.error(\`[ramadan-overlay] Failed to mount variant \"\${config.variant}\"\`, err);
-}
-\`\`\`
-
-### 4 — Confetti error surface
-
-Replace the silent \`void\` with a \`.catch()\`:
-
-\`\`\`ts
-fireRamadanConfetti(year, colors).catch((err) => {
-  if (isDev) console.warn('[ramadan-overlay] Confetti error:', err);
-});
-\`\`\`
-
-### 5 — Framework wrapper safety
-
-Each framework wrapper (React, Vue, Angular, Svelte) should catch init errors and emit them via the framework's error reporting mechanism rather than letting them propagate uncaught.
-
----
-
-## Suggested API Addition (optional)
-
-Add a \`debug\` config flag so library consumers can explicitly opt into verbose logging regardless of build environment:
-
-\`\`\`ts
-init({ variant: 'lanterns', debug: true });
-\`\`\`
-
----
-
-## Acceptance Criteria
-
-- [ ] Config values are validated and invalid values emit \`console.warn\` in development
-- [ ] \`init()\` never throws in production; always returns a valid \`OverlayInstance\`
-- [ ] Variant mount errors are isolated — they do not crash the overlay container setup
-- [ ] Confetti promise rejections are caught and logged in development
-- [ ] Framework wrappers catch and forward errors via framework-native error handling
-- [ ] A \`debug\` option (or \`NODE_ENV\`-based detection) controls verbosity
-- [ ] Existing tests continue to pass; new tests cover validation and error paths
-"
+      - name: Skip if already exists
+        if: steps.check.outputs.existing != ''
+        run: echo "Issue #${{ steps.check.outputs.existing }} already exists, skipping."
