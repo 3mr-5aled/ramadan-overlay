@@ -25,13 +25,22 @@ const REGION_OFFSET: Record<HijriRegion, number> = {
 
 /**
  * Resolve the effective day offset from region + explicit adjustment.
- * `hijriAdjustment` takes precedence when provided (not undefined).
+ * `hijriAdjustment` takes precedence when provided (not undefined) and is clamped to [-3, 3].
  */
 export function resolveHijriOffset(
   region?: HijriRegion | string,
   hijriAdjustment?: number
 ): number {
-  if (hijriAdjustment !== undefined) return hijriAdjustment;
+  if (hijriAdjustment !== undefined) {
+    if (
+      typeof hijriAdjustment === "number" &&
+      !isNaN(hijriAdjustment) &&
+      isFinite(hijriAdjustment)
+    ) {
+      return Math.max(-3, Math.min(3, Math.round(hijriAdjustment)));
+    }
+    return 0;
+  }
   if (region) return (REGION_OFFSET as Record<string, number>)[region] ?? 0;
   return 0;
 }
@@ -99,23 +108,58 @@ export const EID_ADHA_STARTS: Record<number, string> = {
   1455: "2034-03-01",
   1456: "2035-02-19",
   1457: "2036-02-08",
-  1458: "2037-01-27",
-  1459: "2038-01-16",
-  1460: "2039-01-05",
+  1458: "2037-01-28",
+  1459: "2038-01-17",
+  1460: "2039-01-06",
 };
 
-// ─── Intl-based detection ─────────────────────────────────────────────────────
+// ─── Inert Fallback State ─────────────────────────────────────────────────────
+
+/** Immutable inert Ramadan state representing a dormant or failed detector. */
+export const INERT_RAMADAN_STATE: Readonly<RamadanState> = Object.freeze({
+  isRamadan: false,
+  occasion: "none",
+  isEid: false,
+  hijriYear: 0,
+  hijriMonth: 0,
+  hijriDay: 0,
+  dayNumber: 0,
+});
+
+// ─── Core Hijri calculation via Intl ──────────────────────────────────────────
 
 function getHijriParts(
   date: Date
 ): { month: number; day: number; year: number } | null {
   try {
+    if (
+      typeof Intl === "undefined" ||
+      typeof Intl.DateTimeFormat !== "function"
+    ) {
+      return null;
+    }
     const formatter = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {
       day: "numeric",
       month: "numeric",
       year: "numeric",
     });
+
+    if (typeof formatter.formatToParts !== "function") {
+      return null;
+    }
+
+    // Intercept ECMA-402 silent Gregorian fallback trap:
+    // If the environment lacks islamic-umalqura ICU data, resolved calendar falls back to 'gregory'
+    const resolvedCalendar = formatter.resolvedOptions?.().calendar;
+    if (!resolvedCalendar || !resolvedCalendar.startsWith("islamic")) {
+      return null;
+    }
+
     const parts = formatter.formatToParts(date);
+    if (!Array.isArray(parts) || parts.length === 0) {
+      return null;
+    }
+
     const get = (type: string) => {
       const part = parts.find((p) => p.type === type);
       return part ? parseInt(part.value, 10) : NaN;
@@ -220,6 +264,69 @@ function detectViaTable(date: Date): RamadanState {
   };
 }
 
+// ─── Input Normalization ──────────────────────────────────────────────────────
+
+/**
+ * Normalizes input date or query object into a guaranteed valid Date instance and offset.
+ * Defensively recovers from null, undefined, new Date(NaN), ISO strings, and invalid offsets.
+ */
+export function coerceToValidDate(
+  queryOrDate?: unknown,
+  legacyAdjustmentOrDebug: number | boolean = 0,
+  debugParam = false
+): { targetDate: Date; effectiveOffset: number } {
+  const legacyAdjustment =
+    typeof legacyAdjustmentOrDebug === "number" ? legacyAdjustmentOrDebug : 0;
+  let debug =
+    typeof legacyAdjustmentOrDebug === "boolean"
+      ? legacyAdjustmentOrDebug
+      : debugParam;
+
+  let rawDate: unknown;
+  let offset = legacyAdjustment;
+
+  if (queryOrDate instanceof Date) {
+    rawDate = queryOrDate;
+  } else if (typeof queryOrDate === "object" && queryOrDate !== null) {
+    const query = queryOrDate as Record<string, unknown>;
+    rawDate = query.date;
+    if (typeof query.debug === "boolean") {
+      debug = query.debug;
+    }
+    offset = resolveHijriOffset(
+      query.region as HijriRegion,
+      query.hijriAdjustment as number
+    );
+  }
+
+  let targetDate: Date;
+  if (rawDate instanceof Date) {
+    targetDate = isNaN(rawDate.getTime()) ? new Date() : rawDate;
+  } else if (typeof rawDate === "string" || typeof rawDate === "number") {
+    const parsed = new Date(rawDate);
+    targetDate = !isNaN(parsed.getTime()) ? parsed : new Date();
+  } else {
+    if (
+      rawDate !== undefined &&
+      debug &&
+      typeof console !== "undefined" &&
+      console.warn
+    ) {
+      console.warn(
+        `[ramadan-overlay] Invalid Date "${String(rawDate)}"; falling back to current date.`
+      );
+    }
+    targetDate = new Date();
+  }
+
+  const sanitizedOffset =
+    typeof offset === "number" && !isNaN(offset) && isFinite(offset)
+      ? Math.max(-3, Math.min(3, Math.round(offset)))
+      : 0;
+
+  return { targetDate, effectiveOffset: sanitizedOffset };
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -244,18 +351,17 @@ export function getRamadanState(
   queryOrDate: Date | OccasionDateQuery | RamadanDateQuery = new Date(),
   legacyAdjustment = 0
 ): RamadanState {
-  let targetDate: Date;
-  let effectiveOffset = legacyAdjustment;
-
-  if (queryOrDate instanceof Date) {
-    targetDate = queryOrDate;
-  } else {
-    targetDate = queryOrDate.date ?? new Date();
-    effectiveOffset = resolveHijriOffset(
-      queryOrDate.region,
-      queryOrDate.hijriAdjustment
-    );
-  }
+  const isDebug =
+    typeof queryOrDate === "object" &&
+    queryOrDate !== null &&
+    "debug" in queryOrDate
+      ? Boolean((queryOrDate as { debug?: boolean }).debug)
+      : false;
+  const { targetDate, effectiveOffset } = coerceToValidDate(
+    queryOrDate,
+    legacyAdjustment,
+    isDebug
+  );
 
   // Apply offset: shift the date backward so that a +1 adjustment effectively
   // makes the observer see Ramadan one day later than the base calendar.

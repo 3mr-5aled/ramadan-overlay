@@ -334,6 +334,21 @@ export interface RamadanOverlayConfig {
    * @default false
    */
   countdown?: boolean | IftarCountdownConfig;
+
+  /**
+   * Enable diagnostic developer console logging.
+   * When true, emits guidance when autoTrigger is dormant and warnings on clamped config values.
+   * Defaults to active in non-production environments (`NODE_ENV !== 'production'`).
+   * @default false
+   */
+  debug?: boolean;
+
+  /**
+   * Telemetry Hook invoked if overlay initialization or dynamic update fails.
+   * Enclosed within an Error Containment Boundary so exceptions thrown within the
+   * hook never crash the host application.
+   */
+  onError?: (error: unknown) => void;
 }
 
 // ─── State & Instance ─────────────────────────────────────────────────────────
@@ -345,8 +360,10 @@ export interface RamadanDateQuery {
   date?: Date;
   /** Named region preset mapping to a Hijri calendar day offset, or a custom region string. */
   region?: HijriRegion | string;
-  /** Manual day offset (-2, -1, 0, +1, +2). Overrides `region`. */
+  /** Manual day offset (-3, -2, -1, 0, +1, +2, +3). Overrides `region`. */
   hijriAdjustment?: number;
+  /** Enable diagnostic developer console logging */
+  debug?: boolean;
 }
 
 export type OccasionDateQuery = RamadanDateQuery;
@@ -538,6 +555,7 @@ export interface ResolvedConfig extends Required<
   Omit<
     RamadanOverlayConfig,
     | "theme"
+    | "onError"
     | "onRamadanStart"
     | "onRamadanEnd"
     | "onEidStart"
@@ -545,6 +563,8 @@ export interface ResolvedConfig extends Required<
     | "countdown"
   >
 > {
+  debug: boolean;
+  onError?: (error: unknown) => void;
   theme: ThemeOption;
   themeName: string;
   lanternStyle: LanternStyle;

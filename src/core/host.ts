@@ -71,7 +71,18 @@ const VARIANT_MAP: Record<string, VariantMountFn> = {
   "eid-adha": mountEid,
 };
 
-const STYLE_ID = "ramadan-overlay-styles";
+export const HOST_ID = "ramadan-overlay-root";
+export const STYLE_ID = "ramadan-overlay-styles";
+
+export function performHostRollback(): void {
+  try {
+    if (typeof document === "undefined") return;
+    document.getElementById(HOST_ID)?.remove();
+    document.getElementById(STYLE_ID)?.remove();
+  } catch {
+    // Suppress DOM removal errors in restrictive environments
+  }
+}
 
 export function injectStyles(): void {
   if (typeof document === "undefined") return;

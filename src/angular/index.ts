@@ -73,6 +73,8 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   @Input() occasions?: Occasion[];
   @Input() eidVariant?: OverlayVariant;
   @Input() liveTransition?: boolean;
+  @Input() debug?: boolean;
+  @Input() onError?: (error: unknown) => void;
 
   private instance: OverlayInstance | null = null;
 
@@ -130,6 +132,8 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
       "occasions",
       "eidVariant",
       "liveTransition",
+      "debug",
+      "onError",
     ] as const;
 
     const individualInputs: Partial<RamadanOverlayConfig> = {};

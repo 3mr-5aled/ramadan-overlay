@@ -155,8 +155,22 @@ export const RamadanOverlay = defineComponent({
       type: Boolean as PropType<boolean>,
       default: undefined,
     },
+    debug: {
+      type: Boolean as PropType<boolean>,
+      default: undefined,
+    },
+    onError: {
+      type: Function as PropType<(error: unknown) => void>,
+      default: undefined,
+    },
   },
-  emits: ["ramadan-start", "ramadan-end", "eid-start", "occasion-change"],
+  emits: [
+    "ramadan-start",
+    "ramadan-end",
+    "eid-start",
+    "occasion-change",
+    "error",
+  ],
   setup(props, { emit }) {
     let instance: OverlayInstance | null = null;
 
@@ -168,6 +182,11 @@ export const RamadanOverlay = defineComponent({
       return {
         ...config,
         ...overrides,
+        onError: (err) => {
+          emit("error", err);
+          props.onError?.(err);
+          config.onError?.(err);
+        },
         onRamadanStart: (s) => emit("ramadan-start", s),
         onRamadanEnd: () => emit("ramadan-end"),
         onEidStart: (s) => emit("eid-start", s),

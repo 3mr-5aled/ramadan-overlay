@@ -9,6 +9,7 @@ describe("mountEid", () => {
   const createConfig = (
     overrides: Partial<ResolvedConfig> = {}
   ): ResolvedConfig => ({
+    debug: false,
     variant: "eid",
     theme: "classic",
     themeName: "classic",
@@ -131,6 +132,7 @@ describe("mountBannerElements with Eid occasion", () => {
   const createConfig = (
     overrides: Partial<ResolvedConfig> = {}
   ): ResolvedConfig => ({
+    debug: false,
     variant: "banner",
     theme: "classic",
     themeName: "classic",

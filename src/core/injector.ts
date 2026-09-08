@@ -1,31 +1,232 @@
 import type {
+  HijriRegion,
+  MobileSideBehavior,
+  Occasion,
   OverlayInstance,
   OverlayPosition,
   OverlayVariant,
   RamadanOverlayConfig,
   RamadanState,
   ResolvedConfig,
+  RopeStyle,
   ThemeOption,
+  ThemePreset,
 } from "../types";
 import { fireRamadanConfetti, shouldFireConfetti } from "./confetti";
-import { getRamadanState, resolveHijriOffset } from "./detector";
-import { mountHost, resolveSidePositions, type HostMountResult } from "./host";
+import {
+  getRamadanState,
+  resolveHijriOffset,
+  INERT_RAMADAN_STATE,
+} from "./detector";
+import {
+  mountHost,
+  resolveSidePositions,
+  performHostRollback,
+  type HostMountResult,
+} from "./host";
 import {
   createCountdownManager,
   type IftarCountdownManager,
 } from "./countdown";
+import { performCountdownHostRollback } from "./countdown/host";
 import { resolveTheme } from "./themes";
 
-// ─── Defaults ─────────────────────────────────────────────────────────────────
+// ─── Defaults & Validation Sets ──────────────────────────────────────────────
 
-const DEFAULT_COLORS = [
-  "#c9a84c",
-  "#e8c96b",
-  "#8b4513",
-  "#2d5a27",
-  "#4a8a3a",
-  "#fff7cc",
+const VALID_THEMES: readonly ThemePreset[] = [
+  "classic",
+  "midnight",
+  "emerald",
+  "royal",
+  "desert-dusk",
 ];
+
+const VALID_VARIANTS: readonly OverlayVariant[] = [
+  "lanterns",
+  "crescent-stars",
+  "geometric",
+  "sparkles",
+  "banner",
+  "eid",
+  "eid-fitr",
+  "eid-adha",
+];
+
+const VALID_POSITIONS: readonly OverlayPosition[] = [
+  "top",
+  "bottom",
+  "left",
+  "right",
+  "sides",
+  "both",
+  "full",
+  "start",
+  "end",
+];
+
+const VALID_DENSITIES = ["low", "normal", "high"] as const;
+const VALID_ROPE_STYLES: readonly RopeStyle[] = [
+  "straight",
+  "u-shaped",
+  "dual",
+];
+const VALID_OCCASIONS: readonly Occasion[] = [
+  "ramadan",
+  "eid-fitr",
+  "eid-adha",
+];
+const VALID_MOBILE_SIDE_BEHAVIORS: readonly MobileSideBehavior[] = [
+  "hide",
+  "top",
+  "show",
+];
+const VALID_CONFETTI_OPTIONS = ["on", "off"] as const;
+const VALID_LOCALES = ["en", "ar"] as const;
+
+// ─── Defensive Helpers ────────────────────────────────────────────────────────
+
+/**
+ * Evaluates whether diagnostic logging should be active.
+ * Hierarchy: explicit config.debug -> window.__RAMADAN_OVERLAY_DEBUG__ -> NODE_ENV !== 'production'.
+ */
+export function isDebugActive(config?: { debug?: boolean }): boolean {
+  if (config && typeof config.debug === "boolean") {
+    return config.debug;
+  }
+  if (
+    typeof window !== "undefined" &&
+    Boolean(
+      (window as unknown as Record<string, unknown>).__RAMADAN_OVERLAY_DEBUG__
+    ) === true
+  ) {
+    return true;
+  }
+  try {
+    if (
+      typeof process !== "undefined" &&
+      process?.env?.NODE_ENV &&
+      process.env.NODE_ENV !== "production"
+    ) {
+      return true;
+    }
+  } catch {
+    // Suppress ReferenceError in restricted sandbox
+  }
+  return false;
+}
+
+/**
+ * Safely clamp a numeric configuration value.
+ * Falls back if the value is not a finite number or is NaN.
+ */
+export function clampNumber(
+  val: unknown,
+  min: number,
+  max: number,
+  fallback: number
+): number {
+  if (typeof val !== "number" || isNaN(val) || !isFinite(val)) {
+    return fallback;
+  }
+  return Math.max(min, Math.min(max, val));
+}
+
+/**
+ * Diagnostic Logger for consistent debug output.
+ * Guarantees zero console noise in production when debug is falsy.
+ */
+export function createDiagnosticLogger(debug: boolean) {
+  return {
+    info: (msg: string, ...args: unknown[]) => {
+      if (debug && typeof console !== "undefined" && console.info) {
+        console.info(msg, ...args);
+      }
+    },
+    warn: (msg: string, ...args: unknown[]) => {
+      if (debug && typeof console !== "undefined" && console.warn) {
+        console.warn(msg, ...args);
+      }
+    },
+    error: (msg: string, ...args: unknown[]) => {
+      if (debug && typeof console !== "undefined" && console.error) {
+        console.error(msg, ...args);
+      }
+    },
+  };
+}
+
+/**
+ * Sanitize string union literal properties.
+ * If unrecognized or malformed, emits a debug warning and returns fallback.
+ */
+export function sanitizeStringUnion<T extends string>(
+  val: unknown,
+  validList: readonly T[],
+  fallback: T,
+  propertyName: string,
+  debug: boolean
+): T {
+  if (
+    typeof val === "string" &&
+    (validList as readonly string[]).includes(val)
+  ) {
+    return val as T;
+  }
+  if (val !== undefined) {
+    createDiagnosticLogger(debug).warn(
+      `[ramadan-overlay] Invalid ${propertyName} "${String(val)}"; falling back to "${fallback}".`
+    );
+  }
+  return fallback;
+}
+
+/**
+ * Deterministically removes partial overlay roots and styles on catastrophic failure.
+ * Delegates cleanly to host modules to preserve architectural boundaries.
+ */
+export function performAtomicDomRollback(): void {
+  performHostRollback();
+  performCountdownHostRollback();
+}
+
+/**
+ * Double-contained telemetry error invoker.
+ * Prevents consumer onError callback errors from escaping and crashing the host.
+ */
+export function safeInvokeTelemetry(
+  handler: ((error: unknown) => void) | undefined,
+  error: unknown,
+  debug: boolean
+): void {
+  if (typeof handler !== "function") return;
+  try {
+    handler(error);
+  } catch (telemetryError) {
+    createDiagnosticLogger(debug).warn(
+      "[ramadan-overlay] Exception thrown inside consumer onError callback:",
+      telemetryError
+    );
+  }
+}
+
+/**
+ * Factory for creating an infallible safe no-op instance on failure or SSR.
+ */
+export function createSafeNoopInstance(
+  config: ResolvedConfig,
+  state: RamadanState = INERT_RAMADAN_STATE
+): OverlayInstance {
+  return {
+    destroy: () => undefined,
+    update: () => undefined,
+    setTheme: () => undefined,
+    container: null,
+    config,
+    state,
+    getState: () => ({ ...state }),
+    getCountdownController: () => null,
+  };
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -79,34 +280,123 @@ function isOccasionActive(
 // ─── Config resolution ────────────────────────────────────────────────────────
 
 function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
-  const resolvedTheme = resolveTheme(userConfig.theme, userConfig);
+  const debug = isDebugActive(userConfig);
+  const logger = createDiagnosticLogger(debug);
 
-  let position = userConfig.position ?? "both";
+  let theme: ThemeOption = "classic";
+  if (typeof userConfig.theme === "string") {
+    theme = sanitizeStringUnion(
+      userConfig.theme,
+      VALID_THEMES,
+      "classic",
+      "theme",
+      debug
+    );
+  } else if (
+    typeof userConfig.theme === "object" &&
+    userConfig.theme !== null
+  ) {
+    theme = userConfig.theme;
+  }
+
+  const resolvedTheme = resolveTheme(theme, userConfig);
+
+  const variant = sanitizeStringUnion(
+    userConfig.variant,
+    VALID_VARIANTS,
+    "lanterns",
+    "variant",
+    debug
+  );
+
+  let position = sanitizeStringUnion(
+    userConfig.position,
+    VALID_POSITIONS,
+    "both",
+    "position",
+    debug
+  );
   if (
-    userConfig.variant === "banner" &&
+    variant === "banner" &&
     ["left", "right", "sides", "start", "end"].includes(position)
   ) {
-    if (typeof console !== "undefined" && console.warn) {
-      console.warn(
-        '[ramadan-overlay] Banner variant does not support vertical side positioning; falling back to "top"'
-      );
-    }
+    logger.warn(
+      '[ramadan-overlay] Banner variant does not support vertical side positioning; falling back to "top"'
+    );
     position = "top";
   }
 
+  const defaultDensity =
+    typeof window !== "undefined" && window.innerWidth < 640 ? "low" : "normal";
+  const density = sanitizeStringUnion(
+    userConfig.density,
+    VALID_DENSITIES,
+    defaultDensity,
+    "density",
+    debug
+  );
+
+  const ropeStyle = sanitizeStringUnion(
+    userConfig.ropeStyle,
+    VALID_ROPE_STYLES,
+    "straight",
+    "ropeStyle",
+    debug
+  );
+
+  const mobileSideBehavior = sanitizeStringUnion(
+    userConfig.mobileSideBehavior,
+    VALID_MOBILE_SIDE_BEHAVIORS,
+    "hide",
+    "mobileSideBehavior",
+    debug
+  );
+
+  const confetti = sanitizeStringUnion(
+    userConfig.confetti,
+    VALID_CONFETTI_OPTIONS,
+    "on",
+    "confetti",
+    debug
+  );
+
+  const locale = sanitizeStringUnion(
+    userConfig.locale,
+    VALID_LOCALES,
+    "en",
+    "locale",
+    debug
+  );
+
+  const opacity = clampNumber(userConfig.opacity, 0.0, 1.0, 0.85);
+  const zIndex = clampNumber(userConfig.zIndex, -2147483648, 2147483647, 9999);
+  const ropeSag = clampNumber(userConfig.ropeSag, 6, 60, 20);
+
+  let occasions: Occasion[] = ["ramadan", "eid-fitr", "eid-adha"];
+  if (Array.isArray(userConfig.occasions)) {
+    const filtered = userConfig.occasions.filter((occ) =>
+      VALID_OCCASIONS.includes(occ as Occasion)
+    );
+    if (filtered.length > 0) {
+      occasions = filtered as Occasion[];
+    }
+  }
+
   return {
+    debug,
+    onError: userConfig.onError,
     theme: userConfig.theme ?? "classic",
     themeName: resolvedTheme.name ?? "classic",
-    variant: userConfig.variant ?? "lanterns",
+    variant,
     position,
-    mobileSideBehavior: userConfig.mobileSideBehavior ?? "hide",
-    opacity: userConfig.opacity ?? 0.85,
+    mobileSideBehavior,
+    opacity,
     colors: resolvedTheme.colors,
-    zIndex: userConfig.zIndex ?? 9999,
+    zIndex,
     autoTrigger: userConfig.autoTrigger ?? true,
     previewMode: userConfig.previewMode ?? false,
-    confetti: userConfig.confetti ?? "on",
-    locale: userConfig.locale ?? "en",
+    confetti,
+    locale,
     bannerBg: resolvedTheme.bannerBg,
     bannerTextColor: resolvedTheme.bannerTextColor,
     bannerTextEn: userConfig.bannerTextEn ?? "",
@@ -116,22 +406,15 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     glowColor: resolvedTheme.glowColor,
     ceilingColor: resolvedTheme.ceilingColor,
     ropeColor: resolvedTheme.ropeColor,
-    ropeStyle: userConfig.ropeStyle ?? "straight",
-    ropeSag:
-      typeof userConfig.ropeSag === "number"
-        ? Math.max(6, Math.min(60, userConfig.ropeSag))
-        : 20,
+    ropeStyle,
+    ropeSag,
     region: userConfig.region ?? "standard",
     hijriAdjustment: resolveHijriOffset(
       userConfig.region,
       userConfig.hijriAdjustment
     ),
-    density:
-      userConfig.density ??
-      (typeof window !== "undefined" && window.innerWidth < 640
-        ? "low"
-        : "normal"),
-    occasions: userConfig.occasions ?? ["ramadan", "eid-fitr", "eid-adha"],
+    density,
+    occasions,
     eidVariant: userConfig.eidVariant ?? "eid",
     liveTransition: userConfig.liveTransition ?? true,
     countdown: userConfig.countdown ?? false,
@@ -165,317 +448,343 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
 export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
   if (typeof document === "undefined") {
     // SSR — return a no-op instance
-    return {
-      destroy: () => undefined,
-      update: () => undefined,
-      setTheme: () => undefined,
-      container: null,
-      config: resolveConfig(userConfig),
-      state: {
-        isRamadan: false,
-        occasion: "none",
-        isEid: false,
-        hijriYear: 0,
-        hijriMonth: 0,
-        hijriDay: 0,
-        dayNumber: 0,
-      },
-      getCountdownController: () => null,
-      getState: () => ({
-        isRamadan: false,
-        occasion: "none",
-        isEid: false,
-        hijriYear: 0,
-        hijriMonth: 0,
-        hijriDay: 0,
-        dayNumber: 0,
-      }),
-    };
+    return createSafeNoopInstance(
+      resolveConfig(userConfig),
+      INERT_RAMADAN_STATE
+    );
   }
 
   let currentUserConfig: RamadanOverlayConfig = { ...userConfig };
-  let currentConfig = resolveConfig(currentUserConfig);
-  let currentState = getRamadanState({
-    date: new Date(),
-    region: currentConfig.region,
-    hijriAdjustment: currentConfig.hijriAdjustment,
-  });
+  let currentConfig: ResolvedConfig;
+  try {
+    currentConfig = resolveConfig(currentUserConfig);
+  } catch {
+    currentConfig = resolveConfig({});
+  }
+  const debug = isDebugActive(currentConfig);
 
-  let hostMount: HostMountResult | null = null;
-  let lastCheckedDateString = new Date().toDateString();
-
-  const mountCurrent = (state: RamadanState): void => {
-    const effectiveVariant = resolveEffectiveVariant(currentConfig, state);
-    const effectivePosition = resolveEffectivePosition(currentConfig);
-    const effectiveConfig = {
-      ...currentConfig,
-      variant: effectiveVariant,
-      position: effectivePosition,
-    };
-    hostMount = mountHost(effectiveConfig, state.occasion);
-    instance.container = hostMount.container;
-  };
-
-  const unmountCurrent = (): void => {
-    if (hostMount) {
-      hostMount.cleanup();
-      hostMount = null;
-      instance.container = null;
-    }
-  };
-
-  const fireOccasionCallbacks = (
-    prevState: RamadanState | null,
-    newState: RamadanState
-  ): void => {
-    if (!prevState || prevState.occasion !== newState.occasion) {
-      currentConfig.onOccasionChange?.(newState.occasion, newState);
-    }
-
-    if (
-      (newState.isRamadan || currentConfig.previewMode) &&
-      (!prevState || !prevState.isRamadan)
-    ) {
-      currentConfig.onRamadanStart?.(newState);
-    }
-
-    if (newState.isEid && (!prevState || !prevState.isEid)) {
-      currentConfig.onEidStart?.(newState);
-    }
-
-    if (prevState?.isRamadan && !newState.isRamadan) {
-      currentConfig.onRamadanEnd?.();
-    }
-
-    if (shouldFireConfetti(newState, currentConfig.confetti)) {
-      const confettiYear = newState.hijriYear || 1447;
-      void fireRamadanConfetti(confettiYear, currentConfig.colors);
-    }
-  };
-
-  // Live Midnight Transition Engine
-  let midnightTimeoutId: ReturnType<typeof setTimeout> | null = null;
-
-  const scheduleNextMidnight = (): void => {
-    if (!currentConfig.liveTransition || typeof window === "undefined") return;
-    if (midnightTimeoutId) clearTimeout(midnightTimeoutId);
-    const msUntilMidnight = getMsUntilNextMidnight();
-    midnightTimeoutId = setTimeout(() => {
-      evaluateTransition();
-    }, msUntilMidnight);
-  };
-
-  const evaluateTransition = (): void => {
-    const now = new Date();
-    lastCheckedDateString = now.toDateString();
-
-    const newState = getRamadanState({
-      date: now,
+  try {
+    let currentState = getRamadanState({
+      date: new Date(),
       region: currentConfig.region,
       hijriAdjustment: currentConfig.hijriAdjustment,
     });
 
-    const prevState = currentState;
-    const prevOccasion = prevState.occasion;
-    const prevIsActive = isOccasionActive(prevState, currentConfig);
-    const newIsActive = isOccasionActive(newState, currentConfig);
+    const logger = createDiagnosticLogger(debug);
 
-    currentState = newState;
-    instance.state = newState;
-
-    if (newIsActive) {
-      if (!prevIsActive) {
-        mountCurrent(newState);
-        fireOccasionCallbacks(prevState, newState);
-      } else if (prevOccasion !== newState.occasion) {
-        unmountCurrent();
-        mountCurrent(newState);
-        fireOccasionCallbacks(prevState, newState);
-      }
-    } else if (prevIsActive) {
-      unmountCurrent();
-      currentConfig.onOccasionChange?.(newState.occasion, newState);
-      if (prevState.isRamadan) {
-        currentConfig.onRamadanEnd?.();
-      }
+    if (
+      currentConfig.autoTrigger &&
+      !currentConfig.previewMode &&
+      currentState.occasion === "none"
+    ) {
+      logger.info(
+        `[ramadan-overlay] Overlay dormant: autoTrigger is enabled, but current date (${new Date().toISOString().slice(0, 10)}) does not fall within configured occasions (${currentConfig.occasions.join(", ")}). Pass previewMode: true to force display during development.`
+      );
     }
 
-    scheduleNextMidnight();
-  };
-
-  const onBoundaryCheck = (): void => {
-    const now = new Date();
-    if (now.toDateString() !== lastCheckedDateString) {
-      evaluateTransition();
+    if (currentConfig.previewMode) {
+      logger.info(
+        "[ramadan-overlay] Preview mode active: overlay forced visible regardless of Hijri calendar date."
+      );
     }
-  };
 
-  if (currentConfig.liveTransition && typeof document !== "undefined") {
-    scheduleNextMidnight();
-    document.addEventListener("visibilitychange", onBoundaryCheck);
-    if (typeof window !== "undefined") {
-      window.addEventListener("focus", onBoundaryCheck);
-    }
-  }
+    let hostMount: HostMountResult | null = null;
+    let lastCheckedDateString = new Date().toDateString();
 
-  let lastEffectivePosition = resolveEffectivePosition(currentConfig);
-  const onResizePositionCheck = (): void => {
-    const newEffectivePosition = resolveEffectivePosition(currentConfig);
-    if (newEffectivePosition !== lastEffectivePosition) {
-      lastEffectivePosition = newEffectivePosition;
-      if (hostMount && isOccasionActive(currentState, currentConfig)) {
-        unmountCurrent();
-        mountCurrent(currentState);
-      }
-    }
-  };
-
-  if (typeof window !== "undefined") {
-    window.addEventListener("resize", onResizePositionCheck, { passive: true });
-  }
-
-  const isCountdownActive = (
-    state: RamadanState,
-    config: ResolvedConfig
-  ): boolean => state.isRamadan || config.previewMode || !config.autoTrigger;
-
-  let countdownManager: IftarCountdownManager | null = null;
-  if (currentConfig.countdown) {
-    countdownManager = createCountdownManager(currentConfig.countdown, {
-      isBannerActive: currentConfig.variant === "banner",
-      hijriYear: currentState.hijriYear || 1447,
-      colors: currentConfig.colors,
-    });
-    if (isCountdownActive(currentState, currentConfig)) {
-      countdownManager.start();
-    }
-  }
-
-  const instance: OverlayInstance = {
-    destroy: () => {
-      if (countdownManager) {
-        countdownManager.destroy();
-        countdownManager = null;
-      }
-      if (midnightTimeoutId) {
-        clearTimeout(midnightTimeoutId);
-        midnightTimeoutId = null;
-      }
-      if (typeof document !== "undefined") {
-        document.removeEventListener("visibilitychange", onBoundaryCheck);
-      }
-      if (typeof window !== "undefined") {
-        window.removeEventListener("focus", onBoundaryCheck);
-        window.removeEventListener("resize", onResizePositionCheck);
-      }
-      unmountCurrent();
-      if (currentState.isRamadan) {
-        currentConfig.onRamadanEnd?.();
-      }
-    },
-    update: (partialConfig: Partial<RamadanOverlayConfig>) => {
-      currentUserConfig = {
-        ...currentUserConfig,
-        ...partialConfig,
+    const mountCurrent = (state: RamadanState): void => {
+      const effectiveVariant = resolveEffectiveVariant(currentConfig, state);
+      const effectivePosition = resolveEffectivePosition(currentConfig);
+      const effectiveConfig = {
+        ...currentConfig,
+        variant: effectiveVariant,
+        position: effectivePosition,
       };
-      const newConfig = resolveConfig(currentUserConfig);
+      hostMount = mountHost(effectiveConfig, state.occasion);
+      instance.container = hostMount.container;
+    };
 
-      const shouldBeMounted = isOccasionActive(currentState, newConfig);
-      const wasMounted = !!hostMount;
+    const unmountCurrent = (): void => {
+      if (hostMount) {
+        hostMount.cleanup();
+        hostMount = null;
+        instance.container = null;
+      }
+    };
 
-      if (shouldBeMounted && !wasMounted) {
-        currentConfig = newConfig;
-        mountCurrent(currentState);
-      } else if (!shouldBeMounted && wasMounted) {
-        currentConfig = newConfig;
+    const fireOccasionCallbacks = (
+      prevState: RamadanState | null,
+      newState: RamadanState
+    ): void => {
+      if (!prevState || prevState.occasion !== newState.occasion) {
+        currentConfig.onOccasionChange?.(newState.occasion, newState);
+      }
+
+      if (
+        (newState.isRamadan || currentConfig.previewMode) &&
+        (!prevState || !prevState.isRamadan)
+      ) {
+        currentConfig.onRamadanStart?.(newState);
+      }
+
+      if (newState.isEid && (!prevState || !prevState.isEid)) {
+        currentConfig.onEidStart?.(newState);
+      }
+
+      if (prevState?.isRamadan && !newState.isRamadan) {
+        currentConfig.onRamadanEnd?.();
+      }
+
+      if (shouldFireConfetti(newState, currentConfig.confetti)) {
+        const confettiYear = newState.hijriYear || 1447;
+        void fireRamadanConfetti(confettiYear, currentConfig.colors);
+      }
+    };
+
+    // Live Midnight Transition Engine
+    let midnightTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleNextMidnight = (): void => {
+      if (!currentConfig.liveTransition || typeof window === "undefined")
+        return;
+      if (midnightTimeoutId) clearTimeout(midnightTimeoutId);
+      const msUntilMidnight = getMsUntilNextMidnight();
+      midnightTimeoutId = setTimeout(() => {
+        evaluateTransition();
+      }, msUntilMidnight);
+    };
+
+    const evaluateTransition = (): void => {
+      const now = new Date();
+      lastCheckedDateString = now.toDateString();
+
+      const newState = getRamadanState({
+        date: now,
+        region: currentConfig.region,
+        hijriAdjustment: currentConfig.hijriAdjustment,
+      });
+
+      const prevState = currentState;
+      const prevOccasion = prevState.occasion;
+      const prevIsActive = isOccasionActive(prevState, currentConfig);
+      const newIsActive = isOccasionActive(newState, currentConfig);
+
+      currentState = newState;
+      instance.state = newState;
+
+      if (newIsActive) {
+        if (!prevIsActive) {
+          mountCurrent(newState);
+          fireOccasionCallbacks(prevState, newState);
+        } else if (prevOccasion !== newState.occasion) {
+          unmountCurrent();
+          mountCurrent(newState);
+          fireOccasionCallbacks(prevState, newState);
+        }
+      } else if (prevIsActive) {
         unmountCurrent();
-      } else if (hostMount) {
-        const oldEffectiveVariant = resolveEffectiveVariant(
-          currentConfig,
-          currentState
-        );
-        const newEffectiveVariant = resolveEffectiveVariant(
-          newConfig,
-          currentState
-        );
+        currentConfig.onOccasionChange?.(newState.occasion, newState);
+        if (prevState.isRamadan) {
+          currentConfig.onRamadanEnd?.();
+        }
+      }
 
-        const bannerChanged =
-          newConfig.variant === "banner" &&
-          (newConfig.bannerTextEn !== currentConfig.bannerTextEn ||
-            newConfig.bannerTextAr !== currentConfig.bannerTextAr ||
-            newConfig.locale !== currentConfig.locale);
+      scheduleNextMidnight();
+    };
 
-        const oldEffectivePosition = resolveEffectivePosition(currentConfig);
-        const newEffectivePosition = resolveEffectivePosition(newConfig);
+    const onBoundaryCheck = (): void => {
+      const now = new Date();
+      if (now.toDateString() !== lastCheckedDateString) {
+        evaluateTransition();
+      }
+    };
 
-        const structuralChange =
-          newEffectiveVariant !== oldEffectiveVariant ||
-          newEffectivePosition !== oldEffectivePosition ||
-          newConfig.mobileSideBehavior !== currentConfig.mobileSideBehavior ||
-          newConfig.density !== currentConfig.density ||
-          newConfig.lanternStyle !== currentConfig.lanternStyle ||
-          newConfig.ropeStyle !== currentConfig.ropeStyle ||
-          newConfig.ropeSag !== currentConfig.ropeSag ||
-          bannerChanged;
+    if (currentConfig.liveTransition && typeof document !== "undefined") {
+      scheduleNextMidnight();
+      document.addEventListener("visibilitychange", onBoundaryCheck);
+      if (typeof window !== "undefined") {
+        window.addEventListener("focus", onBoundaryCheck);
+      }
+    }
 
-        currentConfig = newConfig;
+    let lastEffectivePosition = resolveEffectivePosition(currentConfig);
+    const onResizePositionCheck = (): void => {
+      const newEffectivePosition = resolveEffectivePosition(currentConfig);
+      if (newEffectivePosition !== lastEffectivePosition) {
         lastEffectivePosition = newEffectivePosition;
-
-        if (structuralChange) {
+        if (hostMount && isOccasionActive(currentState, currentConfig)) {
           unmountCurrent();
           mountCurrent(currentState);
-        } else {
-          hostMount.updateTokens(newConfig);
         }
-      } else {
-        currentConfig = newConfig;
-        lastEffectivePosition = resolveEffectivePosition(newConfig);
       }
+    };
 
-      if (currentConfig.liveTransition) {
-        scheduleNextMidnight();
-      } else if (midnightTimeoutId) {
-        clearTimeout(midnightTimeoutId);
-        midnightTimeoutId = null;
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", onResizePositionCheck, {
+        passive: true,
+      });
+    }
+
+    const isCountdownActive = (
+      state: RamadanState,
+      config: ResolvedConfig
+    ): boolean => state.isRamadan || config.previewMode || !config.autoTrigger;
+
+    let countdownManager: IftarCountdownManager | null = null;
+    if (currentConfig.countdown) {
+      countdownManager = createCountdownManager(currentConfig.countdown, {
+        isBannerActive: currentConfig.variant === "banner",
+        hijriYear: currentState.hijriYear || 1447,
+        colors: currentConfig.colors,
+      });
+      if (isCountdownActive(currentState, currentConfig)) {
+        countdownManager.start();
       }
+    }
 
-      if (partialConfig.countdown !== undefined) {
+    const instance: OverlayInstance = {
+      destroy: () => {
         if (countdownManager) {
           countdownManager.destroy();
           countdownManager = null;
         }
-        if (newConfig.countdown) {
-          countdownManager = createCountdownManager(newConfig.countdown, {
-            isBannerActive: newConfig.variant === "banner",
-            hijriYear: currentState.hijriYear || 1447,
-            colors: newConfig.colors,
-          });
-          if (isCountdownActive(currentState, newConfig)) {
-            countdownManager.start();
-          }
+        if (midnightTimeoutId) {
+          clearTimeout(midnightTimeoutId);
+          midnightTimeoutId = null;
         }
-      }
-    },
-    setTheme: (theme: ThemeOption) => {
-      instance.update({ theme });
-    },
-    container: null,
-    state: currentState,
-    get config() {
-      return currentConfig;
-    },
-    getCountdownController: () =>
-      countdownManager ? countdownManager.controller : null,
-    getState: () => currentState,
-  };
+        if (typeof document !== "undefined") {
+          document.removeEventListener("visibilitychange", onBoundaryCheck);
+        }
+        if (typeof window !== "undefined") {
+          window.removeEventListener("focus", onBoundaryCheck);
+          window.removeEventListener("resize", onResizePositionCheck);
+        }
+        unmountCurrent();
+        if (currentState.isRamadan) {
+          currentConfig.onRamadanEnd?.();
+        }
+      },
+      update: (partialConfig: Partial<RamadanOverlayConfig>) => {
+        try {
+          currentUserConfig = {
+            ...currentUserConfig,
+            ...partialConfig,
+          };
+          const newConfig = resolveConfig(currentUserConfig);
 
-  // Initial evaluation
-  if (isOccasionActive(currentState, currentConfig)) {
-    mountCurrent(currentState);
+          const shouldBeMounted = isOccasionActive(currentState, newConfig);
+          const wasMounted = !!hostMount;
+
+          if (shouldBeMounted && !wasMounted) {
+            currentConfig = newConfig;
+            mountCurrent(currentState);
+          } else if (!shouldBeMounted && wasMounted) {
+            currentConfig = newConfig;
+            unmountCurrent();
+          } else if (hostMount) {
+            const oldEffectiveVariant = resolveEffectiveVariant(
+              currentConfig,
+              currentState
+            );
+            const newEffectiveVariant = resolveEffectiveVariant(
+              newConfig,
+              currentState
+            );
+
+            const bannerChanged =
+              newConfig.variant === "banner" &&
+              (newConfig.bannerTextEn !== currentConfig.bannerTextEn ||
+                newConfig.bannerTextAr !== currentConfig.bannerTextAr ||
+                newConfig.locale !== currentConfig.locale);
+
+            const oldEffectivePosition =
+              resolveEffectivePosition(currentConfig);
+            const newEffectivePosition = resolveEffectivePosition(newConfig);
+
+            const structuralChange =
+              newEffectiveVariant !== oldEffectiveVariant ||
+              newEffectivePosition !== oldEffectivePosition ||
+              newConfig.mobileSideBehavior !==
+                currentConfig.mobileSideBehavior ||
+              newConfig.density !== currentConfig.density ||
+              newConfig.lanternStyle !== currentConfig.lanternStyle ||
+              newConfig.ropeStyle !== currentConfig.ropeStyle ||
+              newConfig.ropeSag !== currentConfig.ropeSag ||
+              bannerChanged;
+
+            currentConfig = newConfig;
+            lastEffectivePosition = newEffectivePosition;
+
+            if (structuralChange) {
+              unmountCurrent();
+              mountCurrent(currentState);
+            } else {
+              hostMount.updateTokens(newConfig);
+            }
+          } else {
+            currentConfig = newConfig;
+            lastEffectivePosition = resolveEffectivePosition(newConfig);
+          }
+
+          if (currentConfig.liveTransition) {
+            scheduleNextMidnight();
+          } else if (midnightTimeoutId) {
+            clearTimeout(midnightTimeoutId);
+            midnightTimeoutId = null;
+          }
+
+          if (partialConfig.countdown !== undefined) {
+            if (countdownManager) {
+              countdownManager.destroy();
+              countdownManager = null;
+            }
+            if (newConfig.countdown) {
+              countdownManager = createCountdownManager(newConfig.countdown, {
+                isBannerActive: newConfig.variant === "banner",
+                hijriYear: currentState.hijriYear || 1447,
+                colors: newConfig.colors,
+              });
+              if (isCountdownActive(currentState, newConfig)) {
+                countdownManager.start();
+              }
+            }
+          }
+        } catch (updateError) {
+          safeInvokeTelemetry(currentUserConfig.onError, updateError, debug);
+          logger.error(
+            "[ramadan-overlay] Dynamic update error caught by containment boundary:",
+            updateError
+          );
+        }
+      },
+      setTheme: (theme: ThemeOption) => {
+        instance.update({ theme });
+      },
+      container: null,
+      state: currentState,
+      get config() {
+        return currentConfig;
+      },
+      getCountdownController: () =>
+        countdownManager ? countdownManager.controller : null,
+      getState: () => currentState,
+    };
+
+    // Initial evaluation
+    if (isOccasionActive(currentState, currentConfig)) {
+      mountCurrent(currentState);
+    }
+    fireOccasionCallbacks(null, currentState);
+
+    return instance;
+  } catch (catastrophicError) {
+    performAtomicDomRollback();
+    safeInvokeTelemetry(userConfig.onError, catastrophicError, debug);
+    createDiagnosticLogger(debug).error(
+      "[ramadan-overlay] Catastrophic initialization error caught by containment boundary:",
+      catastrophicError
+    );
+    return createSafeNoopInstance(currentConfig, INERT_RAMADAN_STATE);
   }
-  fireOccasionCallbacks(null, currentState);
-
-  return instance;
 }
 
 // ─── Public: exports ──────────────────────────────────────────────────────────

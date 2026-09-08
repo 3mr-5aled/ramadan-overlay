@@ -4,7 +4,18 @@ import type {
 } from "../../types";
 import { MilestoneAnnouncer, attachKeyboardNavigation } from "./a11y";
 
-const COUNTDOWN_STYLE_ID = "ramadan-countdown-styles";
+export const COUNTDOWN_STYLE_ID = "ramadan-countdown-styles";
+export const COUNTDOWN_HOST_ID = "ramadan-countdown-root";
+
+export function performCountdownHostRollback(): void {
+  try {
+    if (typeof document === "undefined") return;
+    document.getElementById(COUNTDOWN_HOST_ID)?.remove();
+    document.getElementById(COUNTDOWN_STYLE_ID)?.remove();
+  } catch {
+    // Suppress DOM removal errors in restrictive environments
+  }
+}
 
 export function injectCountdownStyles(): void {
   if (typeof document === "undefined") return;

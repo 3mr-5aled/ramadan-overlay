@@ -13,6 +13,7 @@ describe("init orchestration & live transition", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
     document.body.innerHTML = "";
   });
 
@@ -453,6 +454,247 @@ describe("init orchestration & live transition", () => {
         "#fef08a"
       );
 
+      overlay.destroy();
+    });
+  });
+
+  describe("defensive configuration clamping & sanitization", () => {
+    it("clamps opacity between 0.0 and 1.0", () => {
+      const overlayNegative = init({ opacity: -2.5 });
+      expect(overlayNegative.config.opacity).toBe(0.0);
+      overlayNegative.destroy();
+
+      const overlayExcess = init({ opacity: 99.5 });
+      expect(overlayExcess.config.opacity).toBe(1.0);
+      overlayExcess.destroy();
+
+      const overlayNaN = init({ opacity: NaN as any });
+      expect(overlayNaN.config.opacity).toBe(0.85);
+      overlayNaN.destroy();
+    });
+
+    it("clamps zIndex to safe 32-bit range and falls back on non-numbers", () => {
+      const overlayInvalid = init({ zIndex: "high" as any });
+      expect(overlayInvalid.config.zIndex).toBe(9999);
+      overlayInvalid.destroy();
+
+      const overlayNaN = init({ zIndex: NaN as any });
+      expect(overlayNaN.config.zIndex).toBe(9999);
+      overlayNaN.destroy();
+
+      const overlayValid = init({ zIndex: 50000 });
+      expect(overlayValid.config.zIndex).toBe(50000);
+      overlayValid.destroy();
+    });
+
+    it("clamps ropeSag to [6, 60] with fallback to 20", () => {
+      const overlaySmall = init({ ropeSag: 2 });
+      expect(overlaySmall.config.ropeSag).toBe(6);
+      overlaySmall.destroy();
+
+      const overlayLarge = init({ ropeSag: 999 });
+      expect(overlayLarge.config.ropeSag).toBe(60);
+      overlayLarge.destroy();
+
+      const overlayInvalid = init({ ropeSag: "deep" as any });
+      expect(overlayInvalid.config.ropeSag).toBe(20);
+      overlayInvalid.destroy();
+    });
+
+    it("sanitizes string union properties with safe fallbacks and debug warnings", () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      const overlay = init({
+        variant: "3d-hologram" as any,
+        position: "floating" as any,
+        density: "ultra" as any,
+        debug: true,
+      });
+
+      expect(overlay.config.variant).toBe("lanterns");
+      expect(overlay.config.position).toBe("both");
+      expect(overlay.config.density).toBe("normal");
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Invalid variant "3d-hologram"; falling back to "lanterns"'
+        )
+      );
+
+      warnSpy.mockRestore();
+      overlay.destroy();
+    });
+
+    it("sanitizes occasions array and defaults if empty or malformed", () => {
+      const overlayNull = init({ occasions: null as any });
+      expect(overlayNull.config.occasions).toEqual([
+        "ramadan",
+        "eid-fitr",
+        "eid-adha",
+      ]);
+      overlayNull.destroy();
+
+      const overlayEmpty = init({ occasions: [] });
+      expect(overlayEmpty.config.occasions).toEqual([
+        "ramadan",
+        "eid-fitr",
+        "eid-adha",
+      ]);
+      overlayEmpty.destroy();
+    });
+  });
+
+  describe("catastrophic error containment & atomic DOM rollback", () => {
+    it("safely catches unexpected mount errors, returns no-op instance, and invokes onError", () => {
+      // Intentionally break document.createElement to simulate a fatal DOM crash
+      const originalCreateElement = document.createElement.bind(document);
+      const onError = vi.fn();
+
+      vi.spyOn(document, "createElement").mockImplementation((tag) => {
+        if (tag === "div") {
+          throw new Error("Simulated DOM host mounting crash");
+        }
+        return originalCreateElement(tag);
+      });
+
+      const overlay = init({
+        previewMode: true,
+        onError,
+        debug: true,
+      });
+
+      expect(overlay).toBeDefined();
+      expect(overlay.container).toBeNull();
+      expect(onError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Simulated DOM host mounting crash",
+        })
+      );
+
+      // Verify no-op instance methods safely execute without throwing
+      expect(() => overlay.destroy()).not.toThrow();
+      expect(() => overlay.update({ opacity: 0.5 })).not.toThrow();
+      expect(() => overlay.setTheme("royal")).not.toThrow();
+      expect(overlay.getCountdownController()).toBeNull();
+      expect(overlay.getState()).toEqual(
+        expect.objectContaining({ isRamadan: false, occasion: "none" })
+      );
+
+      vi.restoreAllMocks();
+    });
+
+    it("performs atomic DOM rollback removing partial roots and style elements on error", () => {
+      const onError = vi.fn();
+
+      // Create fake leaked nodes that would simulate a partial initialization leak
+      const leakedStyle = document.createElement("style");
+      leakedStyle.id = "ramadan-overlay-styles";
+      document.head.appendChild(leakedStyle);
+
+      const leakedRoot = document.createElement("div");
+      leakedRoot.id = "ramadan-overlay-root";
+      document.body.appendChild(leakedRoot);
+
+      // Force crash during mountHost by breaking document.getElementById after styles appended
+      const originalAppend = document.body.appendChild.bind(document.body);
+      vi.spyOn(document.body, "appendChild").mockImplementation((node) => {
+        if ((node as HTMLElement).id === "ramadan-overlay-root") {
+          throw new Error("Simulated appendChild fatal failure");
+        }
+        return originalAppend(node);
+      });
+
+      const overlay = init({
+        previewMode: true,
+        onError,
+      });
+
+      expect(overlay.container).toBeNull();
+      // Atomic DOM Rollback should have removed the leaked nodes
+      expect(document.getElementById("ramadan-overlay-styles")).toBeNull();
+      expect(document.getElementById("ramadan-overlay-root")).toBeNull();
+
+      vi.restoreAllMocks();
+    });
+
+    it("isolates consumer onError callback errors (double-containment seam)", () => {
+      const faultyOnError = vi.fn().mockImplementation(() => {
+        throw new Error("Consumer telemetry reporter crashed");
+      });
+
+      // Force crash
+      vi.spyOn(document, "createElement").mockImplementation(() => {
+        throw new Error("Fatal host creation failure");
+      });
+
+      // init() must NOT throw even if onError throws!
+      expect(() => {
+        init({
+          previewMode: true,
+          onError: faultyOnError,
+        });
+      }).not.toThrow();
+
+      expect(faultyOnError).toHaveBeenCalled();
+
+      vi.restoreAllMocks();
+    });
+  });
+
+  describe("developer diagnostic logging", () => {
+    it("emits informative diagnostic notice when autoTrigger is dormant outside Ramadan/Eid and debug is true", () => {
+      // 2026-01-01 is outside Ramadan/Eid
+      vi.setSystemTime(new Date("2026-01-01T12:00:00Z"));
+
+      const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+
+      const overlay = init({
+        autoTrigger: true,
+        debug: true,
+      });
+
+      expect(infoSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "[ramadan-overlay] Overlay dormant: autoTrigger is enabled"
+        )
+      );
+
+      infoSpy.mockRestore();
+      overlay.destroy();
+    });
+
+    it("preserves 100% console silence when debug is false (production guarantee)", () => {
+      vi.setSystemTime(new Date("2026-01-01T12:00:00Z"));
+
+      const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      const overlay = init({
+        autoTrigger: true,
+        debug: false,
+      });
+
+      expect(infoSpy).not.toHaveBeenCalled();
+      expect(warnSpy).not.toHaveBeenCalled();
+
+      infoSpy.mockRestore();
+      warnSpy.mockRestore();
+      overlay.destroy();
+    });
+
+    it("emits preview mode diagnostic notice when previewMode and debug are active", () => {
+      const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+
+      const overlay = init({
+        previewMode: true,
+        debug: true,
+      });
+
+      expect(infoSpy).toHaveBeenCalledWith(
+        expect.stringContaining("[ramadan-overlay] Preview mode active")
+      );
+
+      infoSpy.mockRestore();
       overlay.destroy();
     });
   });

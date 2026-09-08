@@ -151,5 +151,119 @@ if (typeof describe !== "undefined") {
         expect(state.isRamadan).toBe(false);
       });
     });
+
+    describe("defensive input normalization & resilience", () => {
+      it("safely handles null query without throwing", () => {
+        expect(() => getRamadanState(null as any)).not.toThrow();
+        const state = getRamadanState(null as any);
+        expect(typeof state.isRamadan).toBe("boolean");
+        expect(typeof state.occasion).toBe("string");
+      });
+
+      it("safely handles undefined query without throwing", () => {
+        expect(() => getRamadanState(undefined)).not.toThrow();
+        const state = getRamadanState(undefined);
+        expect(typeof state.isRamadan).toBe("boolean");
+        expect(typeof state.occasion).toBe("string");
+      });
+
+      it("safely handles new Date(NaN) without throwing RangeError", () => {
+        expect(() => getRamadanState(new Date(NaN))).not.toThrow();
+        const state = getRamadanState(new Date(NaN));
+        expect(typeof state.isRamadan).toBe("boolean");
+      });
+
+      it("safely handles query with invalid Date object", () => {
+        expect(() =>
+          getRamadanState({ date: new Date(NaN) } as any)
+        ).not.toThrow();
+      });
+
+      it("accepts valid ISO date string in query.date", () => {
+        const state = getRamadanState({ date: "2026-02-18" } as any);
+        expect(state.isRamadan).toBe(true);
+        expect(state.hijriYear).toBe(1447);
+        expect(state.dayNumber).toBe(1);
+      });
+
+      it("accepts numeric timestamp in query.date", () => {
+        const timestamp = new Date("2026-02-18T12:00:00Z").getTime();
+        const state = getRamadanState({ date: timestamp } as any);
+        expect(state.isRamadan).toBe(true);
+        expect(state.hijriYear).toBe(1447);
+      });
+
+      it("clamps extreme or non-finite hijriAdjustment offsets", () => {
+        const stateNaN = getRamadanState({
+          date: new Date("2026-02-18"),
+          hijriAdjustment: NaN,
+        });
+        expect(stateNaN.isRamadan).toBe(true);
+
+        const stateInfinity = getRamadanState({
+          date: new Date("2026-02-18"),
+          hijriAdjustment: Infinity,
+        });
+        expect(stateInfinity.isRamadan).toBe(true);
+      });
+    });
+
+    describe("ECMA-402 silent Gregorian fallback trap & corrupted Intl", () => {
+      const originalDateTimeFormat = Intl.DateTimeFormat;
+
+      afterEach(() => {
+        Intl.DateTimeFormat = originalDateTimeFormat;
+      });
+
+      it("intercepts silent Gregorian fallback and falls back to table (prevents September false positives)", () => {
+        // Mock Intl.DateTimeFormat where calendar resolves to 'gregory' (small-ICU Node.js or Alpine)
+        // and formatToParts returns month 9 for September
+        // @ts-expect-error mocking Intl
+        Intl.DateTimeFormat = function () {
+          return {
+            resolvedOptions: () => ({ calendar: "gregory" }),
+            formatToParts: () => [
+              { type: "month", value: "9" },
+              { type: "day", value: "15" },
+              { type: "year", value: "2026" },
+            ],
+          };
+        };
+
+        // 2026-09-15 is NOT Ramadan (it's Rabi' al-Awwal 1448)
+        const state = getRamadanState(new Date("2026-09-15"));
+        // Without trap check, it would have returned isRamadan: true because month === 9!
+        expect(state.isRamadan).toBe(false);
+        expect(state.occasion).toBe("none");
+      });
+
+      it("gracefully falls back to table when formatToParts is undefined (legacy polyfill)", () => {
+        // @ts-expect-error mocking Intl
+        Intl.DateTimeFormat = function () {
+          return {
+            resolvedOptions: () => ({ calendar: "islamic-umalqura" }),
+            // formatToParts missing
+          };
+        };
+
+        const state = getRamadanState(new Date("2026-02-18"));
+        expect(state.isRamadan).toBe(true);
+        expect(state.occasion).toBe("ramadan");
+      });
+
+      it("gracefully falls back to table when formatToParts returns empty array or corrupted tokens", () => {
+        // @ts-expect-error mocking Intl
+        Intl.DateTimeFormat = function () {
+          return {
+            resolvedOptions: () => ({ calendar: "islamic-umalqura" }),
+            formatToParts: () => [],
+          };
+        };
+
+        const state = getRamadanState(new Date("2026-02-18"));
+        expect(state.isRamadan).toBe(true);
+        expect(state.occasion).toBe("ramadan");
+      });
+    });
   });
 }
