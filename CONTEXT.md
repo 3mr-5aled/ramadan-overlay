@@ -63,3 +63,7 @@ _Avoid_: Audio player, sound manager, chime player
 **Celebration Flare**:
 The festive sensory sequence (confetti burst, celebratory card styling, and audio chime alert) triggered at T-0 upon reaching Iftar.
 _Avoid_: Celebration effect, party mode, alert explosion
+
+**Milestone Live Region**:
+An accessible `aria-live="polite"` DOM element that broadcasts human-readable countdown updates at discrete temporal milestones (entry, 15m, 5m, 1m, and T-0) to avoid screen reader speech queue flooding.
+_Avoid_: Ticker region, live timer, speech queue
