@@ -13,9 +13,10 @@
  * @example Svelte →  import from 'ramadan-overlay/svelte'
  */
 
-export { getRamadanState, init } from "./injector";
+export { getOccasionState, getRamadanState, init } from "./injector";
 
 export type {
+  Occasion,
   OverlayInstance,
   OverlayPosition,
   OverlayVariant,

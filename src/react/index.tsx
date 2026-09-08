@@ -1,8 +1,10 @@
 import type { FC } from "react";
 import { useEffect, useRef, useState } from "react";
-import { getRamadanState, init } from "../core/index";
+import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
+  Occasion,
   OverlayInstance,
+  OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
@@ -38,7 +40,13 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
   useEffect(() => {
     isMountedRef.current = true;
     if (!instanceRef.current) {
-      const overlay = init(config);
+      const overlay = init({
+        ...config,
+        onOccasionChange: (occasion, newState) => {
+          setState(newState);
+          config.onOccasionChange?.(occasion, newState);
+        },
+      });
       instanceRef.current = overlay;
       setState(overlay.state);
     }
@@ -96,9 +104,11 @@ export const RamadanOverlay: FC<RamadanOverlayProps> = (props) => {
   return children ? <>{children(state)}</> : null;
 };
 
-export { getRamadanState };
+export { getOccasionState, getRamadanState };
 export type {
+  Occasion,
   OverlayInstance,
+  OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,

@@ -7,10 +7,11 @@ import {
   OnInit,
   SimpleChanges,
 } from "@angular/core";
-import { getRamadanState, init } from "../core/index";
+import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
   HijriRegion,
   LanternStyle,
+  Occasion,
   OverlayInstance,
   OverlayPosition,
   OverlayVariant,
@@ -60,6 +61,9 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   @Input() bannerTextEn?: string;
   @Input() bannerTextAr?: string;
   @Input() bannerIconColor?: string;
+  @Input() occasions?: Occasion[];
+  @Input() eidVariant?: OverlayVariant;
+  @Input() liveTransition?: boolean;
 
   private instance: OverlayInstance | null = null;
 
@@ -106,6 +110,9 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
       "bannerTextEn",
       "bannerTextAr",
       "bannerIconColor",
+      "occasions",
+      "eidVariant",
+      "liveTransition",
     ] as const;
 
     const individualInputs: Partial<RamadanOverlayConfig> = {};
@@ -143,9 +150,12 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
 })
 export class RamadanOverlayModule {}
 
-export { getRamadanState };
+export { getOccasionState, getRamadanState };
 export type {
+  Occasion,
   OverlayInstance,
+  OverlayPosition,
+  OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,

@@ -63,7 +63,7 @@
     "lint": "eslint src --ext .ts,.tsx,.svelte",
     "test": "vitest run",
     "test:watch": "vitest",
-    "demo": "npx serve demo",
+    "demo": "npx serve .",
     "prepare": "husky"
   },
   "dependencies": {

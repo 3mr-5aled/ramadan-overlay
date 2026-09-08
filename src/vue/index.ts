@@ -6,9 +6,10 @@ import {
   watch,
   type PropType,
 } from "vue";
-import { getRamadanState, init } from "../core/index";
+import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
   LanternStyle,
+  Occasion,
   OverlayInstance,
   OverlayPosition,
   OverlayVariant,
@@ -38,7 +39,13 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
   const instance = ref<OverlayInstance | null>(null);
 
   onMounted(() => {
-    const overlay = init(config);
+    const overlay = init({
+      ...config,
+      onOccasionChange: (occasion, newState) => {
+        state.value = newState;
+        config.onOccasionChange?.(occasion, newState);
+      },
+    });
     instance.value = overlay;
     state.value = overlay.state;
   });
@@ -115,8 +122,20 @@ export const RamadanOverlay = defineComponent({
     bannerTextEn: { type: String as PropType<string>, default: undefined },
     bannerTextAr: { type: String as PropType<string>, default: undefined },
     bannerIconColor: { type: String as PropType<string>, default: undefined },
+    occasions: {
+      type: Array as PropType<Occasion[]>,
+      default: undefined,
+    },
+    eidVariant: {
+      type: String as PropType<OverlayVariant>,
+      default: undefined,
+    },
+    liveTransition: {
+      type: Boolean as PropType<boolean>,
+      default: undefined,
+    },
   },
-  emits: ["ramadan-start", "ramadan-end"],
+  emits: ["ramadan-start", "ramadan-end", "eid-start", "occasion-change"],
   setup(props, { emit }) {
     let instance: OverlayInstance | null = null;
 
@@ -130,6 +149,8 @@ export const RamadanOverlay = defineComponent({
         ...overrides,
         onRamadanStart: (s) => emit("ramadan-start", s),
         onRamadanEnd: () => emit("ramadan-end"),
+        onEidStart: (s) => emit("eid-start", s),
+        onOccasionChange: (occasion, s) => emit("occasion-change", occasion, s),
       };
     };
 
@@ -158,9 +179,12 @@ export const RamadanOverlay = defineComponent({
   },
 });
 
-export { getRamadanState };
+export { getOccasionState, getRamadanState };
 export type {
+  Occasion,
   OverlayInstance,
+  OverlayPosition,
+  OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,

@@ -1,7 +1,9 @@
 import { onDestroy, onMount } from "svelte";
-import { getRamadanState, init } from "../core/index";
+import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
+  Occasion,
   OverlayInstance,
+  OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
@@ -70,9 +72,15 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
   onMount(() => {
     const overlay = init({
       ...config,
+      onOccasionChange: (_occasion, s) => {
+        currentState = s;
+        subscribers.forEach((fn) => fn(s));
+        config.onOccasionChange?.(_occasion, s);
+      },
       onRamadanStart: (s) => {
         currentState = s;
         subscribers.forEach((fn) => fn(s));
+        config.onRamadanStart?.(s);
       },
     });
     currentState = overlay.state;
@@ -86,9 +94,11 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
   return { state: store };
 }
 
-export { getRamadanState };
+export { getOccasionState, getRamadanState };
 export type {
+  Occasion,
   OverlayInstance,
+  OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
