@@ -27,3 +27,23 @@ _Avoid_: Style, skin, theme, visual_mode
 **Hijri Adjustment**:
 A day offset applied to the base astronomical calendar to reconcile regional moon-sighting variations.
 _Avoid_: Timezone offset, date shift, calendar delta
+
+**Alert Window**:
+The time interval immediately preceding Iftar (defaulting to 30 minutes) during which the countdown widget becomes visible.
+_Avoid_: Active window, display period
+
+**Countdown Host**:
+A standalone floating DOM element (`<aside id="ramadan-countdown-root">`) mounted directly to `document.body` with native pointer events and accessibility tree exposure.
+_Avoid_: Overlay child, timer container, popup root
+
+**Countdown Card**:
+The visual UI card containing tabular countdown digits, festive header, target timestamp, and interactive controls.
+_Avoid_: Timer box, countdown modal, alert popup
+
+**Iftar**:
+The sunset meal marking the end of the daily fast during Ramadan.
+_Avoid_: Fast-breaking, breakfast, Maghrib meal
+
+**Iftar Time Resolver**:
+A dynamic callback function or static definition that provides the target Iftar time for a given calendar date.
+_Avoid_: Time calculator, sunset provider
