@@ -1,5 +1,6 @@
 import type {
   OverlayInstance,
+  OverlayPosition,
   OverlayVariant,
   RamadanOverlayConfig,
   RamadanState,
@@ -7,7 +8,7 @@ import type {
 } from "../types";
 import { fireRamadanConfetti, shouldFireConfetti } from "./confetti";
 import { getRamadanState, resolveHijriOffset } from "./detector";
-import { mountHost, type HostMountResult } from "./host";
+import { mountHost, resolveSidePositions, type HostMountResult } from "./host";
 import {
   createCountdownManager,
   type IftarCountdownManager,
@@ -50,6 +51,18 @@ function resolveEffectiveVariant(
     return config.eidVariant;
   }
   return config.variant;
+}
+
+function resolveEffectivePosition(config: ResolvedConfig): OverlayPosition {
+  if (
+    config.mobileSideBehavior === "top" &&
+    resolveSidePositions(config.position).length > 0 &&
+    typeof window !== "undefined" &&
+    window.innerWidth < 768
+  ) {
+    return "top";
+  }
+  return config.position;
 }
 
 function isOccasionActive(
@@ -175,7 +188,12 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
 
   const mountCurrent = (state: RamadanState): void => {
     const effectiveVariant = resolveEffectiveVariant(currentConfig, state);
-    const effectiveConfig = { ...currentConfig, variant: effectiveVariant };
+    const effectivePosition = resolveEffectivePosition(currentConfig);
+    const effectiveConfig = {
+      ...currentConfig,
+      variant: effectiveVariant,
+      position: effectivePosition,
+    };
     hostMount = mountHost(effectiveConfig, state.occasion);
     instance.container = hostMount.container;
   };
@@ -282,6 +300,22 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
     }
   }
 
+  let lastEffectivePosition = resolveEffectivePosition(currentConfig);
+  const onResizePositionCheck = (): void => {
+    const newEffectivePosition = resolveEffectivePosition(currentConfig);
+    if (newEffectivePosition !== lastEffectivePosition) {
+      lastEffectivePosition = newEffectivePosition;
+      if (hostMount && isOccasionActive(currentState, currentConfig)) {
+        unmountCurrent();
+        mountCurrent(currentState);
+      }
+    }
+  };
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("resize", onResizePositionCheck, { passive: true });
+  }
+
   const isCountdownActive = (
     state: RamadanState,
     config: ResolvedConfig
@@ -314,6 +348,7 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
       }
       if (typeof window !== "undefined") {
         window.removeEventListener("focus", onBoundaryCheck);
+        window.removeEventListener("resize", onResizePositionCheck);
       }
       unmountCurrent();
       if (currentState.isRamadan) {
@@ -354,14 +389,19 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
             newConfig.bannerIconColor !== currentConfig.bannerIconColor ||
             newConfig.locale !== currentConfig.locale);
 
+        const oldEffectivePosition = resolveEffectivePosition(currentConfig);
+        const newEffectivePosition = resolveEffectivePosition(newConfig);
+
         const structuralChange =
           newEffectiveVariant !== oldEffectiveVariant ||
-          newConfig.position !== currentConfig.position ||
+          newEffectivePosition !== oldEffectivePosition ||
+          newConfig.mobileSideBehavior !== currentConfig.mobileSideBehavior ||
           newConfig.density !== currentConfig.density ||
           newConfig.lanternStyle !== currentConfig.lanternStyle ||
           bannerChanged;
 
         currentConfig = newConfig;
+        lastEffectivePosition = newEffectivePosition;
 
         if (structuralChange) {
           unmountCurrent();
@@ -371,6 +411,7 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
         }
       } else {
         currentConfig = newConfig;
+        lastEffectivePosition = resolveEffectivePosition(newConfig);
       }
 
       if (currentConfig.liveTransition) {

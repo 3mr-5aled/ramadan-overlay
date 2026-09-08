@@ -1,5 +1,5 @@
 import type { Occasion, ResolvedConfig, VariantMountFn } from "../../types";
-import { resolveSidePositions } from "./lanterns";
+import { calculateParticleCoords } from "../host";
 
 function buildBalloonSVG(
   color: string,
@@ -127,28 +127,7 @@ export const mountEid: VariantMountFn = (
       }
     }
 
-    let x: number;
-    let y: number;
-    const sidePositions = resolveSidePositions(config.position);
-    if (sidePositions.length > 0) {
-      const side =
-        sidePositions[Math.floor(Math.random() * sidePositions.length)];
-      x = side === "left" ? Math.random() * 3.5 : 96.5 + Math.random() * 3.5;
-      y = Math.random() * 90;
-    } else if (config.position === "top") {
-      x = Math.random() * 95;
-      y = Math.random() * 25;
-    } else if (config.position === "bottom") {
-      x = Math.random() * 95;
-      y = 75 + Math.random() * 20;
-    } else if (config.position === "full") {
-      x = Math.random() * 95;
-      y = Math.random() * 90;
-    } else {
-      // 'both'
-      x = Math.random() * 95;
-      y = Math.random() < 0.5 ? Math.random() * 25 : 75 + Math.random() * 20;
-    }
+    const { x, y } = calculateParticleCoords(config.position);
 
     const duration = (4 + Math.random() * 4).toFixed(1);
     const delay = (Math.random() * 3).toFixed(1);

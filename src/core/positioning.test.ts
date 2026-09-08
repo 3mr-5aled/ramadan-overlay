@@ -121,6 +121,51 @@ describe("Vertical Viewport Positioning", () => {
 
       overlay.destroy();
     });
+
+    it("sets and unsets data-is-side attribute based on side positioning", () => {
+      const overlay = init({
+        previewMode: true,
+        position: "sides",
+      });
+
+      expect(overlay.container?.getAttribute("data-is-side")).toBe("true");
+
+      overlay.update({ position: "top" });
+      expect(overlay.container?.getAttribute("data-is-side")).toBeNull();
+
+      overlay.destroy();
+    });
+
+    it("falls back to top position on narrow screens (< 768px) when mobileSideBehavior is 'top'", () => {
+      const originalWidth = window.innerWidth;
+      try {
+        Object.defineProperty(window, "innerWidth", {
+          writable: true,
+          configurable: true,
+          value: 480,
+        });
+
+        const overlay = init({
+          previewMode: true,
+          variant: "lanterns",
+          position: "sides",
+          mobileSideBehavior: "top",
+        });
+
+        expect(
+          overlay.container?.querySelector(".ro-lantern-row")
+        ).not.toBeNull();
+        expect(overlay.container?.querySelector(".ro-lantern-side")).toBeNull();
+
+        overlay.destroy();
+      } finally {
+        Object.defineProperty(window, "innerWidth", {
+          writable: true,
+          configurable: true,
+          value: originalWidth,
+        });
+      }
+    });
   });
 
   describe("Variant Visual Seams - Lanterns", () => {
@@ -207,6 +252,45 @@ describe("Vertical Viewport Positioning", () => {
 
       document.documentElement.dir = "";
     });
+
+    it("updates lantern unit count dynamically on window resize without leaking listeners", () => {
+      const originalHeight = window.innerHeight;
+      try {
+        Object.defineProperty(window, "innerHeight", {
+          writable: true,
+          configurable: true,
+          value: 600,
+        });
+
+        const overlay = init({
+          previewMode: true,
+          variant: "lanterns",
+          position: "left",
+        });
+
+        const initialUnits =
+          overlay.container?.querySelectorAll(".ro-lantern-unit").length;
+
+        Object.defineProperty(window, "innerHeight", {
+          writable: true,
+          configurable: true,
+          value: 1200,
+        });
+        window.dispatchEvent(new Event("resize"));
+
+        const updatedUnits =
+          overlay.container?.querySelectorAll(".ro-lantern-unit").length;
+        expect(updatedUnits).toBeGreaterThan(initialUnits ?? 0);
+
+        overlay.destroy();
+      } finally {
+        Object.defineProperty(window, "innerHeight", {
+          writable: true,
+          configurable: true,
+          value: originalHeight,
+        });
+      }
+    });
   });
 
   describe("Variant Visual Seams - Geometric", () => {
@@ -235,6 +319,20 @@ describe("Vertical Viewport Positioning", () => {
 
       const rect = leftBand?.querySelector("rect");
       expect(rect?.getAttribute("fill")).toContain("url(#");
+
+      overlay.destroy();
+    });
+
+    it("uses CSS variable theme tokens inside pattern definitions", () => {
+      const overlay = init({
+        previewMode: true,
+        variant: "geometric",
+        position: "left",
+      });
+
+      const pattern = overlay.container?.querySelector("defs pattern");
+      expect(pattern?.innerHTML).toContain("var(--ro-color-1");
+      expect(pattern?.innerHTML).toContain("var(--ro-color-2");
 
       overlay.destroy();
     });

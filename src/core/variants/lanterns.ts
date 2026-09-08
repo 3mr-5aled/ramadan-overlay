@@ -1,4 +1,7 @@
 import type { OverlayPosition, VariantMountFn } from "../../types";
+import { resolveSidePositions } from "../host";
+
+export { resolveSidePositions };
 
 // 12 unique lantern silhouette SVGs sourced from the lanterns/ folder.
 // Each entry stores the viewBox and the inner <g> markup (fill replaced at render time).
@@ -329,27 +332,6 @@ const LANTERN_SVG_DATA: Array<{ viewBox: string; gContent: string }> = [
   },
 ];
 
-export function resolveSidePositions(
-  pos: OverlayPosition,
-  isRtl = typeof document !== "undefined" &&
-    (document.documentElement.dir === "rtl" || document.body?.dir === "rtl")
-): Array<"left" | "right"> {
-  switch (pos) {
-    case "left":
-      return ["left"];
-    case "right":
-      return ["right"];
-    case "sides":
-      return ["left", "right"];
-    case "start":
-      return [isRtl ? "right" : "left"];
-    case "end":
-      return [isRtl ? "left" : "right"];
-    default:
-      return [];
-  }
-}
-
 export const mountLanterns: VariantMountFn = (
   container,
   config
@@ -386,10 +368,49 @@ export const mountLanterns: VariantMountFn = (
   const sidePositions = resolveSidePositions(config.position);
   if (sidePositions.length > 0) {
     const sideElements: HTMLElement[] = [];
-    const count = Math.max(
+    let currentCount = Math.max(
       2,
       Math.min(6, Math.round(window.innerHeight / 220))
     );
+
+    const renderUnits = (targetCount: number) => {
+      for (const sideWrap of sideElements) {
+        const existingUnits = sideWrap.querySelectorAll(".ro-lantern-unit");
+        existingUnits.forEach((u) => u.remove());
+
+        for (let i = 0; i < targetCount; i++) {
+          const svgIndex =
+            config.lanternStyle > 0
+              ? (config.lanternStyle - 1) % LANTERN_SVG_DATA.length
+              : i % LANTERN_SVG_DATA.length;
+          const color = palette[i % palette.length];
+          const duration = (3.2 + ((i * 0.23) % 1.2)).toFixed(1);
+          const phase = -((i * 0.73) % parseFloat(duration));
+          const topPct = (
+            10 +
+            (i * 80) / (targetCount > 1 ? targetCount - 1 : 1)
+          ).toFixed(1);
+
+          const unit = document.createElement("div");
+          unit.className = "ro-lantern-unit";
+          unit.style.top = `${topPct}%`;
+          unit.style.setProperty("--ro-swing-duration", `${duration}s`);
+          unit.style.animationDelay = `${phase.toFixed(2)}s`;
+
+          const dropline = document.createElement("div");
+          dropline.className = "ro-lantern-dropline";
+          dropline.style.background = ropeColor;
+
+          const svgWrap = document.createElement("div");
+          svgWrap.className = "ro-lantern-svg-wrap";
+          svgWrap.innerHTML = buildLanternSVG(svgIndex, color);
+
+          unit.appendChild(dropline);
+          unit.appendChild(svgWrap);
+          sideWrap.appendChild(unit);
+        }
+      }
+    };
 
     for (const side of sidePositions) {
       const sideWrap = document.createElement("div");
@@ -399,47 +420,20 @@ export const mountLanterns: VariantMountFn = (
       spine.className = "ro-lantern-spine";
       sideWrap.appendChild(spine);
 
-      for (let i = 0; i < count; i++) {
-        const svgIndex =
-          config.lanternStyle > 0
-            ? (config.lanternStyle - 1) % LANTERN_SVG_DATA.length
-            : i % LANTERN_SVG_DATA.length;
-        const color = palette[i % palette.length];
-        const duration = (3.2 + ((i * 0.23) % 1.2)).toFixed(1);
-        const phase = -((i * 0.73) % parseFloat(duration));
-        const topPct = (10 + (i * 80) / (count > 1 ? count - 1 : 1)).toFixed(1);
-
-        const unit = document.createElement("div");
-        unit.className = "ro-lantern-unit";
-        unit.style.top = `${topPct}%`;
-        unit.style.setProperty("--ro-swing-duration", `${duration}s`);
-        unit.style.animationDelay = `${phase.toFixed(2)}s`;
-
-        const dropline = document.createElement("div");
-        dropline.className = "ro-lantern-dropline";
-        dropline.style.background = ropeColor;
-
-        const svgWrap = document.createElement("div");
-        svgWrap.className = "ro-lantern-svg-wrap";
-        svgWrap.innerHTML = buildLanternSVG(svgIndex, color);
-
-        unit.appendChild(dropline);
-        unit.appendChild(svgWrap);
-        sideWrap.appendChild(unit);
-      }
-
       container.appendChild(sideWrap);
       sideElements.push(sideWrap);
     }
+
+    renderUnits(currentCount);
 
     const onResize = () => {
       const newCount = Math.max(
         2,
         Math.min(6, Math.round(window.innerHeight / 220))
       );
-      if (newCount !== count) {
-        sideElements.forEach((el) => el.remove());
-        mountLanterns(container, config);
+      if (newCount !== currentCount) {
+        currentCount = newCount;
+        renderUnits(currentCount);
       }
     };
     window.addEventListener("resize", onResize, { passive: true });

@@ -286,4 +286,37 @@ describe("init orchestration & live transition", () => {
       overlay.destroy();
     });
   });
+
+  describe("vertical viewport positioning & fallback", () => {
+    it("resolves side positions and exposes resolved config", () => {
+      const overlay = init({
+        previewMode: true,
+        position: "sides",
+        mobileSideBehavior: "show",
+      });
+
+      expect(overlay.config.position).toBe("sides");
+      expect(overlay.config.mobileSideBehavior).toBe("show");
+
+      overlay.destroy();
+    });
+
+    it("falls back banner with side position to 'top' with warning", () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const overlay = init({
+        previewMode: true,
+        variant: "banner",
+        position: "left",
+      });
+
+      expect(overlay.config.position).toBe("top");
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "Banner variant does not support vertical side positioning"
+        )
+      );
+      warnSpy.mockRestore();
+      overlay.destroy();
+    });
+  });
 });

@@ -1,6 +1,6 @@
 import type { VariantMountFn } from "../../types";
 import { isMotionAllowed, scheduleRender } from "../motion";
-import { resolveSidePositions } from "./lanterns";
+import { resolveSidePositions } from "../host";
 
 interface SparkleParticle {
   el: HTMLElement;

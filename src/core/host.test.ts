@@ -108,4 +108,19 @@ describe("HostMount and Overlay Lifecycle", () => {
     overlay.destroy();
     expect(document.querySelector('[role="banner"]')).toBeNull();
   });
+
+  it("reflects data-mobile-side and data-is-side tokens on the overlay container for side positions", () => {
+    const overlay = init({
+      variant: "lanterns",
+      position: "left",
+      mobileSideBehavior: "show",
+      previewMode: true,
+    });
+
+    expect(overlay.container?.getAttribute("data-mobile-side")).toBe("show");
+    expect(overlay.container?.getAttribute("data-position")).toBe("left");
+    expect(overlay.container?.getAttribute("data-is-side")).toBe("true");
+
+    overlay.destroy();
+  });
 });
