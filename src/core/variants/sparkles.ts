@@ -1,5 +1,6 @@
 import type { VariantMountFn } from "../../types";
 import { isMotionAllowed, scheduleRender } from "../motion";
+import { resolveSidePositions } from "./lanterns";
 
 interface SparkleParticle {
   el: HTMLElement;
@@ -99,7 +100,13 @@ export const mountSparkles: VariantMountFn = (
 
     let x: number, y: number;
     const pos = config.position;
-    if (pos === "top") {
+    const sidePositions = resolveSidePositions(pos);
+    if (sidePositions.length > 0) {
+      const side =
+        sidePositions[Math.floor(Math.random() * sidePositions.length)];
+      x = side === "left" ? Math.random() * 4 : 96 + Math.random() * 4;
+      y = Math.random() * 100;
+    } else if (pos === "top") {
       x = Math.random() * 100;
       y = Math.random() * 20;
     } else if (pos === "bottom") {
@@ -114,6 +121,8 @@ export const mountSparkles: VariantMountFn = (
     }
 
     const maxLife = 80 + Math.random() * 80;
+    el.style.left = `${x}%`;
+    el.style.top = `${y}%`;
     return {
       el,
       x,
@@ -126,6 +135,11 @@ export const mountSparkles: VariantMountFn = (
       maxLife,
       color,
     };
+  }
+
+  // Pre-seed initial particles
+  while (particles.length < MAX_PARTICLES) {
+    particles.push(spawnParticle());
   }
 
   function tick(_dt: number) {

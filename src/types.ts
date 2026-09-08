@@ -51,7 +51,18 @@ export type HijriRegion =
   | "us"
   | "uk";
 
-export type OverlayPosition = "top" | "bottom" | "both" | "full";
+export type OverlayPosition =
+  | "top"
+  | "bottom"
+  | "both"
+  | "full"
+  | "left"
+  | "right"
+  | "sides"
+  | "start"
+  | "end";
+
+export type MobileSideBehavior = "hide" | "top" | "show";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -67,6 +78,12 @@ export interface RamadanOverlayConfig {
    * @default 'both'
    */
   position?: OverlayPosition;
+
+  /**
+   * Behavior of side decorations on viewports below 768px.
+   * @default 'hide'
+   */
+  mobileSideBehavior?: MobileSideBehavior;
 
   /**
    * Overall opacity of the decoration layer (0–1).
@@ -286,6 +303,8 @@ export interface OverlayInstance {
   container: HTMLElement | null;
   /** The detected Ramadan state at mount time. */
   state: RamadanState;
+  /** The active resolved overlay configuration. */
+  readonly config: ResolvedConfig;
   /** Access the active Iftar countdown widget controller, if enabled. */
   getCountdownController: () => IftarCountdownController | null;
 }

@@ -69,9 +69,23 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
       ? userConfig.colors
       : [...DEFAULT_COLORS];
 
+  let position = userConfig.position ?? "both";
+  if (
+    userConfig.variant === "banner" &&
+    ["left", "right", "sides", "start", "end"].includes(position)
+  ) {
+    if (typeof console !== "undefined" && console.warn) {
+      console.warn(
+        '[ramadan-overlay] Banner variant does not support vertical side positioning; falling back to "top"'
+      );
+    }
+    position = "top";
+  }
+
   return {
     variant: userConfig.variant ?? "lanterns",
-    position: userConfig.position ?? "both",
+    position,
+    mobileSideBehavior: userConfig.mobileSideBehavior ?? "hide",
     opacity: userConfig.opacity ?? 0.85,
     colors,
     zIndex: userConfig.zIndex ?? 9999,
@@ -135,6 +149,7 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
       destroy: () => undefined,
       update: () => undefined,
       container: null,
+      config: resolveConfig(userConfig),
       state: {
         isRamadan: false,
         occasion: "none",
@@ -384,6 +399,9 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
     },
     container: null,
     state: currentState,
+    get config() {
+      return currentConfig;
+    },
     getCountdownController: () =>
       countdownManager ? countdownManager.controller : null,
   };
@@ -403,6 +421,7 @@ export type {
   Occasion,
   OverlayInstance,
   OverlayPosition,
+  MobileSideBehavior,
   OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,

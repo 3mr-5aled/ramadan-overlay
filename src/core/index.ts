@@ -20,6 +20,7 @@ export type {
   Occasion,
   OverlayInstance,
   OverlayPosition,
+  MobileSideBehavior,
   OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,

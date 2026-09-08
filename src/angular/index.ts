@@ -11,6 +11,7 @@ import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
   HijriRegion,
   LanternStyle,
+  MobileSideBehavior,
   Occasion,
   OverlayInstance,
   OverlayPosition,
@@ -42,6 +43,7 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   // Individual input overrides
   @Input() variant?: OverlayVariant;
   @Input() position?: OverlayPosition;
+  @Input() mobileSideBehavior?: MobileSideBehavior;
   @Input() opacity?: number;
   @Input() colors?: string[];
   @Input() zIndex?: number;
@@ -91,6 +93,7 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
     const inputKeys = [
       "variant",
       "position",
+      "mobileSideBehavior",
       "opacity",
       "colors",
       "zIndex",
@@ -152,6 +155,7 @@ export class RamadanOverlayModule {}
 
 export { getOccasionState, getRamadanState };
 export type {
+  MobileSideBehavior,
   Occasion,
   OverlayInstance,
   OverlayPosition,

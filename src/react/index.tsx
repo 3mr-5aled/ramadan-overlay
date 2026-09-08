@@ -2,8 +2,10 @@ import type { FC } from "react";
 import { useEffect, useRef, useState } from "react";
 import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
+  MobileSideBehavior,
   Occasion,
   OverlayInstance,
+  OverlayPosition,
   OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,
@@ -108,6 +110,8 @@ export { getOccasionState, getRamadanState };
 export type {
   Occasion,
   OverlayInstance,
+  OverlayPosition,
+  MobileSideBehavior,
   OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,

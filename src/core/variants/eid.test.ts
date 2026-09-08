@@ -11,6 +11,7 @@ describe("mountEid", () => {
   ): ResolvedConfig => ({
     variant: "eid",
     position: "both",
+    mobileSideBehavior: "hide",
     opacity: 0.85,
     colors: ["#c9a84c", "#e8c96b", "#2d5a27", "#8b4513", "#1a3a1a"],
     density: "normal",
@@ -125,6 +126,7 @@ describe("mountBannerElements with Eid occasion", () => {
   ): ResolvedConfig => ({
     variant: "banner",
     position: "top",
+    mobileSideBehavior: "hide",
     opacity: 0.85,
     colors: ["#c9a84c", "#e8c96b", "#2d5a27", "#8b4513", "#1a3a1a"],
     density: "normal",

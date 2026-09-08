@@ -1,8 +1,10 @@
 import { onDestroy, onMount } from "svelte";
 import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
+  MobileSideBehavior,
   Occasion,
   OverlayInstance,
+  OverlayPosition,
   OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,
@@ -96,8 +98,10 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
 
 export { getOccasionState, getRamadanState };
 export type {
+  MobileSideBehavior,
   Occasion,
   OverlayInstance,
+  OverlayPosition,
   OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,

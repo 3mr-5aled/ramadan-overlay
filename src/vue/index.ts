@@ -9,6 +9,7 @@ import {
 import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
   LanternStyle,
+  MobileSideBehavior,
   Occasion,
   OverlayInstance,
   OverlayPosition,
@@ -86,6 +87,10 @@ export const RamadanOverlay = defineComponent({
     },
     position: {
       type: String as PropType<OverlayPosition>,
+      default: undefined,
+    },
+    mobileSideBehavior: {
+      type: String as PropType<MobileSideBehavior>,
       default: undefined,
     },
     opacity: { type: Number as PropType<number>, default: undefined },
@@ -181,6 +186,7 @@ export const RamadanOverlay = defineComponent({
 
 export { getOccasionState, getRamadanState };
 export type {
+  MobileSideBehavior,
   Occasion,
   OverlayInstance,
   OverlayPosition,
