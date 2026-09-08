@@ -15,6 +15,7 @@ export async function fireRamadanConfetti(
   colors?: string[]
 ): Promise<void> {
   if (!isMotionAllowed()) return;
+  if (typeof OffscreenCanvas === "undefined") return;
 
   const palette = colors?.length
     ? colors
@@ -181,7 +182,7 @@ export function shouldFireConfetti(
 ): boolean {
   if (option === "off") return false;
   if (!isMotionAllowed()) return false;
-  return state.isRamadan;
+  return state.isRamadan || state.isEid;
 }
 
 function delay(ms: number): Promise<void> {
