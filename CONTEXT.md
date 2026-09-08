@@ -75,3 +75,23 @@ _Avoid_: Celebration effect, party mode, alert explosion
 **Milestone Live Region**:
 An accessible `aria-live="polite"` DOM element that broadcasts human-readable countdown updates at discrete temporal milestones (entry, 15m, 5m, 1m, and T-0) to avoid screen reader speech queue flooding.
 _Avoid_: Ticker region, live timer, speech queue
+
+**Error Containment Boundary**:
+The outermost defensive execution perimeter wrapping public lifecycle methods (`init()`, `update()`, `setTheme()`), ensuring unexpected runtime exceptions never crash the host application.
+_Avoid_: Error handler, try-catch block, catch-all
+
+**Safe No-Op Instance**:
+An infallible fallback object returned upon catastrophic initialization failure, implementing the complete `OverlayInstance` contract with inert methods (`() => undefined` / `() => null`) and immutable dormant state.
+_Avoid_: Empty overlay, stub instance, dummy object
+
+**Atomic DOM Rollback**:
+The deterministic cleanup procedure that instantly removes partially injected `<style>` elements and host containers from the DOM when initialization fails mid-flight, leaving zero orphaned nodes.
+_Avoid_: DOM wipe, error teardown, element clearing
+
+**Telemetry Hook**:
+An isolated consumer callback (`onError?: (error: unknown) => void`) invoked upon initialization or runtime failure, protected by double-containment to prevent secondary crashes.
+_Avoid_: Error listener, crash reporter, failure event
+
+**Diagnostic Logger**:
+The internal, prefix-standardized developer notice mechanism that activates in development or debug mode to explain dormant states (e.g. `autoTrigger` outside Ramadan/Eid) while maintaining complete silence in production.
+_Avoid_: Console wrapper, debug printer, log util
