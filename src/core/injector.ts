@@ -88,7 +88,11 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
       container: null,
       state: {
         isRamadan: false,
+        occasion: "none",
+        isEid: false,
         hijriYear: 0,
+        hijriMonth: 0,
+        hijriDay: 0,
         dayNumber: 0,
       },
     };

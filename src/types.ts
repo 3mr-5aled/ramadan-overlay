@@ -204,6 +204,8 @@ export interface RamadanOverlayConfig {
 
 // ─── State & Instance ─────────────────────────────────────────────────────────
 
+export type Occasion = "ramadan" | "eid-fitr" | "eid-adha" | "none";
+
 export interface RamadanDateQuery {
   /** Target Gregorian date to evaluate. Defaults to `new Date()`. */
   date?: Date;
@@ -213,12 +215,22 @@ export interface RamadanDateQuery {
   hijriAdjustment?: number;
 }
 
+export type OccasionDateQuery = RamadanDateQuery;
+
 export interface RamadanState {
   /** True when the current date falls within Ramadan (Hijri month 9). */
   isRamadan: boolean;
+  /** Current active occasion: 'ramadan' | 'eid-fitr' | 'eid-adha' | 'none'. */
+  occasion: Occasion;
+  /** True when either Eid Al-Fitr or Eid Al-Adha is active. */
+  isEid: boolean;
   /** Current Hijri year number. */
   hijriYear: number;
-  /** Day number within Ramadan (1–30). */
+  /** Current Hijri month number (1–12). */
+  hijriMonth: number;
+  /** Current Hijri day of the month (1–30). */
+  hijriDay: number;
+  /** Day number within active occasion (1–30 for Ramadan, 1–3 for Fitr, 1–4 for Adha), or 0 if none. */
   dayNumber: number;
 }
 
