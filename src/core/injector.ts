@@ -8,6 +8,10 @@ import type {
 import { fireRamadanConfetti, shouldFireConfetti } from "./confetti";
 import { getRamadanState, resolveHijriOffset } from "./detector";
 import { mountHost, type HostMountResult } from "./host";
+import {
+  createCountdownManager,
+  type IftarCountdownManager,
+} from "./countdown";
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -99,6 +103,7 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     occasions: userConfig.occasions ?? ["ramadan", "eid-fitr", "eid-adha"],
     eidVariant: userConfig.eidVariant ?? "eid",
     liveTransition: userConfig.liveTransition ?? true,
+    countdown: userConfig.countdown ?? false,
     onRamadanStart: userConfig.onRamadanStart,
     onRamadanEnd: userConfig.onRamadanEnd,
     onEidStart: userConfig.onEidStart,
@@ -261,8 +266,29 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
     }
   }
 
+  let countdownManager: IftarCountdownManager | null = null;
+  if (currentConfig.countdown) {
+    countdownManager = createCountdownManager(
+      currentConfig.countdown,
+      currentConfig.variant === "banner",
+      currentState.hijriYear || 1447,
+      currentConfig.colors
+    );
+    if (
+      currentState.isRamadan ||
+      currentConfig.previewMode ||
+      !currentConfig.autoTrigger
+    ) {
+      countdownManager.start();
+    }
+  }
+
   const instance: OverlayInstance = {
     destroy: () => {
+      if (countdownManager) {
+        countdownManager.destroy();
+        countdownManager = null;
+      }
       if (midnightTimeoutId) {
         clearTimeout(midnightTimeoutId);
         midnightTimeoutId = null;
@@ -337,9 +363,35 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
         clearTimeout(midnightTimeoutId);
         midnightTimeoutId = null;
       }
+
+      if (partialConfig.countdown !== undefined) {
+        if (countdownManager) {
+          countdownManager.destroy();
+          countdownManager = null;
+        }
+        if (newConfig.countdown) {
+          countdownManager = createCountdownManager(
+            newConfig.countdown,
+            newConfig.variant === "banner"
+          );
+          if (
+            currentState.isRamadan ||
+            newConfig.previewMode ||
+            !newConfig.autoTrigger
+          ) {
+            countdownManager.start();
+          }
+        }
+        instance.countdown = countdownManager
+          ? countdownManager.controller
+          : null;
+      }
     },
     container: null,
     state: currentState,
+    countdown: countdownManager ? countdownManager.controller : null,
+    getCountdownController: () =>
+      countdownManager ? countdownManager.controller : null,
   };
 
   // Initial evaluation
@@ -361,5 +413,12 @@ export type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  IftarCountdownConfig,
+  IftarCountdownController,
+  IftarCountdownLabels,
+  IftarTimeResolver,
+  IftarTimeValue,
+  CountdownAnchorPosition,
 } from "../types";
 export { getOccasionState, getRamadanState } from "./detector";
+export * from "./countdown";

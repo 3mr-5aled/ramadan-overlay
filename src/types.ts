@@ -235,6 +235,14 @@ export interface RamadanOverlayConfig {
    * Called whenever the active occasion changes (at init, midnight transition, or dynamic update).
    */
   onOccasionChange?: (occasion: Occasion, state: RamadanState) => void;
+
+  /**
+   * Iftar Countdown Widget configuration.
+   * Pass an IftarCountdownConfig object to enable with custom settings,
+   * true to enable with defaults, or false to disable.
+   * @default false
+   */
+  countdown?: boolean | IftarCountdownConfig;
 }
 
 // ─── State & Instance ─────────────────────────────────────────────────────────
@@ -278,6 +286,143 @@ export interface OverlayInstance {
   container: HTMLElement | null;
   /** The detected Ramadan state at mount time. */
   state: RamadanState;
+  /** The active Iftar countdown widget controller, if mounted/configured. */
+  countdown?: IftarCountdownController | null;
+  /** Access the active Iftar countdown widget controller, if enabled. */
+  getCountdownController?: () => IftarCountdownController | null;
+}
+
+// ─── Countdown Types ─────────────────────────────────────────────────────────
+
+/**
+ * Dynamic callback providing the target Iftar time for a given calendar date.
+ */
+export type IftarTimeResolver = (
+  date: Date
+) => Date | string | null | undefined;
+
+/**
+ * Accepted representations of Iftar time:
+ * - "HH:mm" (24-hour local time format, e.g. "18:45")
+ * - ISO-8601 string (e.g. "2026-03-10T18:45:00+03:00")
+ * - JavaScript Date object representing target Iftar
+ * - Dynamic resolver function evaluated per calendar day
+ */
+export type IftarTimeValue = string | Date | IftarTimeResolver;
+
+/**
+ * Viewport anchor corner for the countdown widget.
+ */
+export type CountdownAnchorPosition =
+  "bottom-right" | "bottom-left" | "top-right" | "top-left";
+
+/**
+ * Localized string dictionary for the countdown widget UI and screen reader announcements.
+ */
+export interface IftarCountdownLabels {
+  title: string;
+  targetTime: string;
+  hours: string;
+  minutes: string;
+  seconds: string;
+  celebration: string;
+  dismissButton: string;
+  muteButton: string;
+  unmuteButton: string;
+  playButton: string;
+  srInitialAnnouncement: string;
+  srMilestoneMinutes: string;
+  srArrivedAnnouncement: string;
+}
+
+/**
+ * Configuration options for the Iftar Countdown Widget.
+ */
+export interface IftarCountdownConfig {
+  /**
+   * Target Iftar time: "HH:mm" string, ISO string, Date object, or dynamic resolver function.
+   */
+  iftarTime: IftarTimeValue;
+
+  /**
+   * Number of minutes prior to Iftar when the countdown widget becomes visible.
+   * @default 30
+   */
+  alertWindowMinutes?: number;
+
+  /**
+   * Screen corner anchor position.
+   * @default 'bottom-right'
+   */
+  position?: CountdownAnchorPosition;
+
+  /**
+   * Number of minutes after Iftar arrives before the widget automatically dismisses and unmounts.
+   * Set to 0 to disable auto-dismiss.
+   * @default 10
+   */
+  autoDismissAfterMinutes?: number;
+
+  /**
+   * Duration in milliseconds for the celebratory gold pulse and confetti flare at T-0.
+   * @default 30000 (30 seconds)
+   */
+  celebrationDurationMs?: number;
+
+  /**
+   * Optional consumer-supplied audio chime or Adhan URL.
+   */
+  soundUrl?: string;
+
+  /**
+   * Whether audio alerts start muted by default.
+   * @default true
+   */
+  defaultMuted?: boolean;
+
+  /**
+   * Whether to fire a festive confetti burst at T-0.
+   * @default true
+   */
+  confetti?: boolean;
+
+  /**
+   * UI language locale: 'auto' detects document language, 'ar' forces Arabic, 'en' forces English.
+   * @default 'auto'
+   */
+  locale?: "auto" | "en" | "ar";
+
+  /**
+   * Custom label overrides for card text, tooltips, and screen reader announcements.
+   */
+  labels?: Partial<IftarCountdownLabels>;
+
+  /**
+   * Callback fired at T-0 when Iftar arrives.
+   */
+  onIftar?: () => void;
+
+  /**
+   * Callback fired when audio alert playback was blocked by browser autoplay policy.
+   */
+  onAudioBlocked?: () => void;
+
+  /**
+   * Callback fired when the widget is dismissed.
+   */
+  onDismiss?: () => void;
+}
+
+/**
+ * Controller interface for interacting with the active Iftar Countdown Widget.
+ */
+export interface IftarCountdownController {
+  show: () => void;
+  dismiss: () => void;
+  toggleMute: () => boolean;
+  isMuted: () => boolean;
+  getTargetTime: () => Date | null;
+  updateConfig: (config: Partial<IftarCountdownConfig>) => void;
 }
 
 // ─── Variant Module Contract ────────────────────────────────────────────────
@@ -297,7 +442,11 @@ export type VariantMountFn = (
 export interface ResolvedConfig extends Required<
   Omit<
     RamadanOverlayConfig,
-    "onRamadanStart" | "onRamadanEnd" | "onEidStart" | "onOccasionChange"
+    | "onRamadanStart"
+    | "onRamadanEnd"
+    | "onEidStart"
+    | "onOccasionChange"
+    | "countdown"
   >
 > {
   lanternStyle: LanternStyle;
@@ -307,6 +456,7 @@ export interface ResolvedConfig extends Required<
   occasions: Occasion[];
   eidVariant: OverlayVariant;
   liveTransition: boolean;
+  countdown: boolean | IftarCountdownConfig;
   onRamadanStart: RamadanOverlayConfig["onRamadanStart"];
   onRamadanEnd: RamadanOverlayConfig["onRamadanEnd"];
   onEidStart: RamadanOverlayConfig["onEidStart"];

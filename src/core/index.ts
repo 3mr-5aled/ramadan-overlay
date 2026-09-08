@@ -14,6 +14,7 @@
  */
 
 export { getOccasionState, getRamadanState, init } from "./injector";
+export * from "./countdown";
 
 export type {
   Occasion,
@@ -23,4 +24,10 @@ export type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  IftarCountdownConfig,
+  IftarCountdownController,
+  IftarCountdownLabels,
+  IftarTimeResolver,
+  IftarTimeValue,
+  CountdownAnchorPosition,
 } from "../types";

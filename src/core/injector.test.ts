@@ -240,4 +240,51 @@ describe("init orchestration & live transition", () => {
       expect(onOccasionChange).toHaveBeenCalledTimes(1); // only the initial init call
     });
   });
+
+  describe("countdown widget integration", () => {
+    it("initializes countdown widget when within alert window and cleans up on destroy", () => {
+      // 18:30 (within 30m of 18:45)
+      const now = new Date(2026, 2, 10, 18, 30, 0);
+      vi.setSystemTime(now);
+
+      const overlay = init({
+        previewMode: true,
+        countdown: {
+          iftarTime: "18:45",
+          alertWindowMinutes: 30,
+        },
+      });
+
+      expect(overlay.countdown).not.toBeNull();
+      expect(overlay.getCountdownController?.()).not.toBeNull();
+      expect(document.getElementById("ramadan-countdown-root")).not.toBeNull();
+      expect(document.getElementById("ramadan-overlay-root")).not.toBeNull();
+
+      overlay.destroy();
+      expect(document.getElementById("ramadan-countdown-root")).toBeNull();
+      expect(document.getElementById("ramadan-overlay-root")).toBeNull();
+    });
+
+    it("schedules countdown widget via dormant timer when outside alert window", () => {
+      // 17:00 (outside 30m window for 18:00)
+      const now = new Date(2026, 2, 10, 17, 0, 0);
+      vi.setSystemTime(now);
+
+      const overlay = init({
+        previewMode: true,
+        countdown: {
+          iftarTime: "18:00",
+          alertWindowMinutes: 30,
+        },
+      });
+
+      expect(document.getElementById("ramadan-countdown-root")).toBeNull();
+
+      // Advance 30 minutes to 17:30 (alert window entry)
+      vi.advanceTimersByTime(30 * 60 * 1000);
+      expect(document.getElementById("ramadan-countdown-root")).not.toBeNull();
+
+      overlay.destroy();
+    });
+  });
 });
