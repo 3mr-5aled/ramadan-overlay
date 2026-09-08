@@ -57,8 +57,13 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
       (typeof window !== "undefined" && window.innerWidth < 640
         ? "low"
         : "normal"),
+    occasions: userConfig.occasions ?? ["ramadan", "eid-fitr", "eid-adha"],
+    eidVariant: userConfig.eidVariant ?? "eid",
+    liveTransition: userConfig.liveTransition ?? true,
     onRamadanStart: userConfig.onRamadanStart,
     onRamadanEnd: userConfig.onRamadanEnd,
+    onEidStart: userConfig.onEidStart,
+    onOccasionChange: userConfig.onOccasionChange,
   };
 }
 

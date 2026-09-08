@@ -1,6 +1,7 @@
-import type { ResolvedConfig, VariantMountFn } from "../types";
+import type { Occasion, ResolvedConfig, VariantMountFn } from "../types";
 import { mountBannerElements } from "./variants/banner";
 import { mountCrescentStars } from "./variants/crescent-stars";
+import { mountEid } from "./variants/eid";
 import { mountGeometric } from "./variants/geometric";
 import { mountLanterns } from "./variants/lanterns";
 import { mountSparkles } from "./variants/sparkles";
@@ -10,6 +11,9 @@ const VARIANT_MAP: Record<string, VariantMountFn> = {
   "crescent-stars": mountCrescentStars,
   geometric: mountGeometric,
   sparkles: mountSparkles,
+  eid: mountEid,
+  "eid-fitr": mountEid,
+  "eid-adha": mountEid,
 };
 
 const STYLE_ID = "ramadan-overlay-styles";
@@ -24,7 +28,7 @@ export function injectStyles(): void {
 #ramadan-overlay-root .ro-lantern{display:flex;flex-direction:column;align-items:center;transform-origin:top center;animation:ro-swing var(--ro-swing-duration,3s) ease-in-out infinite alternate}
 #ramadan-overlay-root .ro-lantern svg{width:var(--ro-lantern-size,clamp(18px,2.5vw,38px));height:auto;animation:ro-glow-pulse 2.5s ease-in-out infinite;will-change:transform,opacity}
 #ramadan-overlay-root .ro-lantern-string{width:1px;height:var(--ro-string-height,clamp(20px,3vw,48px));background:var(--ro-color-1);opacity:.7}
-#ramadan-overlay-root .ro-crescent,#ramadan-overlay-root .ro-star{position:absolute;animation:ro-float var(--ro-float-duration,6s) ease-in-out infinite alternate;will-change:transform,opacity}
+#ramadan-overlay-root .ro-crescent,#ramadan-overlay-root .ro-star,#ramadan-overlay-root .ro-balloon,#ramadan-overlay-root .ro-gift,#ramadan-overlay-root .ro-sheep,#ramadan-overlay-root .ro-kaaba{position:absolute;animation:ro-float var(--ro-float-duration,6s) ease-in-out infinite alternate;will-change:transform,opacity}
 #ramadan-overlay-root .ro-sparkle{position:absolute;border-radius:50%;background:var(--ro-color-2);opacity:0;will-change:transform,opacity}
 #ramadan-overlay-root .ro-geo-band{position:absolute;left:0;width:100%;overflow:hidden;opacity:.6}
 #ramadan-overlay-root .ro-geo-band--top{top:0}
@@ -58,14 +62,20 @@ export interface HostMountResult {
   updateTokens: (config: ResolvedConfig) => void;
 }
 
-export function mountHost(config: ResolvedConfig): HostMountResult {
+export function mountHost(
+  config: ResolvedConfig,
+  occasion?: Occasion
+): HostMountResult {
   if (config.variant === "banner") {
-    return mountBannerHost(config);
+    return mountBannerHost(config, occasion);
   }
-  return mountOverlayHost(config);
+  return mountOverlayHost(config, occasion);
 }
 
-function mountOverlayHost(config: ResolvedConfig): HostMountResult {
+function mountOverlayHost(
+  config: ResolvedConfig,
+  occasion?: Occasion
+): HostMountResult {
   injectStyles();
 
   const root = document.createElement("div");
@@ -77,7 +87,7 @@ function mountOverlayHost(config: ResolvedConfig): HostMountResult {
   document.body.appendChild(root);
 
   const mountFn = VARIANT_MAP[config.variant] ?? mountLanterns;
-  const cleanupVariant = mountFn(root, config);
+  const cleanupVariant = mountFn(root, config, occasion);
 
   const onVisibilityChange = (): void => {
     root.style.visibility = document.hidden ? "hidden" : "";
@@ -97,8 +107,14 @@ function mountOverlayHost(config: ResolvedConfig): HostMountResult {
   return { container: root, cleanup, updateTokens };
 }
 
-function mountBannerHost(config: ResolvedConfig): HostMountResult {
-  const { elements, cleanup: cleanupBanner } = mountBannerElements(config);
+function mountBannerHost(
+  config: ResolvedConfig,
+  occasion?: Occasion
+): HostMountResult {
+  const { elements, cleanup: cleanupBanner } = mountBannerElements(
+    config,
+    occasion
+  );
   const container = elements[0] ?? document.body;
 
   const updateTokens = (_newConfig: ResolvedConfig): void => {

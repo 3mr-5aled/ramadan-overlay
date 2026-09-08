@@ -1,7 +1,14 @@
 // ─── Variant Types ────────────────────────────────────────────────────────────
 
 export type OverlayVariant =
-  "lanterns" | "crescent-stars" | "geometric" | "sparkles" | "banner";
+  | "lanterns"
+  | "crescent-stars"
+  | "geometric"
+  | "sparkles"
+  | "banner"
+  | "eid"
+  | "eid-fitr"
+  | "eid-adha";
 
 /**
  * Which of the 12 lantern SVG designs to display.
@@ -200,6 +207,34 @@ export interface RamadanOverlayConfig {
    * Falls back to `colors[1]` when omitted.
    */
   bannerIconColor?: string;
+
+  /**
+   * List of occasions that trigger overlay display when autoTrigger is true.
+   * @default ['ramadan', 'eid-fitr', 'eid-adha']
+   */
+  occasions?: Occasion[];
+
+  /**
+   * Which variant to show during Eid celebrations when auto-triggered.
+   * @default 'eid'
+   */
+  eidVariant?: OverlayVariant;
+
+  /**
+   * Whether to automatically detect midnight transitions and hot-swap active occasions in live tabs.
+   * @default true
+   */
+  liveTransition?: boolean;
+
+  /**
+   * Called when Eid Al-Fitr or Eid Al-Adha starts.
+   */
+  onEidStart?: (state: RamadanState) => void;
+
+  /**
+   * Called whenever the active occasion changes (at init, midnight transition, or dynamic update).
+   */
+  onOccasionChange?: (occasion: Occasion, state: RamadanState) => void;
 }
 
 // ─── State & Instance ─────────────────────────────────────────────────────────
@@ -253,18 +288,27 @@ export interface OverlayInstance {
  */
 export type VariantMountFn = (
   container: HTMLElement,
-  config: ResolvedConfig
+  config: ResolvedConfig,
+  occasion?: Occasion
 ) => () => void;
 
 // ─── Internal Resolved Config ─────────────────────────────────────────────────
 
 export interface ResolvedConfig extends Required<
-  Omit<RamadanOverlayConfig, "onRamadanStart" | "onRamadanEnd">
+  Omit<
+    RamadanOverlayConfig,
+    "onRamadanStart" | "onRamadanEnd" | "onEidStart" | "onOccasionChange"
+  >
 > {
   lanternStyle: LanternStyle;
   glowColor: string;
   region: HijriRegion;
   hijriAdjustment: number;
+  occasions: Occasion[];
+  eidVariant: OverlayVariant;
+  liveTransition: boolean;
   onRamadanStart: RamadanOverlayConfig["onRamadanStart"];
   onRamadanEnd: RamadanOverlayConfig["onRamadanEnd"];
+  onEidStart: RamadanOverlayConfig["onEidStart"];
+  onOccasionChange: RamadanOverlayConfig["onOccasionChange"];
 }

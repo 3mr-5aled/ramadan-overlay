@@ -1,9 +1,9 @@
-import type { ResolvedConfig } from "../../types";
+import type { Occasion, ResolvedConfig } from "../../types";
 
 /**
  * Banner variant — a 52 px bar prepended to document.body that pushes page
- * content down (not an overlay). Shows a Ramadan greeting alongside a
- * lantern-3 icon.
+ * content down (not an overlay). Shows a Ramadan or Eid greeting alongside a
+ * celebratory icon.
  *
  * Configurable via:
  *  - `bannerBg`        — bar background color
@@ -14,9 +14,14 @@ import type { ResolvedConfig } from "../../types";
  *  - `position`        — 'top' | 'bottom' (both/full shows top only for banner)
  */
 
-const GREETINGS: Record<string, string> = {
+const RAMADAN_GREETINGS: Record<string, string> = {
   en: "Ramadan Mubarak - May allah bless you with peace, health, and happiness",
   ar: "رمضان مبارك - أعاده الله عليكم بالخير واليمن والبركات",
+};
+
+const EID_GREETINGS: Record<string, string> = {
+  en: "Eid Mubarak - May this blessed day bring joy, peace, and prosperity",
+  ar: "عيد مبارك - تقبل الله منا ومنكم صالح الأعمال وكل عام وأنتم بخير",
 };
 
 // Lantern-3 SVG paths (viewBox="0 0 54.700001 119.00001"), fill driven by color param
@@ -33,12 +38,19 @@ function buildLanternIcon(color: string): string {
   </svg>`;
 }
 
+function buildEidIcon(color: string): string {
+  return `<svg viewBox="0 0 36 36" height="32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;display:block">
+    <path d="M18 3 C9 3 4 10 4 18 C4 26 9 33 18 33 C12 29 10 24 10 18 C10 12 12 7 18 3 Z" fill="${color}"/>
+    <polygon points="25,12 26.5,16.5 31,16.5 27.5,19 29,23 25,20.5 21,23 22.5,19 19,16.5 23.5,16.5" fill="${color}"/>
+  </svg>`;
+}
+
 const BANNER_HEIGHT = 52;
 
 function buildBar(
   bg: string,
   textColor: string,
-  iconColor: string,
+  iconSvg: string,
   greeting: string,
   isArabic: boolean,
   zIndex: number,
@@ -67,10 +79,10 @@ function buildBar(
     `display:flex;align-items:center;justify-content:center;gap:12px;` +
     `max-width:960px;width:100%;padding:0 20px;direction:${isArabic ? "rtl" : "ltr"}`;
 
-  // Lantern icon
+  // Icon
   const iconWrap = document.createElement("span");
   iconWrap.style.cssText = "display:flex;align-items:center;flex-shrink:0";
-  iconWrap.innerHTML = buildLanternIcon(iconColor);
+  iconWrap.innerHTML = iconSvg;
 
   const text = document.createElement("span");
   text.textContent = greeting;
@@ -92,7 +104,10 @@ function buildBar(
   return bar;
 }
 
-export function mountBannerElements(config: ResolvedConfig): {
+export function mountBannerElements(
+  config: ResolvedConfig,
+  occasion?: Occasion
+): {
   elements: HTMLElement[];
   cleanup: () => void;
 } {
@@ -103,11 +118,15 @@ export function mountBannerElements(config: ResolvedConfig): {
   const locale = config.locale ?? "en";
   const enText = config.bannerTextEn?.trim();
   const arText = config.bannerTextAr?.trim();
+
+  const isEid = occasion === "eid-fitr" || occasion === "eid-adha";
+  const defaultGreetings = isEid ? EID_GREETINGS : RAMADAN_GREETINGS;
+
   // Pick locale-matching text first, fall back to the other lang, then built-in default
   const greeting =
     locale === "ar"
-      ? arText || enText || GREETINGS.ar
-      : enText || arText || GREETINGS.en;
+      ? arText || enText || defaultGreetings.ar
+      : enText || arText || defaultGreetings.en;
   // Direction and font follow locale regardless of whether custom text is provided
   const isArabic = locale === "ar";
 
@@ -122,11 +141,13 @@ export function mountBannerElements(config: ResolvedConfig): {
     config.position === "both" ||
     config.position === "full";
 
+  const iconSvg = isEid ? buildEidIcon(iconColor) : buildLanternIcon(iconColor);
+
   if (showTop) {
     const el = buildBar(
       bg,
       textColor,
-      iconColor,
+      iconSvg,
       greeting,
       isArabic,
       zIndex,
@@ -143,7 +164,7 @@ export function mountBannerElements(config: ResolvedConfig): {
     const el = buildBar(
       bg,
       textColor,
-      iconColor,
+      iconSvg,
       greeting,
       isArabic,
       zIndex,
