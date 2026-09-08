@@ -2,7 +2,7 @@
 
 # 🌙 ramadan-overlay
 
-**Beautiful, auto-triggering Ramadan decorations for any website**
+**Beautiful, auto-triggering Ramadan and Eid decorations for any website**
 
 [![npm version](https://img.shields.io/npm/v/ramadan-overlay?style=flat-square&color=c9a84c)](https://www.npmjs.com/package/ramadan-overlay)
 [![npm downloads](https://img.shields.io/npm/dm/ramadan-overlay?style=flat-square&color=c9a84c)](https://www.npmjs.com/package/ramadan-overlay)
@@ -12,8 +12,8 @@
 [![CDN jsDelivr](https://img.shields.io/badge/CDN-jsDelivr-blue?style=flat-square)](https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js)
 [![CDN unpkg](https://img.shields.io/badge/CDN-unpkg-orange?style=flat-square)](https://unpkg.com/ramadan-overlay/dist/ramadan-overlay.min.js)
 
-A lightweight TypeScript library that injects beautiful Ramadan decorations into any web app —
-**zero dependencies, no build step required.** Auto-detects Ramadan via the Hijri calendar
+A lightweight TypeScript library that injects beautiful Ramadan and Eid decorations into any web app —
+**zero dependencies, no build step required.** Auto-detects Ramadan, Eid Al-Fitr, and Eid Al-Adha via the Hijri calendar
 with support for 10+ regional presets.
 
 [**🔴 Live Demo & Config Generator →**](https://3mr-5aled.github.io/ramadan-overlay/)
@@ -24,12 +24,13 @@ with support for 10+ regional presets.
 
 ## ✨ Features
 
-- 🗓️ **Auto-detection** — activates automatically during Ramadan using Hijri calendar conversion
-- 🎨 **5 visual variants** — Lanterns, Sparkles, Crescent & Stars, Geometric, Banner
+- 🗓️ **Auto-detection** — activates automatically during Ramadan, Eid Al-Fitr, and Eid Al-Adha using Hijri calendar conversion
+- 🎨 **8 visual variants** — Lanterns, Sparkles, Crescent & Stars, Geometric, Eid Al-Fitr, Eid Al-Adha, Auto-Eid, and Contextual Banner
+- 🕛 **Live midnight transitions** — dynamic transitions and automatic re-synchronization across midnight and tab focus changes
 - 🌍 **Region-aware** — 10+ regional calendar presets with configurable day offsets
 - ⚡ **Zero dependencies** — tree-shakeable, framework-agnostic
 - 🧩 **All frameworks** — React, Vue 3, Angular, Svelte, or plain HTML / CDN
-- 🎊 **Confetti** — on or off
+- 🎊 **Confetti** — celebratory bursts for festive holidays
 - 🖌️ **Fully customizable** — colors, opacity, density, position, and more
 
 ---
@@ -85,13 +86,16 @@ overlay.destroy();
 
 ## 🎨 Variants
 
-| Variant          | Description                                                                    |
-| ---------------- | ------------------------------------------------------------------------------ |
-| `lanterns`       | Classic hanging lanterns with customizable colors and styles (12 designs)      |
-| `sparkles`       | Glittering sparkle particles                                                   |
-| `crescent-stars` | Crescent moon and star motifs                                                  |
-| `geometric`      | Decorative Islamic geometric patterns                                          |
-| `banner`         | Fixed greeting bar prepended to the page (pushes content down, not an overlay) |
+| Variant          | Description                                                                         |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| `lanterns`       | Classic hanging lanterns with customizable colors and styles (12 designs)           |
+| `sparkles`       | Glittering sparkle particles                                                        |
+| `crescent-stars` | Crescent moon and star motifs                                                       |
+| `geometric`      | Decorative Islamic geometric patterns                                               |
+| `eid`            | Auto-adapting Eid variant: mounts `eid-fitr` or `eid-adha` based on current holiday |
+| `eid-fitr`       | Eid Al-Fitr celebration with floating festive balloons, gift boxes, and stars       |
+| `eid-adha`       | Eid Al-Adha celebration with geometric sheep, the Kaaba motif, and crescents        |
+| `banner`         | Fixed greeting bar prepended to the page (contextually adapts for Ramadan and Eids) |
 
 ---
 
@@ -99,23 +103,26 @@ overlay.destroy();
 
 ### General
 
-| Option     | Type       | Default         | Description                                                                              |
-| ---------- | ---------- | --------------- | ---------------------------------------------------------------------------------------- |
-| `variant`  | `string`   | `'lanterns'`    | Visual decoration style                                                                  |
-| `position` | `string`   | `'both'`        | `'top'` \| `'bottom'` \| `'both'` \| `'full'`                                            |
-| `opacity`  | `number`   | `0.85`          | Overlay opacity `0`–`1`                                                                  |
-| `colors`   | `string[]` | Ramadan palette | Custom CSS color array                                                                   |
-| `density`  | `string`   | auto            | `'low'` \| `'normal'` \| `'high'` — defaults to `'low'` on mobile, `'normal'` on desktop |
-| `zIndex`   | `number`   | `9999`          | CSS z-index of the overlay                                                               |
-| `locale`   | `string`   | `'en'`          | `'en'` \| `'ar'`                                                                         |
+| Option       | Type             | Default                               | Description                                                                                                                              |
+| ------------ | ---------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `variant`    | `OverlayVariant` | `'lanterns'`                          | Visual decoration style (`'lanterns'`, `'sparkles'`, `'crescent-stars'`, `'geometric'`, `'eid'`, `'eid-fitr'`, `'eid-adha'`, `'banner'`) |
+| `occasions`  | `Occasion[]`     | `['ramadan', 'eid-fitr', 'eid-adha']` | Filter which occasions display decorations                                                                                               |
+| `eidVariant` | `OverlayVariant` | `'eid'`                               | Visual variant to render during Eid when `variant` is Ramadan-specific                                                                   |
+| `position`   | `string`         | `'both'`                              | `'top'` \| `'bottom'` \| `'both'` \| `'full'`                                                                                            |
+| `opacity`    | `number`         | `0.85`                                | Overlay opacity `0`–`1`                                                                                                                  |
+| `colors`     | `string[]`       | Festive palette                       | Custom CSS color array                                                                                                                   |
+| `density`    | `string`         | auto                                  | `'low'` \| `'normal'` \| `'high'` — defaults to `'low'` on mobile, `'normal'` on desktop                                                 |
+| `zIndex`     | `number`         | `9999`                                | CSS z-index of the overlay                                                                                                               |
+| `locale`     | `string`         | `'en'`                                | `'en'` \| `'ar'`                                                                                                                         |
 
 ### Behaviour
 
-| Option        | Type      | Default | Description                               |
-| ------------- | --------- | ------- | ----------------------------------------- |
-| `autoTrigger` | `boolean` | `true`  | Only show during Hijri Ramadan            |
-| `previewMode` | `boolean` | `false` | Force display regardless of date          |
-| `confetti`    | `string` | `'on'`        | `'on'` = fires every day of Ramadan, `'off'` = disabled                   |
+| Option           | Type      | Default | Description                                                                    |
+| ---------------- | --------- | ------- | ------------------------------------------------------------------------------ |
+| `autoTrigger`    | `boolean` | `true`  | Only show during detected holidays                                             |
+| `previewMode`    | `boolean` | `false` | Force display regardless of date (simulates active occasion)                   |
+| `confetti`       | `string`  | `'on'`  | `'on'` = fires during active festive days, `'off'` = disabled                  |
+| `liveTransition` | `boolean` | `true`  | Automatic midnight re-evaluation and tab visibility / focus re-synchronization |
 
 ### Date & Region
 
@@ -153,28 +160,31 @@ overlay.destroy();
 
 ### Banner variant
 
-| Option            | Type     | Default                   | Description                               |
-| ----------------- | -------- | ------------------------- | ----------------------------------------- |
-| `bannerBg`        | `string` | `'rgba(15,15,20,0.92)'`   | Background color of the banner bar        |
-| `bannerTextColor` | `string` | `colors[0]`               | Greeting text color                       |
-| `bannerIconColor` | `string` | `colors[1]`               | Color of the lantern icon beside the text |
-| `bannerTextEn`    | `string` | built-in English greeting | Custom English greeting text              |
-| `bannerTextAr`    | `string` | built-in Arabic greeting  | Custom Arabic greeting text               |
+| Option            | Type     | Default                   | Description                                                   |
+| ----------------- | -------- | ------------------------- | ------------------------------------------------------------- |
+| `bannerBg`        | `string` | `'rgba(15,15,20,0.92)'`   | Background color of the banner bar                            |
+| `bannerTextColor` | `string` | `colors[0]`               | Greeting text color                                           |
+| `bannerIconColor` | `string` | `colors[1]`               | Color of the icon beside the text                             |
+| `bannerTextEn`    | `string` | built-in English greeting | Custom English greeting (defaults to Ramadan or Eid Mubarak)  |
+| `bannerTextAr`    | `string` | built-in Arabic greeting  | Custom Arabic greeting (defaults to رمضان مبارك or عيد مبارك) |
 
 ### Callbacks
 
-| Option           | Type                            | Description                                  |
-| ---------------- | ------------------------------- | -------------------------------------------- |
-| `onRamadanStart` | `(state: RamadanState) => void` | Called once when Ramadan is detected at init |
-| `onRamadanEnd`   | `() => void`                    | Called when `overlay.destroy()` is invoked   |
+| Option             | Type                                                | Description                                                |
+| ------------------ | --------------------------------------------------- | ---------------------------------------------------------- |
+| `onRamadanStart`   | `(state: RamadanState) => void`                     | Called once when Ramadan is active                         |
+| `onEidStart`       | `(state: RamadanState) => void`                     | Called once when an Eid holiday is active                  |
+| `onOccasionChange` | `(occasion: Occasion, state: RamadanState) => void` | Called whenever the active occasion transitions or updates |
+| `onRamadanEnd`     | `() => void`                                        | Called when `overlay.destroy()` is invoked                 |
 
 ```ts
 import { init } from "ramadan-overlay";
 
 init({
   variant: "lanterns",
-  onRamadanStart: (state) => {
-    console.log(`Ramadan ${state.hijriYear} — day ${state.dayNumber}`);
+  eidVariant: "eid", // automatically displays festive balloons or sheep/Kaaba during Eid!
+  onOccasionChange: (occasion, state) => {
+    console.log(`Active occasion: ${occasion} (Hijri ${state.hijriYear})`);
   },
   onRamadanEnd: () => {
     console.log("Overlay removed");
@@ -184,16 +194,23 @@ init({
 
 ---
 
-## 📊 Checking Ramadan State
+## 📊 Checking Occasion & Calendar State
 
 ```ts
-import { getRamadanState } from "ramadan-overlay";
+import { getOccasionState, getRamadanState } from "ramadan-overlay";
 
 // Today's state (standard calendar)
-const { isRamadan, hijriYear, dayNumber } = getRamadanState();
+const state = getOccasionState();
+console.log(state.occasion); // 'ramadan' | 'eid-fitr' | 'eid-adha' | 'none'
+console.log(state.isRamadan); // boolean
+console.log(state.isEid); // boolean
+console.log(state.hijriMonth); // e.g. 9 (Ramadan), 10 (Shawwal), 12 (Dhu al-Hijjah)
+console.log(state.hijriDay); // e.g. 1
+console.log(state.dayNumber); // e.g. 1-30
 
 // Optional: pass a specific date and/or a Hijri day offset
-const state = getRamadanState(new Date("2025-03-01"), +1);
+const eidAdhaState = getOccasionState(new Date("2025-06-06"), 0);
+console.log(eidAdhaState.occasion); // 'eid-adha'
 ```
 
 | Parameter         | Type     | Default      | Description                                                  |
@@ -201,11 +218,15 @@ const state = getRamadanState(new Date("2025-03-01"), +1);
 | `date`            | `Date`   | `new Date()` | Date to evaluate                                             |
 | `hijriAdjustment` | `number` | `0`          | Day offset applied before detection (positive = later start) |
 
-| Field       | Type      | Description                                |
-| ----------- | --------- | ------------------------------------------ |
-| `isRamadan` | `boolean` | Whether today is within Ramadan            |
-| `hijriYear` | `number`  | Current Hijri year                         |
-| `dayNumber` | `number`  | Day within Ramadan (`1`–`30`), `0` outside |
+| Field        | Type       | Description                                                 |
+| ------------ | ---------- | ----------------------------------------------------------- |
+| `occasion`   | `Occasion` | `'ramadan'`, `'eid-fitr'`, `'eid-adha'`, or `'none'`        |
+| `isRamadan`  | `boolean`  | Whether the date falls within Ramadan                       |
+| `isEid`      | `boolean`  | Whether the date falls within Eid Al-Fitr or Eid Al-Adha    |
+| `hijriYear`  | `number`   | Current Hijri year                                          |
+| `hijriMonth` | `number`   | Hijri month (9: Ramadan, 10: Shawwal, 12: Dhu al-Hijjah)    |
+| `hijriDay`   | `number`   | Day within current Hijri month                              |
+| `dayNumber`  | `number`   | Day within Ramadan (`1`–`30`) or Eid (`1`–`4`), `0` outside |
 
 ---
 

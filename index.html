@@ -683,9 +683,10 @@
         <h1 class="hero-title">🌙 ramadan-overlay</h1>
 
         <p class="hero-sub">
-          Add beautiful Ramadan celebration overlays to any website in seconds.
-          Auto-detects Ramadan dates, five visual variants, and works with every
-          major framework — zero dependencies.
+          Add beautiful Ramadan and Eid celebration overlays to any website in
+          seconds. Auto-detects Ramadan, Eid Al-Fitr, and Eid Al-Adha dates,
+          dedicated visual variants, and works with every major framework — zero
+          dependencies.
         </p>
 
         <div class="install-cmd">
@@ -727,16 +728,16 @@
             <div class="feature-icon">🗓️</div>
             <div class="feature-label">Auto-detection</div>
             <div class="feature-desc">
-              Automatically activates during Ramadan using Hijri calendar
-              calculation — no manual dates needed.
+              Automatically activates during Ramadan, Eid Al-Fitr, and Eid
+              Al-Adha using Hijri calendar calculation — no manual dates needed.
             </div>
           </div>
           <div class="feature-card">
             <div class="feature-icon">🎨</div>
-            <div class="feature-label">5 Variants</div>
+            <div class="feature-label">8 Variants</div>
             <div class="feature-desc">
-              Lanterns, Sparkles, Crescent &amp; Stars, Geometric, and Banner
-              styles to suit any site.
+              Lanterns, Sparkles, Crescent &amp; Stars, Geometric, Eid Al-Fitr,
+              Eid Al-Adha, and Banner styles to suit any site.
             </div>
           </div>
           <div class="feature-card">
@@ -779,7 +780,31 @@
             <option value="sparkles">Sparkles</option>
             <option value="crescent-stars">Crescent &amp; Stars</option>
             <option value="geometric">Geometric</option>
+            <option value="eid">Eid (Auto: Fitr / Adha)</option>
+            <option value="eid-fitr">Eid Al-Fitr (Balloons &amp; Gifts)</option>
+            <option value="eid-adha">Eid Al-Adha (Sheep &amp; Kaaba)</option>
             <option value="banner">Banner</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Occasions</label>
+          <select id="occasionsSelect">
+            <option value="all" selected>All (Ramadan + Eids)</option>
+            <option value="ramadan">Ramadan Only</option>
+            <option value="eid">Eids Only</option>
+            <option value="eid-fitr">Eid Al-Fitr Only</option>
+            <option value="eid-adha">Eid Al-Adha Only</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Occasion Preview</label>
+          <select id="occasionPreviewSelect">
+            <option value="auto" selected>Auto (Current Date)</option>
+            <option value="ramadan">Simulate Ramadan (1446 AH)</option>
+            <option value="eid-fitr">Simulate Eid Al-Fitr (1446 AH)</option>
+            <option value="eid-adha">Simulate Eid Al-Adha (1446 AH)</option>
           </select>
         </div>
 
@@ -1157,11 +1182,15 @@
     <!-- ── State + code ── -->
     <div class="bottom-grid">
       <div class="panel" style="margin: 0">
-        <div class="panel-title">Ramadan State</div>
+        <div class="panel-title">Occasion &amp; Calendar State</div>
         <div class="state-grid">
+          <div class="state-item">
+            occasion<strong id="s-occasion">—</strong>
+          </div>
           <div class="state-item">
             isRamadan<strong id="s-isRamadan">—</strong>
           </div>
+          <div class="state-item">isEid<strong id="s-isEid">—</strong></div>
           <div class="state-item">
             hijriYear<strong id="s-hijriYear">—</strong>
           </div>
@@ -1286,7 +1315,7 @@
     <!-- initApp must be defined before the script tag's onload fires -->
     <script>
       function initApp() {
-        const { init, getRamadanState } = RamadanOverlay;
+        const { init, getRamadanState, getOccasionState } = RamadanOverlay;
 
         let currentInstance = null;
         let overlayOn = true;
@@ -1330,11 +1359,11 @@
           if (isLanterns) {
             return Array.from(
               { length: 12 },
-              (_, i) => document.getElementById("lc" + (i + 1)).value,
+              (_, i) => document.getElementById("lc" + (i + 1)).value
             );
           }
           return [1, 2, 3, 4, 5].map(
-            (i) => document.getElementById("gc" + i).value,
+            (i) => document.getElementById("gc" + i).value
           );
         }
 
@@ -1379,14 +1408,30 @@
             ropeColor: document.getElementById("ropeColor").value,
             previewMode: true,
             onRamadanStart: (state) => console.log("Ramadan started!", state),
+            onEidStart: (state) => console.log("Eid started!", state),
+            onOccasionChange: (occ, state) =>
+              console.log("Occasion changed:", occ, state),
           };
+          const occVal = document.getElementById("occasionsSelect")?.value;
+          if (occVal === "ramadan") cfg.occasions = ["ramadan"];
+          else if (occVal === "eid") cfg.occasions = ["eid-fitr", "eid-adha"];
+          else if (occVal === "eid-fitr") cfg.occasions = ["eid-fitr"];
+          else if (occVal === "eid-adha") cfg.occasions = ["eid-adha"];
+
+          const previewOcc = document.getElementById(
+            "occasionPreviewSelect"
+          )?.value;
+          if (previewOcc === "ramadan") cfg.date = "2025-03-05";
+          else if (previewOcc === "eid-fitr") cfg.date = "2025-03-31";
+          else if (previewOcc === "eid-adha") cfg.date = "2025-06-06";
+
           if (variant === "banner") {
             cfg.bannerBg = document.getElementById("bannerBgColor").value;
             cfg.bannerTextColor = document.getElementById(
-              "bannerTextColorInput",
+              "bannerTextColorInput"
             ).value;
             cfg.bannerIconColor = document.getElementById(
-              "bannerIconColorInput",
+              "bannerIconColorInput"
             ).value;
             // Pass both texts; banner.ts picks by locale with fallback
             const _enText = document
@@ -1409,7 +1454,7 @@
           if (variant === "lanterns") {
             cfg.lanternStyle = parseInt(
               document.getElementById("lanternStyleSelect").value,
-              10,
+              10
             );
           }
           const densityVal = document.getElementById("densitySelect").value;
@@ -1420,13 +1465,20 @@
         }
 
         function updateStateDisplay(state) {
-          document.getElementById("s-isRamadan").textContent = String(
-            state.isRamadan,
-          );
+          if (!state) return;
+          const occ =
+            state.occasion ||
+            (state.isRamadan ? "ramadan" : state.isEid ? "eid" : "none");
+          const sOcc = document.getElementById("s-occasion");
+          if (sOcc) sOcc.textContent = occ;
+          const sRamadan = document.getElementById("s-isRamadan");
+          if (sRamadan) sRamadan.textContent = String(Boolean(state.isRamadan));
+          const sEid = document.getElementById("s-isEid");
+          if (sEid) sEid.textContent = String(Boolean(state.isEid));
           document.getElementById("s-hijriYear").textContent =
             state.hijriYear || "—";
           document.getElementById("s-dayNumber").textContent =
-            state.dayNumber || "—";
+            state.dayNumber != null ? String(state.dayNumber) : "—";
         }
 
         // ── Code generation ────────────────────────────────────────────────
@@ -1443,12 +1495,12 @@
             .replace(/>/g, "&gt;")
             .replace(
               /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
-              '<span class="tok-str">$1</span>',
+              '<span class="tok-str">$1</span>'
             )
             .replace(/\/\/[^\n]*/g, '<span class="tok-cmt">$&</span>')
             .replace(
               /(import|from|export|const|return|function|default)(?=[\s({])/g,
-              '<span class="tok-key">$1</span>',
+              '<span class="tok-key">$1</span>'
             )
             .replace(/\b(true|false)\b/g, '<span class="tok-bool">$1</span>')
             .replace(/\b(\d+\.?\d*)\b/g, '<span class="tok-num">$1</span>');
@@ -1459,7 +1511,7 @@
           for (const [k, v] of Object.entries(cfg)) {
             if (Array.isArray(v)) {
               lines.push(
-                `  ${k}: [${v.map((x) => JSON.stringify(x)).join(", ")}]`,
+                `  ${k}: [${v.map((x) => JSON.stringify(x)).join(", ")}]`
               );
             } else {
               lines.push(`  ${k}: ${JSON.stringify(v)}`);
@@ -1472,8 +1524,15 @@
           return Object.fromEntries(
             Object.entries(cfg).filter(
               ([k]) =>
-                !["onRamadanStart", "onRamadanEnd", "previewMode"].includes(k),
-            ),
+                ![
+                  "onRamadanStart",
+                  "onRamadanEnd",
+                  "onEidStart",
+                  "onOccasionChange",
+                  "previewMode",
+                  "date",
+                ].includes(k)
+            )
           );
         }
 
@@ -1524,7 +1583,10 @@
           try {
             // Pass cfg.confetti only when explicitly requested (confetti select changed).
             // All other re-mounts (color, variant, opacity...) stay silent.
-            currentInstance = init({ ...cfg, confetti: withConfetti ? cfg.confetti : "off" });
+            currentInstance = init({
+              ...cfg,
+              confetti: withConfetti ? cfg.confetti : "off",
+            });
             updateStateDisplay(currentInstance.state);
           } catch (e) {
             console.warn("[ramadan-overlay] init error:", e);
@@ -1555,7 +1617,7 @@
             }
             if (cfg.confetti != null)
               document.getElementById("confettiSelect").value = String(
-                cfg.confetti,
+                cfg.confetti
               );
             if (cfg.locale)
               document.getElementById("localeSelect").value = cfg.locale;
@@ -1603,6 +1665,19 @@
               document.getElementById("bannerTextEn").value = cfg.bannerTextEn;
             if (cfg.bannerTextAr)
               document.getElementById("bannerTextAr").value = cfg.bannerTextAr;
+            if (cfg.occasions) {
+              const occStr = Array.isArray(cfg.occasions)
+                ? cfg.occasions.join(",")
+                : cfg.occasions;
+              if (occStr === "ramadan")
+                document.getElementById("occasionsSelect").value = "ramadan";
+              else if (occStr === "eid-fitr,eid-adha")
+                document.getElementById("occasionsSelect").value = "eid";
+              else if (occStr === "eid-fitr")
+                document.getElementById("occasionsSelect").value = "eid-fitr";
+              else if (occStr === "eid-adha")
+                document.getElementById("occasionsSelect").value = "eid-adha";
+            }
           } catch (_) {}
         }
 
@@ -1610,7 +1685,9 @@
         loadHash();
         syncColorPanels();
         syncHijriAdjGroup();
-        updateStateDisplay(getRamadanState());
+        updateStateDisplay(
+          getOccasionState ? getOccasionState() : getRamadanState()
+        );
         mount(true);
 
         // ── Toggle overlay ──
@@ -1680,7 +1757,9 @@
 
         // ── Auto-apply on any control change ──
         document
-          .querySelectorAll('select:not(#confettiSelect), input[type="range"], input[type="number"]')
+          .querySelectorAll(
+            'select:not(#confettiSelect), input[type="range"], input[type="number"]'
+          )
           .forEach((el) => {
             el.addEventListener("change", () => {
               syncColorPanels();
@@ -1689,10 +1768,12 @@
             });
           });
         // Confetti select controls both code output AND live demo behaviour
-        document.getElementById("confettiSelect").addEventListener("change", () => {
-          if (overlayOn) mount(true);
-          else updateCodeBox(getConfig());
-        });
+        document
+          .getElementById("confettiSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount(true);
+            else updateCodeBox(getConfig());
+          });
         document.querySelectorAll('input[type="color"]').forEach((el) => {
           el.addEventListener("input", () => {
             if (overlayOn) mount();
