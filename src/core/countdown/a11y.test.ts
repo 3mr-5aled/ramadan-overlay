@@ -66,11 +66,15 @@ describe("MilestoneAnnouncer", () => {
     );
   });
 
-  it("announces intermediate milestone minutes (15m, 5m, 1m) only once per milestone", () => {
+  it("announces intermediate milestone minutes (30m, 15m, 5m, 1m) only once per milestone", () => {
     const announcer = new MilestoneAnnouncer(
       announcerEl,
       DEFAULT_COUNTDOWN_LABELS.en
     );
+
+    // 30 minutes remaining
+    announcer.checkMilestone(30 * 60 * 1000);
+    expect(announcerEl.textContent).toBe("30 minutes remaining until Iftar.");
 
     // 15 minutes remaining
     announcer.checkMilestone(15 * 60 * 1000);
@@ -103,10 +107,11 @@ describe("MilestoneAnnouncer", () => {
 });
 
 describe("attachKeyboardNavigation", () => {
-  it("dismisses on Escape key press", () => {
+  it("dismisses on Escape key press and restores focus to document.body", () => {
     const root = document.createElement("aside");
     document.body.appendChild(root);
     const onDismiss = vi.fn();
+    const focusSpy = vi.spyOn(document.body, "focus");
 
     const cleanup = attachKeyboardNavigation(root, onDismiss);
 
@@ -118,6 +123,7 @@ describe("attachKeyboardNavigation", () => {
     root.dispatchEvent(escapeEvent);
 
     expect(onDismiss).toHaveBeenCalledTimes(1);
+    expect(focusSpy).toHaveBeenCalled();
 
     cleanup();
     root.remove();

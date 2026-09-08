@@ -144,6 +144,7 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
         hijriDay: 0,
         dayNumber: 0,
       },
+      getCountdownController: () => null,
     };
   }
 
@@ -266,19 +267,19 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
     }
   }
 
+  const isCountdownActive = (
+    state: RamadanState,
+    config: ResolvedConfig
+  ): boolean => state.isRamadan || config.previewMode || !config.autoTrigger;
+
   let countdownManager: IftarCountdownManager | null = null;
   if (currentConfig.countdown) {
-    countdownManager = createCountdownManager(
-      currentConfig.countdown,
-      currentConfig.variant === "banner",
-      currentState.hijriYear || 1447,
-      currentConfig.colors
-    );
-    if (
-      currentState.isRamadan ||
-      currentConfig.previewMode ||
-      !currentConfig.autoTrigger
-    ) {
+    countdownManager = createCountdownManager(currentConfig.countdown, {
+      isBannerActive: currentConfig.variant === "banner",
+      hijriYear: currentState.hijriYear || 1447,
+      colors: currentConfig.colors,
+    });
+    if (isCountdownActive(currentState, currentConfig)) {
       countdownManager.start();
     }
   }
@@ -370,26 +371,19 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
           countdownManager = null;
         }
         if (newConfig.countdown) {
-          countdownManager = createCountdownManager(
-            newConfig.countdown,
-            newConfig.variant === "banner"
-          );
-          if (
-            currentState.isRamadan ||
-            newConfig.previewMode ||
-            !newConfig.autoTrigger
-          ) {
+          countdownManager = createCountdownManager(newConfig.countdown, {
+            isBannerActive: newConfig.variant === "banner",
+            hijriYear: currentState.hijriYear || 1447,
+            colors: newConfig.colors,
+          });
+          if (isCountdownActive(currentState, newConfig)) {
             countdownManager.start();
           }
         }
-        instance.countdown = countdownManager
-          ? countdownManager.controller
-          : null;
       }
     },
     container: null,
     state: currentState,
-    countdown: countdownManager ? countdownManager.controller : null,
     getCountdownController: () =>
       countdownManager ? countdownManager.controller : null,
   };

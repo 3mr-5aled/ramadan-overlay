@@ -286,10 +286,8 @@ export interface OverlayInstance {
   container: HTMLElement | null;
   /** The detected Ramadan state at mount time. */
   state: RamadanState;
-  /** The active Iftar countdown widget controller, if mounted/configured. */
-  countdown?: IftarCountdownController | null;
   /** Access the active Iftar countdown widget controller, if enabled. */
-  getCountdownController?: () => IftarCountdownController | null;
+  getCountdownController: () => IftarCountdownController | null;
 }
 
 // ─── Countdown Types ─────────────────────────────────────────────────────────

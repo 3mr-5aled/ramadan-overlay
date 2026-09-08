@@ -14,7 +14,7 @@
  */
 
 export { getOccasionState, getRamadanState, init } from "./injector";
-export * from "./countdown";
+export { createCountdownManager } from "./countdown";
 
 export type {
   Occasion,

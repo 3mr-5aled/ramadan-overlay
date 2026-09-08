@@ -74,4 +74,75 @@ describe("createCountdownManager", () => {
 
     manager.destroy();
   });
+
+  it("forces immediate display and ticking via controller.show() even when outside alert window", () => {
+    // 17:00 (1 hour 45m before 18:45, with 30m alert window)
+    const now = new Date(2026, 2, 10, 17, 0, 0);
+    vi.setSystemTime(now);
+
+    const manager = createCountdownManager({
+      iftarTime: "18:45",
+      alertWindowMinutes: 30,
+    });
+
+    manager.start();
+    // Inactive because 17:00 is outside the 30m window
+    expect(document.getElementById("ramadan-countdown-root")).toBeNull();
+
+    // Call show() to force bypass dormant timer
+    manager.controller?.show();
+    expect(document.getElementById("ramadan-countdown-root")).not.toBeNull();
+
+    // Digits are populated with hours, minutes, seconds (1h 45m = 01:45:00)
+    const hoursVal = document.querySelector(".ro-val-hours");
+    const minutesVal = document.querySelector(".ro-val-minutes");
+    expect(hoursVal?.textContent).toBe("01");
+    expect(minutesVal?.textContent).toBe("45");
+
+    manager.destroy();
+  });
+
+  it("updates target time and configuration dynamically via updateConfig()", () => {
+    const now = new Date(2026, 2, 10, 18, 30, 0);
+    vi.setSystemTime(now);
+
+    const manager = createCountdownManager({
+      iftarTime: "18:45",
+      alertWindowMinutes: 30,
+    });
+
+    manager.start();
+    expect(manager.controller?.getTargetTime()?.getMinutes()).toBe(45);
+
+    // Update target time to 19:00
+    manager.controller?.updateConfig({ iftarTime: "19:00" });
+    expect(manager.controller?.getTargetTime()?.getMinutes()).toBe(0);
+    expect(manager.controller?.getTargetTime()?.getHours()).toBe(19);
+
+    manager.destroy();
+  });
+
+  it("clears celebration flare after celebrationDurationMs expires", () => {
+    const now = new Date(2026, 2, 10, 18, 44, 59);
+    vi.setSystemTime(now);
+
+    const manager = createCountdownManager({
+      iftarTime: "18:45",
+      alertWindowMinutes: 30,
+      celebrationDurationMs: 10000, // 10 seconds
+      confetti: false,
+    });
+
+    manager.start();
+    vi.advanceTimersByTime(1000); // T-0
+
+    const card = document.querySelector(".ro-countdown-card");
+    expect(card?.classList.contains("ro-countdown--celebrating")).toBe(true);
+
+    // Advance past celebration duration
+    vi.advanceTimersByTime(10000);
+    expect(card?.classList.contains("ro-countdown--celebrating")).toBe(false);
+
+    manager.destroy();
+  });
 });

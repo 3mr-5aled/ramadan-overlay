@@ -44,14 +44,40 @@ export class AmbientAudioController {
   private audio: HTMLAudioElement | null = null;
   private muted: boolean;
   private onAudioBlocked?: () => void;
+  private soundUrl?: string;
 
   constructor(options: AmbientAudioOptions = {}) {
     this.muted = options.defaultMuted ?? true;
     this.onAudioBlocked = options.onAudioBlocked;
+    this.soundUrl = options.soundUrl;
 
     if (options.soundUrl && typeof Audio !== "undefined") {
       try {
         this.audio = new Audio(options.soundUrl);
+        this.audio.preload = "auto";
+        this.audio.loop = false;
+      } catch {
+        this.audio = null;
+      }
+    }
+  }
+
+  public setSoundUrl(url?: string): void {
+    if (this.soundUrl === url) return;
+    this.soundUrl = url;
+    if (this.audio) {
+      try {
+        this.audio.pause();
+        this.audio.removeAttribute("src");
+        this.audio.load();
+      } catch {
+        // Ignore
+      }
+      this.audio = null;
+    }
+    if (url && typeof Audio !== "undefined") {
+      try {
+        this.audio = new Audio(url);
         this.audio.preload = "auto";
         this.audio.loop = false;
       } catch {

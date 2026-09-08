@@ -83,9 +83,9 @@ export function resolveCountdownLabels(
   };
 }
 
-const MILESTONES = [15, 5, 1];
+const MILESTONES = [30, 15, 5, 1];
 
-export class MilestoneAnnouncer {
+export class MilestoneLiveRegion {
   private announcerEl: HTMLElement;
   private dict: IftarCountdownLabels;
   private announcedMilestones = new Set<number>();
@@ -131,6 +131,8 @@ export class MilestoneAnnouncer {
   }
 }
 
+export { MilestoneLiveRegion as MilestoneAnnouncer };
+
 export function attachKeyboardNavigation(
   rootEl: HTMLElement,
   onDismiss: () => void
@@ -139,6 +141,9 @@ export function attachKeyboardNavigation(
     if (e.key === "Escape") {
       e.stopPropagation();
       onDismiss();
+      if (typeof document !== "undefined" && document.body) {
+        document.body.focus?.();
+      }
     }
   };
 

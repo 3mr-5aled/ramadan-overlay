@@ -248,12 +248,15 @@ export interface MountCountdownHostOptions {
   lang: string;
   onDismiss: () => void;
   onToggleSound: () => void;
+  onPlayAlert?: () => void;
 }
 
 export interface CountdownHostResult {
   root: HTMLElement;
   updateDigits: (remainingMs: number) => void;
   showCelebration: () => void;
+  triggerCelebrationFlare: () => void;
+  endCelebration: () => void;
   updateSoundButton: (muted: boolean, isBlocked?: boolean) => void;
   announcer: MilestoneAnnouncer;
   destroy: () => void;
@@ -336,7 +339,12 @@ export function mountCountdownHost(
       : '<span class="ro-countdown-icon">🔊</span>';
 
     soundBtn.addEventListener("click", () => {
-      options.onToggleSound();
+      if (soundBtn?.classList.contains("ro-countdown-btn--prompt")) {
+        soundBtn.classList.remove("ro-countdown-btn--prompt");
+        options.onPlayAlert?.();
+      } else {
+        options.onToggleSound();
+      }
     });
     actions.appendChild(soundBtn);
   }
@@ -362,46 +370,43 @@ export function mountCountdownHost(
   digits.className = "ro-countdown-digits";
   digits.setAttribute("aria-hidden", "true");
 
-  const hVal = document.createElement("span");
-  hVal.className = "ro-countdown-value ro-val-hours";
-  hVal.textContent = "00";
-  const hUnit = document.createElement("div");
-  hUnit.className = "ro-countdown-unit";
-  const hLbl = document.createElement("span");
-  hLbl.className = "ro-countdown-label";
-  hLbl.textContent = options.labels.hours;
-  hUnit.appendChild(hVal);
-  hUnit.appendChild(hLbl);
+  const createTimeUnit = (
+    valClass: string,
+    labelText: string
+  ): { unit: HTMLDivElement; val: HTMLSpanElement } => {
+    const val = document.createElement("span");
+    val.className = `ro-countdown-value ${valClass}`;
+    val.textContent = "00";
+    const unit = document.createElement("div");
+    unit.className = "ro-countdown-unit";
+    const lbl = document.createElement("span");
+    lbl.className = "ro-countdown-label";
+    lbl.textContent = labelText;
+    unit.appendChild(val);
+    unit.appendChild(lbl);
+    return { unit, val };
+  };
 
+  const { unit: hUnit, val: hVal } = createTimeUnit(
+    "ro-val-hours",
+    options.labels.hours
+  );
   const sep1 = document.createElement("span");
   sep1.className = "ro-countdown-sep";
   sep1.textContent = ":";
 
-  const mVal = document.createElement("span");
-  mVal.className = "ro-countdown-value ro-val-minutes";
-  mVal.textContent = "00";
-  const mUnit = document.createElement("div");
-  mUnit.className = "ro-countdown-unit";
-  const mLbl = document.createElement("span");
-  mLbl.className = "ro-countdown-label";
-  mLbl.textContent = options.labels.minutes;
-  mUnit.appendChild(mVal);
-  mUnit.appendChild(mLbl);
-
+  const { unit: mUnit, val: mVal } = createTimeUnit(
+    "ro-val-minutes",
+    options.labels.minutes
+  );
   const sep2 = document.createElement("span");
   sep2.className = "ro-countdown-sep";
   sep2.textContent = ":";
 
-  const sVal = document.createElement("span");
-  sVal.className = "ro-countdown-value ro-val-seconds";
-  sVal.textContent = "00";
-  const sUnit = document.createElement("div");
-  sUnit.className = "ro-countdown-unit";
-  const sLbl = document.createElement("span");
-  sLbl.className = "ro-countdown-label";
-  sLbl.textContent = options.labels.seconds;
-  sUnit.appendChild(sVal);
-  sUnit.appendChild(sLbl);
+  const { unit: sUnit, val: sVal } = createTimeUnit(
+    "ro-val-seconds",
+    options.labels.seconds
+  );
 
   digits.appendChild(hUnit);
   digits.appendChild(sep1);
@@ -410,7 +415,7 @@ export function mountCountdownHost(
   digits.appendChild(sUnit);
   card.appendChild(digits);
 
-  // Celebration Banner
+  // Celebration Banner (Celebration Flare)
   const celebration = document.createElement("div");
   celebration.className = "ro-countdown-celebration";
   celebration.style.display = "none";
@@ -447,11 +452,17 @@ export function mountCountdownHost(
     announcer.checkMilestone(remainingMs);
   };
 
-  const showCelebration = (): void => {
+  const triggerCelebrationFlare = (): void => {
     card.classList.add("ro-countdown--celebrating");
     digits.style.display = "none";
     celebration.style.display = "flex";
     announcer.checkMilestone(0);
+  };
+
+  const endCelebration = (): void => {
+    card.classList.remove("ro-countdown--celebrating");
+    celebration.style.display = "none";
+    digits.style.display = "flex";
   };
 
   const updateSoundButton = (muted: boolean, isBlocked?: boolean): void => {
@@ -482,7 +493,9 @@ export function mountCountdownHost(
   return {
     root,
     updateDigits,
-    showCelebration,
+    showCelebration: triggerCelebrationFlare,
+    triggerCelebrationFlare,
+    endCelebration,
     updateSoundButton,
     announcer,
     destroy,

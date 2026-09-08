@@ -1,9 +1,11 @@
 export interface CountdownTimerOptions {
   alertWindowMinutes?: number;
   autoDismissMinutes?: number;
+  celebrationDurationMs?: number;
   onAlertWindow?: () => void;
   onTick?: (remainingMs: number) => void;
   onT0?: () => void;
+  onCelebrationEnd?: () => void;
   onAutoDismiss?: () => void;
 }
 
@@ -11,17 +13,21 @@ export class CountdownTimerEngine {
   private targetTime: Date;
   private alertWindowMinutes: number;
   private autoDismissMinutes: number;
+  private celebrationDurationMs: number;
   private onAlertWindow?: () => void;
   private onTick?: (remainingMs: number) => void;
   private onT0?: () => void;
+  private onCelebrationEnd?: () => void;
   private onAutoDismiss?: () => void;
 
   private dormantTimeoutId: number | null = null;
   private tickTimeoutId: number | null = null;
+  private celebrationTimeoutId: number | null = null;
   private autoDismissTimeoutId: number | null = null;
 
   private alertWindowActive = false;
   private t0Fired = false;
+  private celebrationEndFired = false;
   private autoDismissFired = false;
   private destroyed = false;
 
@@ -39,9 +45,11 @@ export class CountdownTimerEngine {
     this.targetTime = new Date(targetTime.getTime());
     this.alertWindowMinutes = options.alertWindowMinutes ?? 30;
     this.autoDismissMinutes = options.autoDismissMinutes ?? 10;
+    this.celebrationDurationMs = options.celebrationDurationMs ?? 30000;
     this.onAlertWindow = options.onAlertWindow;
     this.onTick = options.onTick;
     this.onT0 = options.onT0;
+    this.onCelebrationEnd = options.onCelebrationEnd;
     this.onAutoDismiss = options.onAutoDismiss;
   }
 
@@ -85,6 +93,7 @@ export class CountdownTimerEngine {
           this.t0Fired = true;
           this.onTick?.(0);
           this.onT0?.();
+          this.scheduleCelebrationEnd();
           this.scheduleAutoDismiss();
         }
         return;
@@ -98,6 +107,22 @@ export class CountdownTimerEngine {
     };
 
     runTick();
+  }
+
+  private scheduleCelebrationEnd(): void {
+    if (this.celebrationDurationMs <= 0 || this.celebrationEndFired) return;
+
+    const now = Date.now();
+    const celebrationEndMs =
+      this.targetTime.getTime() + this.celebrationDurationMs;
+    const delay = Math.max(0, celebrationEndMs - now);
+
+    this.celebrationTimeoutId = window.setTimeout(() => {
+      if (!this.destroyed && !this.celebrationEndFired) {
+        this.celebrationEndFired = true;
+        this.onCelebrationEnd?.();
+      }
+    }, delay);
   }
 
   private scheduleAutoDismiss(): void {
@@ -114,6 +139,25 @@ export class CountdownTimerEngine {
         this.onAutoDismiss?.();
       }
     }, delay);
+  }
+
+  public forceOpen(): void {
+    if (this.destroyed) return;
+
+    if (this.dormantTimeoutId !== null) {
+      clearTimeout(this.dormantTimeoutId);
+      this.dormantTimeoutId = null;
+    }
+
+    if (!this.alertWindowActive) {
+      this.enterAlertWindow();
+    } else if (!this.t0Fired) {
+      if (this.tickTimeoutId !== null) {
+        clearTimeout(this.tickTimeoutId);
+        this.tickTimeoutId = null;
+      }
+      this.startActiveTickLoop();
+    }
   }
 
   public forceTick(): void {
@@ -141,6 +185,31 @@ export class CountdownTimerEngine {
     }
   }
 
+  public updateTarget(
+    targetTime: Date,
+    alertWindowMinutes?: number,
+    autoDismissMinutes?: number,
+    celebrationDurationMs?: number
+  ): void {
+    this.targetTime = new Date(targetTime.getTime());
+    if (alertWindowMinutes !== undefined) {
+      this.alertWindowMinutes = alertWindowMinutes;
+    }
+    if (autoDismissMinutes !== undefined) {
+      this.autoDismissMinutes = autoDismissMinutes;
+    }
+    if (celebrationDurationMs !== undefined) {
+      this.celebrationDurationMs = celebrationDurationMs;
+    }
+
+    this.stop();
+    this.alertWindowActive = false;
+    this.t0Fired = false;
+    this.celebrationEndFired = false;
+    this.autoDismissFired = false;
+    this.start();
+  }
+
   public isAlertWindowActive(): boolean {
     return this.alertWindowActive;
   }
@@ -157,6 +226,10 @@ export class CountdownTimerEngine {
     if (this.tickTimeoutId !== null) {
       clearTimeout(this.tickTimeoutId);
       this.tickTimeoutId = null;
+    }
+    if (this.celebrationTimeoutId !== null) {
+      clearTimeout(this.celebrationTimeoutId);
+      this.celebrationTimeoutId = null;
     }
     if (this.autoDismissTimeoutId !== null) {
       clearTimeout(this.autoDismissTimeoutId);

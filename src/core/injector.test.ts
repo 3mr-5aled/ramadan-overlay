@@ -255,8 +255,7 @@ describe("init orchestration & live transition", () => {
         },
       });
 
-      expect(overlay.countdown).not.toBeNull();
-      expect(overlay.getCountdownController?.()).not.toBeNull();
+      expect(overlay.getCountdownController()).not.toBeNull();
       expect(document.getElementById("ramadan-countdown-root")).not.toBeNull();
       expect(document.getElementById("ramadan-overlay-root")).not.toBeNull();
 

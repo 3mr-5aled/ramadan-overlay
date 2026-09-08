@@ -23,11 +23,15 @@ export interface IftarCountdownManager {
   controller: IftarCountdownController | null;
 }
 
+export interface CountdownManagerOptions {
+  isBannerActive?: boolean;
+  hijriYear?: number;
+  colors?: string[];
+}
+
 export function createCountdownManager(
   config: boolean | IftarCountdownConfig | undefined,
-  isBannerActive = false,
-  hijriYear = 1447,
-  colors?: string[]
+  options: CountdownManagerOptions = {}
 ): IftarCountdownManager {
   if (!config) {
     return {
@@ -39,6 +43,8 @@ export function createCountdownManager(
     };
   }
 
+  const { isBannerActive = false, hijriYear = 1447, colors } = options;
+
   const resolvedConfig: IftarCountdownConfig =
     typeof config === "boolean" ? { iftarTime: "18:45" } : { ...config };
 
@@ -47,6 +53,7 @@ export function createCountdownManager(
     resolvedConfig.autoDismissAfterMinutes !== undefined
       ? resolvedConfig.autoDismissAfterMinutes
       : 10;
+  const celebrationDurationMs = resolvedConfig.celebrationDurationMs ?? 30000;
 
   const targetTime = resolveTargetIftarTime(
     resolvedConfig.iftarTime,
@@ -90,7 +97,7 @@ export function createCountdownManager(
     if (hostResult || isDestroyed) return;
 
     hostResult = mountCountdownHost({
-      targetTime,
+      targetTime: timerEngine.getTargetTime(),
       position: resolvedConfig.position ?? "bottom-right",
       isBannerTopActive: isBannerActive,
       hasSound: Boolean(resolvedConfig.soundUrl),
@@ -104,13 +111,17 @@ export function createCountdownManager(
       onToggleSound: () => {
         controller.toggleMute();
       },
+      onPlayAlert: () => {
+        audioController.playAlert();
+      },
     });
 
     // Prime audio on mount (or first card interaction)
     audioController.prime();
 
     // Announce initial appearance
-    const remainingMs = targetTime.getTime() - Date.now();
+    const currentTarget = timerEngine.getTargetTime();
+    const remainingMs = currentTarget.getTime() - Date.now();
     const remainingMinutes = Math.max(1, Math.floor(remainingMs / 60000));
     hostResult.announcer.announceInitial(remainingMinutes);
   };
@@ -118,6 +129,7 @@ export function createCountdownManager(
   const timerEngine = new CountdownTimerEngine(targetTime, {
     alertWindowMinutes,
     autoDismissMinutes,
+    celebrationDurationMs,
     onAlertWindow: () => {
       mountHost();
     },
@@ -128,7 +140,7 @@ export function createCountdownManager(
     },
     onT0: () => {
       if (hostResult) {
-        hostResult.showCelebration();
+        hostResult.triggerCelebrationFlare();
       }
 
       // Fire confetti if enabled
@@ -146,6 +158,11 @@ export function createCountdownManager(
       // Fire consumer callback
       resolvedConfig.onIftar?.();
     },
+    onCelebrationEnd: () => {
+      if (hostResult) {
+        hostResult.endCelebration();
+      }
+    },
     onAutoDismiss: () => {
       controller.dismiss();
     },
@@ -154,7 +171,7 @@ export function createCountdownManager(
   const controller: IftarCountdownController = {
     show: () => {
       mountHost();
-      timerEngine.forceTick();
+      timerEngine.forceOpen();
     },
     dismiss: () => {
       if (hostResult) {
@@ -176,11 +193,40 @@ export function createCountdownManager(
       return isMuted;
     },
     isMuted: () => audioController.isMuted(),
-    getTargetTime: () => new Date(targetTime.getTime()),
+    getTargetTime: () => timerEngine.getTargetTime(),
     updateConfig: (partial) => {
       Object.assign(resolvedConfig, partial);
       if (partial.defaultMuted !== undefined) {
         audioController.setMuted(partial.defaultMuted);
+      }
+      if (partial.soundUrl !== undefined) {
+        audioController.setSoundUrl(partial.soundUrl);
+      }
+      if (
+        partial.iftarTime !== undefined ||
+        partial.alertWindowMinutes !== undefined ||
+        partial.autoDismissAfterMinutes !== undefined ||
+        partial.celebrationDurationMs !== undefined
+      ) {
+        const newTarget = resolveTargetIftarTime(
+          resolvedConfig.iftarTime,
+          new Date(),
+          resolvedConfig.autoDismissAfterMinutes ?? 10
+        );
+        if (newTarget) {
+          timerEngine.updateTarget(
+            newTarget,
+            resolvedConfig.alertWindowMinutes ?? 30,
+            resolvedConfig.autoDismissAfterMinutes ?? 10,
+            resolvedConfig.celebrationDurationMs ?? 30000
+          );
+        }
+      }
+      if (partial.position && hostResult) {
+        hostResult.root.className = `ro-countdown-host ro-countdown-host--${partial.position}`;
+        if (isBannerActive && partial.position.startsWith("top-")) {
+          hostResult.root.classList.add("ro-countdown-host--banner-offset-top");
+        }
       }
     },
   };
