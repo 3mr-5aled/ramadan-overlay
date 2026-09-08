@@ -225,6 +225,7 @@ export function createSafeNoopInstance(
     state,
     getState: () => ({ ...state }),
     getCountdownController: () => null,
+    fireConfetti: async () => undefined,
   };
 }
 
@@ -389,7 +390,19 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     }
   }
 
+  let date: Date | undefined;
+  if (userConfig.date instanceof Date) {
+    date = isNaN(userConfig.date.getTime()) ? undefined : userConfig.date;
+  } else if (
+    typeof userConfig.date === "string" ||
+    typeof userConfig.date === "number"
+  ) {
+    const parsed = new Date(userConfig.date);
+    date = isNaN(parsed.getTime()) ? undefined : parsed;
+  }
+
   return {
+    date,
     debug,
     onError: userConfig.onError,
     theme: userConfig.theme ?? "classic",
@@ -472,7 +485,7 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
 
   try {
     let currentState = getRamadanState({
-      date: new Date(),
+      date: currentConfig.date ?? new Date(),
       region: currentConfig.region,
       hijriAdjustment: currentConfig.hijriAdjustment,
     });
@@ -484,8 +497,9 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
       !currentConfig.previewMode &&
       currentState.occasion === "none"
     ) {
+      const evalDate = currentConfig.date ?? new Date();
       logger.info(
-        `[ramadan-overlay] Overlay dormant: autoTrigger is enabled, but current date (${new Date().toISOString().slice(0, 10)}) does not fall within configured occasions (${currentConfig.occasions.join(", ")}). Pass previewMode: true to force display during development.`
+        `[ramadan-overlay] Overlay dormant: autoTrigger is enabled, but current date (${evalDate.toISOString().slice(0, 10)}) does not fall within configured occasions (${currentConfig.occasions.join(", ")}). Pass previewMode: true to force display during development.`
       );
     }
 
@@ -541,7 +555,13 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
         currentConfig.onRamadanEnd?.();
       }
 
-      if (shouldFireConfetti(newState, currentConfig.confetti)) {
+      if (
+        shouldFireConfetti(
+          newState,
+          currentConfig.confetti,
+          currentConfig.previewMode
+        )
+      ) {
         const confettiYear = newState.hijriYear || 1447;
         void fireRamadanConfetti(confettiYear, currentConfig.colors);
       }
@@ -678,6 +698,23 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
           };
           const newConfig = resolveConfig(currentUserConfig);
 
+          if (
+            partialConfig.date !== undefined ||
+            partialConfig.region !== undefined ||
+            partialConfig.hijriAdjustment !== undefined
+          ) {
+            const previousState = currentState;
+            currentState = getRamadanState({
+              date: newConfig.date ?? new Date(),
+              region: newConfig.region,
+              hijriAdjustment: newConfig.hijriAdjustment,
+            });
+            instance.state = currentState;
+            if (previousState.occasion !== currentState.occasion) {
+              fireOccasionCallbacks(previousState, currentState);
+            }
+          }
+
           const shouldBeMounted = isOccasionActive(currentState, newConfig);
           const wasMounted = !!hostMount;
 
@@ -774,6 +811,10 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
       getCountdownController: () =>
         countdownManager ? countdownManager.controller : null,
       getState: () => currentState,
+      fireConfetti: async () => {
+        const confettiYear = currentState.hijriYear || 1447;
+        await fireRamadanConfetti(confettiYear, currentConfig.colors);
+      },
     };
 
     // Initial evaluation

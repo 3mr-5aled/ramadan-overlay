@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { init } from "./injector";
+import { fireRamadanConfetti, shouldFireConfetti } from "./confetti";
 import type { RamadanState } from "../types";
 
 describe("init orchestration & live transition", () => {
@@ -695,6 +696,91 @@ describe("init orchestration & live transition", () => {
       );
 
       infoSpy.mockRestore();
+      overlay.destroy();
+    });
+  });
+
+  describe("confetti and date configuration", () => {
+    it("shouldFireConfetti respects option, state, and previewMode", () => {
+      const inertState: RamadanState = {
+        isRamadan: false,
+        occasion: "none",
+        isEid: false,
+        hijriYear: 1448,
+        hijriMonth: 3,
+        hijriDay: 15,
+        dayNumber: 0,
+      };
+      const ramadanState: RamadanState = {
+        ...inertState,
+        isRamadan: true,
+        occasion: "ramadan",
+        hijriMonth: 9,
+        dayNumber: 1,
+      };
+      const eidState: RamadanState = {
+        ...inertState,
+        isEid: true,
+        occasion: "eid-fitr",
+        hijriMonth: 10,
+        dayNumber: 1,
+      };
+
+      // When option is off -> always false
+      expect(shouldFireConfetti(ramadanState, "off", true)).toBe(false);
+      expect(shouldFireConfetti(eidState, "off", true)).toBe(false);
+      expect(shouldFireConfetti(inertState, "off", false)).toBe(false);
+
+      // When option is on:
+      // Ramadan -> true
+      expect(shouldFireConfetti(ramadanState, "on", false)).toBe(true);
+      // Eid -> true
+      expect(shouldFireConfetti(eidState, "on", false)).toBe(true);
+      // Inert without previewMode -> false
+      expect(shouldFireConfetti(inertState, "on", false)).toBe(false);
+      // Inert WITH previewMode -> true
+      expect(shouldFireConfetti(inertState, "on", true)).toBe(true);
+    });
+
+    it("evaluates custom date string or Date object in userConfig", () => {
+      // Pass 2025-03-05 (Ramadan 1446)
+      const overlay = init({
+        date: "2025-03-05",
+        autoTrigger: true,
+      });
+
+      expect(overlay.state.isRamadan).toBe(true);
+      expect(overlay.state.occasion).toBe("ramadan");
+      expect(overlay.state.hijriYear).toBe(1446);
+      expect(overlay.container).not.toBeNull();
+
+      overlay.destroy();
+    });
+
+    it("recalculates state on instance.update({ date })", () => {
+      vi.setSystemTime(new Date("2026-01-01T12:00:00Z"));
+      const overlay = init({
+        autoTrigger: true,
+      });
+      expect(overlay.state.occasion).toBe("none");
+      expect(overlay.container).toBeNull();
+
+      // Update with a Ramadan date
+      overlay.update({ date: new Date("2025-03-05T12:00:00Z") });
+      expect(overlay.state.isRamadan).toBe(true);
+      expect(overlay.state.occasion).toBe("ramadan");
+      expect(overlay.container).not.toBeNull();
+
+      overlay.destroy();
+    });
+
+    it("exposes fireConfetti on overlay instance which resolves cleanly", async () => {
+      const overlay = init({ previewMode: true });
+      expect(typeof overlay.fireConfetti).toBe("function");
+
+      const confettiPromise = overlay.fireConfetti();
+      await vi.advanceTimersByTimeAsync(1000);
+      await expect(confettiPromise).resolves.toBeUndefined();
       overlay.destroy();
     });
   });

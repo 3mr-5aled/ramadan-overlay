@@ -6,16 +6,27 @@ const DEFAULT_GOLD = "#c9a84c";
 const DEFAULT_GREEN = "#2d5a27";
 const DEFAULT_CREAM = "#fff7cc";
 
+export function isCanvasSupported(): boolean {
+  if (typeof document === "undefined") return false;
+  try {
+    const canvas = document.createElement("canvas");
+    return Boolean(canvas.getContext && canvas.getContext("2d"));
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Fire a 3-burst Ramadan confetti sequence on day 1.
- * Uses crescent moon + star emoji shapes via canvas-confetti's shapeFromText API.
+ * Fire a 3-burst Ramadan confetti sequence on day 1 or on demand.
+ * Uses crescent moon + star emoji shapes via canvas-confetti's shapeFromText API,
+ * with graceful fallback to standard geometric confetti shapes when OffscreenCanvas is unavailable.
  */
 export async function fireRamadanConfetti(
   hijriYear: number,
   colors?: string[]
 ): Promise<void> {
   if (!isMotionAllowed()) return;
-  if (typeof OffscreenCanvas === "undefined") return;
+  if (!isCanvasSupported()) return;
 
   const palette = colors?.length
     ? colors
@@ -28,57 +39,89 @@ export async function fireRamadanConfetti(
         "#ffffff",
       ];
 
-  // Emoji shapes for cultural flair — rendered with a dark stroke so they
-  // stand out against both light and coloured confetti particles.
-  const crescentShape = buildEmojiShape("🌙");
-  const starShape = buildEmojiShape("✨");
-  const yearStr = hijriYear.toString();
+  let shapes: confetti.Shape[] | undefined;
+  if (typeof OffscreenCanvas !== "undefined") {
+    try {
+      const crescentShape = buildEmojiShape("🌙");
+      const starShape = buildEmojiShape("✨");
+      const yearStr = (hijriYear || 1447).toString();
+      const yearShape = buildYearShape(yearStr);
+      shapes = [crescentShape, starShape, yearShape];
+    } catch {
+      // Fallback to default confetti shapes if canvas shape generation fails
+      shapes = undefined;
+    }
+  }
 
-  // Build a bitmap shape for the year with white fill + black stroke
-  // so it stands out on any background color in the confetti burst.
-  const yearShape = buildYearShape(yearStr);
-
-  const baseOptions = {
+  const baseOptions: confetti.Options = {
     particleCount: 60,
     spread: 70,
     colors: palette,
     ticks: 200,
     gravity: 0.8,
-    scalar: 1.8,
+    scalar: shapes ? 1.8 : 1.2,
     drift: 0,
     disableForReducedMotion: true,
   };
 
-  // Burst 1 — left cannon
-  confetti({
-    ...baseOptions,
-    angle: 60,
-    origin: { x: 0, y: 0.85 },
-    shapes: [crescentShape, starShape],
-  });
+  if (shapes) {
+    // Burst 1 — left cannon
+    confetti({
+      ...baseOptions,
+      angle: 60,
+      origin: { x: 0, y: 0.85 },
+      shapes: [shapes[0], shapes[1]],
+    });
 
-  await delay(300);
+    await delay(300);
 
-  // Burst 2 — right cannon
-  confetti({
-    ...baseOptions,
-    angle: 120,
-    origin: { x: 1, y: 0.85 },
-    shapes: [crescentShape, starShape],
-  });
+    // Burst 2 — right cannon
+    confetti({
+      ...baseOptions,
+      angle: 120,
+      origin: { x: 1, y: 0.85 },
+      shapes: [shapes[0], shapes[1]],
+    });
 
-  await delay(300);
+    await delay(300);
 
-  // Burst 3 — center with Hijri year label
-  await confetti({
-    ...baseOptions,
-    angle: 90,
-    particleCount: 80,
-    spread: 100,
-    origin: { x: 0.5, y: 0.7 },
-    shapes: [crescentShape, starShape, yearShape],
-    scalar: 2,
-  });
+    // Burst 3 — center with Hijri year label
+    await confetti({
+      ...baseOptions,
+      angle: 90,
+      particleCount: 80,
+      spread: 100,
+      origin: { x: 0.5, y: 0.7 },
+      shapes,
+      scalar: 2,
+    });
+  } else {
+    // Fallback: standard geometric confetti shapes
+    confetti({
+      ...baseOptions,
+      angle: 60,
+      origin: { x: 0, y: 0.85 },
+    });
+
+    await delay(300);
+
+    confetti({
+      ...baseOptions,
+      angle: 120,
+      origin: { x: 1, y: 0.85 },
+    });
+
+    await delay(300);
+
+    await confetti({
+      ...baseOptions,
+      angle: 90,
+      particleCount: 80,
+      spread: 100,
+      origin: { x: 0.5, y: 0.7 },
+      scalar: 1.4,
+    });
+  }
 }
 
 /**
@@ -97,12 +140,24 @@ function buildEmojiShape(emoji: string): confetti.Shape {
   ctx.font = font;
   const m = ctx.measureText(emoji);
   const pad = strokeWidth + 2;
-  const w =
-    Math.ceil(m.actualBoundingBoxRight + m.actualBoundingBoxLeft) + pad * 2;
-  const h =
-    Math.ceil(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) + pad * 2;
-  const x = m.actualBoundingBoxLeft + pad;
-  const y = m.actualBoundingBoxAscent + pad;
+  const left =
+    typeof m.actualBoundingBoxLeft === "number" ? m.actualBoundingBoxLeft : 0;
+  const right =
+    typeof m.actualBoundingBoxRight === "number"
+      ? m.actualBoundingBoxRight
+      : m.width || fontSize;
+  const ascent =
+    typeof m.actualBoundingBoxAscent === "number"
+      ? m.actualBoundingBoxAscent
+      : fontSize;
+  const descent =
+    typeof m.actualBoundingBoxDescent === "number"
+      ? m.actualBoundingBoxDescent
+      : 0;
+  const w = Math.max(1, Math.ceil(right + left) + pad * 2);
+  const h = Math.max(1, Math.ceil(ascent + descent) + pad * 2);
+  const x = left + pad;
+  const y = ascent + pad;
 
   // Draw with stroke then fill
   cv = new OffscreenCanvas(w, h);
@@ -139,13 +194,24 @@ function buildYearShape(text: string): confetti.Shape {
   ctx.font = fontFamily;
   const m = ctx.measureText(text);
   const padding = 3;
-  const w =
-    Math.ceil(m.actualBoundingBoxRight + m.actualBoundingBoxLeft) + padding * 2;
-  const h =
-    Math.ceil(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) +
-    padding * 2;
-  const x = m.actualBoundingBoxLeft + padding;
-  const y = m.actualBoundingBoxAscent + padding;
+  const left =
+    typeof m.actualBoundingBoxLeft === "number" ? m.actualBoundingBoxLeft : 0;
+  const right =
+    typeof m.actualBoundingBoxRight === "number"
+      ? m.actualBoundingBoxRight
+      : m.width || fontSize;
+  const ascent =
+    typeof m.actualBoundingBoxAscent === "number"
+      ? m.actualBoundingBoxAscent
+      : fontSize;
+  const descent =
+    typeof m.actualBoundingBoxDescent === "number"
+      ? m.actualBoundingBoxDescent
+      : 0;
+  const w = Math.max(1, Math.ceil(right + left) + padding * 2);
+  const h = Math.max(1, Math.ceil(ascent + descent) + padding * 2);
+  const x = left + padding;
+  const y = ascent + padding;
 
   // Draw on correctly-sized canvas
   cv = new OffscreenCanvas(w, h);
@@ -169,20 +235,23 @@ function buildYearShape(text: string): confetti.Shape {
 /**
  * Decide whether confetti should fire.
  *
- * Pure function of state + option only — previewMode does not affect this.
+ * Fires when option is 'on', motion is allowed, and either:
+ * - Current state is Ramadan or Eid
+ * - previewMode is true
  *
- * | option  | fires when              |
- * |---------|-------------------------|
- * | `'off'` | never                   |
- * | `'on'`  | isRamadan (every day)   |
+ * | option  | fires when                                  |
+ * |---------|---------------------------------------------|
+ * | `'off'` | never                                       |
+ * | `'on'`  | isRamadan || isEid || previewMode           |
  */
 export function shouldFireConfetti(
   state: RamadanState,
-  option: "on" | "off"
+  option: "on" | "off",
+  previewMode = false
 ): boolean {
   if (option === "off") return false;
   if (!isMotionAllowed()) return false;
-  return state.isRamadan || state.isEid;
+  return state.isRamadan || state.isEid || previewMode;
 }
 
 function delay(ms: number): Promise<void> {

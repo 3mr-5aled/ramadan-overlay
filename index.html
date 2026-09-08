@@ -1895,10 +1895,17 @@
         document.getElementById("confettiBtn").addEventListener("click", () => {
           const cfg = getConfig();
           if (cfg.confetti === "off") return;
-          currentInstance?.destroy();
-          currentInstance = init({ ...cfg, confetti: "on" });
-          updateStateDisplay(currentInstance.state);
-          updateCodeBox(cfg);
+          if (
+            currentInstance &&
+            typeof currentInstance.fireConfetti === "function"
+          ) {
+            currentInstance.fireConfetti();
+          } else {
+            currentInstance?.destroy();
+            currentInstance = init({ ...cfg, confetti: "on" });
+            updateStateDisplay(currentInstance.state);
+            updateCodeBox(cfg);
+          }
         });
 
         // ── Banner apply ──

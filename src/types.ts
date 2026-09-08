@@ -175,6 +175,13 @@ export interface RamadanOverlayConfig {
   previewMode?: boolean;
 
   /**
+   * Target date to evaluate for occasion/Ramadan detection (defaults to `new Date()`).
+   * Can be a Date object, ISO string, or numeric timestamp.
+   * Useful for simulation, testing, and SSR environments.
+   */
+  date?: Date | string | number;
+
+  /**
    * Controls whether confetti fires:
    * - `'on'`  — fires every day throughout Ramadan (default)
    * - `'off'` — disabled
@@ -357,7 +364,7 @@ export type Occasion = "ramadan" | "eid-fitr" | "eid-adha" | "none";
 
 export interface RamadanDateQuery {
   /** Target Gregorian date to evaluate. Defaults to `new Date()`. */
-  date?: Date;
+  date?: Date | string | number;
   /** Named region preset mapping to a Hijri calendar day offset, or a custom region string. */
   region?: HijriRegion | string;
   /** Manual day offset (-3, -2, -1, 0, +1, +2, +3). Overrides `region`. */
@@ -402,6 +409,8 @@ export interface OverlayInstance {
   getCountdownController: () => IftarCountdownController | null;
   /** Get the current detected Ramadan and occasion state. */
   getState: () => RamadanState;
+  /** Programmatically fire the festive Ramadan / Eid celebration confetti burst. */
+  fireConfetti: () => Promise<void>;
 }
 
 // ─── Countdown Types ─────────────────────────────────────────────────────────
@@ -561,8 +570,10 @@ export interface ResolvedConfig extends Required<
     | "onEidStart"
     | "onOccasionChange"
     | "countdown"
+    | "date"
   >
 > {
+  date?: Date;
   debug: boolean;
   onError?: (error: unknown) => void;
   theme: ThemeOption;
