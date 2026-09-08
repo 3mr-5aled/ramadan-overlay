@@ -55,3 +55,11 @@ _Avoid_: Sleeping timer, long interval, background polling
 **Active Tick Loop**:
 The self-correcting 1-second timing cycle that drives countdown digit rendering and tab-visibility resynchronization.
 _Avoid_: Animation frame, second ticker, interval loop
+
+**Ambient Audio Controller**:
+The lifecycle manager for audio alert playback and priming, wrapping `HTMLAudioElement` with zero-throw browser autoplay policy enforcement.
+_Avoid_: Audio player, sound manager, chime player
+
+**Celebration Flare**:
+The festive sensory sequence (confetti burst, celebratory card styling, and audio chime alert) triggered at T-0 upon reaching Iftar.
+_Avoid_: Celebration effect, party mode, alert explosion
