@@ -1,11 +1,7 @@
 // ─── Variant Types ────────────────────────────────────────────────────────────
 
 export type OverlayVariant =
-  | "lanterns"
-  | "crescent-stars"
-  | "geometric"
-  | "sparkles"
-  | "banner";
+  "lanterns" | "crescent-stars" | "geometric" | "sparkles" | "banner";
 
 /**
  * Which of the 12 lantern SVG designs to display.
@@ -208,6 +204,15 @@ export interface RamadanOverlayConfig {
 
 // ─── State & Instance ─────────────────────────────────────────────────────────
 
+export interface RamadanDateQuery {
+  /** Target Gregorian date to evaluate. Defaults to `new Date()`. */
+  date?: Date;
+  /** Named region preset mapping to a Hijri calendar day offset, or a custom region string. */
+  region?: HijriRegion | string;
+  /** Manual day offset (-2, -1, 0, +1, +2). Overrides `region`. */
+  hijriAdjustment?: number;
+}
+
 export interface RamadanState {
   /** True when the current date falls within Ramadan (Hijri month 9). */
   isRamadan: boolean;
@@ -220,6 +225,8 @@ export interface RamadanState {
 export interface OverlayInstance {
   /** Remove the overlay from the DOM and clean up all resources. */
   destroy: () => void;
+  /** Update overlay configuration dynamically without full re-creation where possible. */
+  update: (config: Partial<RamadanOverlayConfig>) => void;
   /** The root container element (null if overlay was not mounted). */
   container: HTMLElement | null;
   /** The detected Ramadan state at mount time. */
@@ -234,7 +241,7 @@ export interface OverlayInstance {
  */
 export type VariantMountFn = (
   container: HTMLElement,
-  config: ResolvedConfig,
+  config: ResolvedConfig
 ) => () => void;
 
 // ─── Internal Resolved Config ─────────────────────────────────────────────────

@@ -1,16 +1,10 @@
 import confetti from "canvas-confetti";
 import type { RamadanState } from "../types";
+import { isMotionAllowed } from "./motion";
 
 const DEFAULT_GOLD = "#c9a84c";
 const DEFAULT_GREEN = "#2d5a27";
 const DEFAULT_CREAM = "#fff7cc";
-
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-  );
-}
 
 /**
  * Fire a 3-burst Ramadan confetti sequence on day 1.
@@ -18,9 +12,9 @@ function prefersReducedMotion(): boolean {
  */
 export async function fireRamadanConfetti(
   hijriYear: number,
-  colors?: string[],
+  colors?: string[]
 ): Promise<void> {
-  if (prefersReducedMotion()) return;
+  if (!isMotionAllowed()) return;
 
   const palette = colors?.length
     ? colors
@@ -183,10 +177,10 @@ function buildYearShape(text: string): confetti.Shape {
  */
 export function shouldFireConfetti(
   state: RamadanState,
-  option: "on" | "off",
+  option: "on" | "off"
 ): boolean {
   if (option === "off") return false;
-  if (prefersReducedMotion()) return false;
+  if (!isMotionAllowed()) return false;
   return state.isRamadan;
 }
 

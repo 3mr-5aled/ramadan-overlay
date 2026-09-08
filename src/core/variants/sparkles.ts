@@ -1,5 +1,5 @@
 import type { VariantMountFn } from "../../types";
-import { scheduleRender } from "../scheduler";
+import { isMotionAllowed, scheduleRender } from "../motion";
 
 interface SparkleParticle {
   el: HTMLElement;
@@ -28,10 +28,10 @@ function build8StarSVG(color: string, size: number): string {
     const outer = (i * Math.PI) / 4;
     const inner = outer + Math.PI / 8;
     pts.push(
-      `${20 + outerR * Math.sin(outer)},${20 - outerR * Math.cos(outer)}`,
+      `${20 + outerR * Math.sin(outer)},${20 - outerR * Math.cos(outer)}`
     );
     pts.push(
-      `${20 + innerR * Math.sin(inner)},${20 - innerR * Math.cos(inner)}`,
+      `${20 + innerR * Math.sin(inner)},${20 - innerR * Math.cos(inner)}`
     );
   }
   return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -41,8 +41,12 @@ function build8StarSVG(color: string, size: number): string {
 
 export const mountSparkles: VariantMountFn = (
   container,
-  config,
+  config
 ): (() => void) => {
+  if (!isMotionAllowed()) {
+    return () => undefined;
+  }
+
   const colors = config.colors.length
     ? config.colors
     : ["#c9a84c", "#e8c96b", "#fff7cc", "#4a8a3a"];

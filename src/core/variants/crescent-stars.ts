@@ -14,10 +14,10 @@ function build8StarSVG(color: string, size: number): string {
     const outer = (i * Math.PI) / 4;
     const inner = outer + Math.PI / 8;
     pts.push(
-      `${20 + outerR * Math.sin(outer)},${20 - outerR * Math.cos(outer)}`,
+      `${20 + outerR * Math.sin(outer)},${20 - outerR * Math.cos(outer)}`
     );
     pts.push(
-      `${20 + innerR * Math.sin(inner)},${20 - innerR * Math.cos(inner)}`,
+      `${20 + innerR * Math.sin(inner)},${20 - innerR * Math.cos(inner)}`
     );
   }
   return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -27,7 +27,7 @@ function build8StarSVG(color: string, size: number): string {
 
 export const mountCrescentStars: VariantMountFn = (
   container,
-  config,
+  config
 ): (() => void) => {
   const colors = config.colors;
   const elements: HTMLElement[] = [];

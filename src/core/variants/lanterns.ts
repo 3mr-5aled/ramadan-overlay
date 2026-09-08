@@ -331,7 +331,7 @@ const LANTERN_SVG_DATA: Array<{ viewBox: string; gContent: string }> = [
 
 export const mountLanterns: VariantMountFn = (
   container,
-  config,
+  config
 ): (() => void) => {
   const colors = config.colors;
 
@@ -351,7 +351,7 @@ export const mountLanterns: VariantMountFn = (
     "#1a7a6b",
   ];
   const palette: string[] = DEFAULTS.map((d, i) =>
-    colors && colors.length > 0 ? colors[i % colors.length] : d,
+    colors && colors.length > 0 ? colors[i % colors.length] : d
   );
   const ceilingColor = config.ceilingColor;
   const ropeColor = config.ropeColor;
@@ -411,7 +411,7 @@ export const mountLanterns: VariantMountFn = (
   const onResize = () => {
     const newCount = Math.max(
       4,
-      Math.min(12, Math.round(window.innerWidth / 120)),
+      Math.min(12, Math.round(window.innerWidth / 120))
     );
     if (newCount !== count) {
       row.remove();

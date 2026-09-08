@@ -8,7 +8,7 @@ function buildGeometricSVG(
   color1: string,
   color2: string,
   width: number,
-  height: number,
+  height: number
 ): string {
   return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
@@ -35,7 +35,7 @@ function buildGeometricSVG(
 
 export const mountGeometric: VariantMountFn = (
   container,
-  config,
+  config
 ): (() => void) => {
   const colors = config.colors;
   const color1 = colors[0] ?? "#c9a84c";
@@ -53,7 +53,7 @@ export const mountGeometric: VariantMountFn = (
 
   const bandH = Math.max(
     28,
-    Math.min(56, Math.round(window.innerWidth * 0.035)),
+    Math.min(56, Math.round(window.innerWidth * 0.035))
   );
 
   for (const pos of positions) {
@@ -63,7 +63,7 @@ export const mountGeometric: VariantMountFn = (
       color1,
       color2,
       window.innerWidth,
-      bandH,
+      bandH
     );
     container.appendChild(band);
     bands.push(band);
@@ -79,7 +79,7 @@ export const mountGeometric: VariantMountFn = (
       color1,
       color2,
       window.innerWidth,
-      window.innerHeight,
+      window.innerHeight
     );
     container.appendChild(bg);
     bands.push(bg);

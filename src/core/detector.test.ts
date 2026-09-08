@@ -27,5 +27,36 @@ if (typeof describe !== "undefined") {
       const state = getRamadanState(new Date("2026-04-01"));
       expect(state.isRamadan).toBe(false);
     });
+
+    it("handles regional presets via query object", () => {
+      const egyptStartDay = getRamadanState({
+        date: new Date("2026-02-18"),
+        region: "egypt",
+      });
+      expect(egyptStartDay.isRamadan).toBe(false);
+
+      const egyptDayOne = getRamadanState({
+        date: new Date("2026-02-19"),
+        region: "egypt",
+      });
+      expect(egyptDayOne.isRamadan).toBe(true);
+      expect(egyptDayOne.dayNumber).toBe(1);
+    });
+
+    it("prefers explicit hijriAdjustment over region preset", () => {
+      const state = getRamadanState({
+        date: new Date("2026-02-18"),
+        region: "egypt",
+        hijriAdjustment: 0,
+      });
+      expect(state.isRamadan).toBe(true);
+      expect(state.dayNumber).toBe(1);
+    });
+
+    it("supports legacy arguments getRamadanState(date, adjustment)", () => {
+      const state = getRamadanState(new Date("2026-02-19"), 1);
+      expect(state.isRamadan).toBe(true);
+      expect(state.dayNumber).toBe(1);
+    });
   });
 }

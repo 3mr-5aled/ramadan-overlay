@@ -8,7 +8,11 @@ import {
 } from "vue";
 import { getRamadanState, init } from "../core/index";
 import type {
+  LanternStyle,
   OverlayInstance,
+  OverlayPosition,
+  OverlayVariant,
+  RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
 } from "../types";
@@ -30,7 +34,7 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
   state: ReturnType<typeof ref<RamadanState>>;
   instance: ReturnType<typeof ref<OverlayInstance | null>>;
 } {
-  const state = ref<RamadanState>(getRamadanState());
+  const state = ref<RamadanState>(getRamadanState(config));
   const instance = ref<OverlayInstance | null>(null);
 
   onMounted(() => {
@@ -70,11 +74,11 @@ export const RamadanOverlay = defineComponent({
       default: () => ({}),
     },
     variant: {
-      type: String as PropType<RamadanOverlayConfig["variant"]>,
+      type: String as PropType<OverlayVariant>,
       default: undefined,
     },
     position: {
-      type: String as PropType<RamadanOverlayConfig["position"]>,
+      type: String as PropType<OverlayPosition>,
       default: undefined,
     },
     opacity: { type: Number as PropType<number>, default: undefined },
@@ -91,9 +95,11 @@ export const RamadanOverlay = defineComponent({
       default: undefined,
     },
     lanternStyle: {
-      type: Number as PropType<RamadanOverlayConfig["lanternStyle"]>,
+      type: Number as PropType<LanternStyle>,
       default: undefined,
     },
+    ceilingColor: { type: String as PropType<string>, default: undefined },
+    ropeColor: { type: String as PropType<string>, default: undefined },
     glowColor: { type: String as PropType<string>, default: undefined },
     region: {
       type: String as PropType<RamadanOverlayConfig["region"]>,
@@ -104,33 +110,43 @@ export const RamadanOverlay = defineComponent({
       type: String as PropType<RamadanOverlayConfig["density"]>,
       default: undefined,
     },
+    bannerBg: { type: String as PropType<string>, default: undefined },
+    bannerTextColor: { type: String as PropType<string>, default: undefined },
+    bannerTextEn: { type: String as PropType<string>, default: undefined },
+    bannerTextAr: { type: String as PropType<string>, default: undefined },
+    bannerIconColor: { type: String as PropType<string>, default: undefined },
   },
   emits: ["ramadan-start", "ramadan-end"],
   setup(props, { emit }) {
     let instance: OverlayInstance | null = null;
 
-    const mount = () => {
-      instance?.destroy();
-      // Individual props override the config object
+    const buildConfig = (): RamadanOverlayConfig => {
       const { config, ...individualProps } = props;
-      // Remove undefined entries so they don't overwrite config defaults
       const overrides = Object.fromEntries(
-        Object.entries(individualProps).filter(([, v]) => v !== undefined),
+        Object.entries(individualProps).filter(([, v]) => v !== undefined)
       ) as Partial<RamadanOverlayConfig>;
-      const merged: RamadanOverlayConfig = {
+      return {
         ...config,
         ...overrides,
         onRamadanStart: (s) => emit("ramadan-start", s),
         onRamadanEnd: () => emit("ramadan-end"),
       };
-      instance = init(merged);
     };
 
-    onMounted(mount);
+    onMounted(() => {
+      instance = init(buildConfig());
+    });
 
     watch(
       () => JSON.stringify(props),
-      () => mount(),
+      () => {
+        const newConfig = buildConfig();
+        if (!instance) {
+          instance = init(newConfig);
+        } else {
+          instance.update(newConfig);
+        }
+      }
     );
 
     onUnmounted(() => {
@@ -143,4 +159,9 @@ export const RamadanOverlay = defineComponent({
 });
 
 export { getRamadanState };
-export type { OverlayInstance, RamadanOverlayConfig, RamadanState };
+export type {
+  OverlayInstance,
+  RamadanDateQuery,
+  RamadanOverlayConfig,
+  RamadanState,
+};

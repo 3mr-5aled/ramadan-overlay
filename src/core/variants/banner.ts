@@ -1,4 +1,4 @@
-import type { VariantMountFn } from "../../types";
+import type { ResolvedConfig } from "../../types";
 
 /**
  * Banner variant — a 52 px bar prepended to document.body that pushes page
@@ -42,7 +42,7 @@ function buildBar(
   greeting: string,
   isArabic: boolean,
   zIndex: number,
-  placement: "top" | "bottom",
+  placement: "top" | "bottom"
 ): HTMLElement {
   const bar = document.createElement("div");
   bar.setAttribute("role", "banner");
@@ -92,10 +92,10 @@ function buildBar(
   return bar;
 }
 
-export const mountBanner: VariantMountFn = (
-  _container,
-  config,
-): (() => void) => {
+export function mountBannerElements(config: ResolvedConfig): {
+  elements: HTMLElement[];
+  cleanup: () => void;
+} {
   const bg = config.bannerBg;
   const textColor = config.bannerTextColor;
   const iconColor = config.bannerIconColor;
@@ -130,7 +130,7 @@ export const mountBanner: VariantMountFn = (
       greeting,
       isArabic,
       zIndex,
-      "top",
+      "top"
     );
     document.body.prepend(el);
     elements.push(el);
@@ -147,7 +147,7 @@ export const mountBanner: VariantMountFn = (
       greeting,
       isArabic,
       zIndex,
-      "bottom",
+      "bottom"
     );
     document.body.appendChild(el);
     elements.push(el);
@@ -156,9 +156,11 @@ export const mountBanner: VariantMountFn = (
     document.body.style.paddingBottom = `${current + BANNER_HEIGHT}px`;
   }
 
-  return () => {
+  const cleanup = (): void => {
     elements.forEach((el) => el.remove());
     document.body.style.paddingTop = origPaddingTop;
     document.body.style.paddingBottom = origPaddingBottom;
   };
-};
+
+  return { elements, cleanup };
+}

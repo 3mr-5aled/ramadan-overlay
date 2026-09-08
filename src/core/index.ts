@@ -19,6 +19,7 @@ export type {
   OverlayInstance,
   OverlayPosition,
   OverlayVariant,
+  RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
 } from "../types";

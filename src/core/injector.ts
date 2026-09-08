@@ -2,15 +2,10 @@ import type {
   OverlayInstance,
   RamadanOverlayConfig,
   ResolvedConfig,
-  VariantMountFn,
 } from "../types";
 import { fireRamadanConfetti, shouldFireConfetti } from "./confetti";
 import { getRamadanState, resolveHijriOffset } from "./detector";
-import { mountBanner } from "./variants/banner";
-import { mountCrescentStars } from "./variants/crescent-stars";
-import { mountGeometric } from "./variants/geometric";
-import { mountLanterns } from "./variants/lanterns";
-import { mountSparkles } from "./variants/sparkles";
+import { mountHost } from "./host";
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -23,22 +18,19 @@ const DEFAULT_COLORS = [
   "#fff7cc",
 ];
 
-const VARIANT_MAP: Record<string, VariantMountFn> = {
-  lanterns: mountLanterns,
-  "crescent-stars": mountCrescentStars,
-  geometric: mountGeometric,
-  sparkles: mountSparkles,
-  banner: mountBanner,
-};
-
 // ─── Config resolution ────────────────────────────────────────────────────────
 
 function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
+  const colors =
+    userConfig.colors && userConfig.colors.length > 0
+      ? userConfig.colors
+      : [...DEFAULT_COLORS];
+
   return {
     variant: userConfig.variant ?? "lanterns",
     position: userConfig.position ?? "both",
     opacity: userConfig.opacity ?? 0.85,
-    colors: userConfig.colors?.length ? userConfig.colors : [...DEFAULT_COLORS],
+    colors,
     zIndex: userConfig.zIndex ?? 9999,
     autoTrigger: userConfig.autoTrigger ?? true,
     previewMode: userConfig.previewMode ?? false,
@@ -58,65 +50,16 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     region: userConfig.region ?? "standard",
     hijriAdjustment: resolveHijriOffset(
       userConfig.region,
-      userConfig.hijriAdjustment,
+      userConfig.hijriAdjustment
     ),
-    density: userConfig.density ?? (window.innerWidth < 640 ? "low" : "normal"),
+    density:
+      userConfig.density ??
+      (typeof window !== "undefined" && window.innerWidth < 640
+        ? "low"
+        : "normal"),
     onRamadanStart: userConfig.onRamadanStart,
     onRamadanEnd: userConfig.onRamadanEnd,
   };
-}
-
-// ─── CSS injection ────────────────────────────────────────────────────────────
-
-const STYLE_ID = "ramadan-overlay-styles";
-
-function injectStyles(): void {
-  if (typeof document === "undefined") return;
-  if (document.getElementById(STYLE_ID)) return;
-
-  // Styles are inlined at build time via the CSS-in-JS approach to avoid
-  // requiring a separate CSS import step from consumers.
-  const css = `
-#ramadan-overlay-root{--ro-color-1:#c9a84c;--ro-color-2:#e8c96b;--ro-color-3:#8b4513;--ro-color-4:#2d5a27;--ro-color-5:#1a3a1a;--ro-opacity:0.85;--ro-z:9999;position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:var(--ro-z);overflow:hidden;opacity:var(--ro-opacity);will-change:opacity;contain:strict}
-#ramadan-overlay-root .ro-lantern-row{position:absolute;top:0;left:0;width:100%;display:flex;justify-content:space-around;align-items:flex-start}
-#ramadan-overlay-root .ro-lantern{display:flex;flex-direction:column;align-items:center;transform-origin:top center;animation:ro-swing var(--ro-swing-duration,3s) ease-in-out infinite alternate}
-#ramadan-overlay-root .ro-lantern svg{width:var(--ro-lantern-size,clamp(18px,2.5vw,38px));height:auto;animation:ro-glow-pulse 2.5s ease-in-out infinite;will-change:transform,opacity}
-#ramadan-overlay-root .ro-lantern-string{width:1px;height:var(--ro-string-height,clamp(20px,3vw,48px));background:var(--ro-color-1);opacity:.7}
-#ramadan-overlay-root .ro-crescent,#ramadan-overlay-root .ro-star{position:absolute;animation:ro-float var(--ro-float-duration,6s) ease-in-out infinite alternate;will-change:transform,opacity}
-#ramadan-overlay-root .ro-sparkle{position:absolute;border-radius:50%;background:var(--ro-color-2);opacity:0;will-change:transform,opacity}
-#ramadan-overlay-root .ro-banner{position:absolute;left:0;width:100%;height:52px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-#ramadan-overlay-root .ro-banner--top{top:0}
-#ramadan-overlay-root .ro-banner--bottom{bottom:0}
-#ramadan-overlay-root .ro-banner-inner{display:flex;align-items:center;justify-content:center;gap:12px;max-width:960px;width:100%;padding:0 20px}
-#ramadan-overlay-root .ro-banner-icon{flex-shrink:0;display:flex;align-items:center;width:32px;height:32px}
-#ramadan-overlay-root .ro-banner-icon svg{width:100%;height:100%}
-#ramadan-overlay-root .ro-banner-text{font-size:clamp(12px,1.6vw,15px);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;line-height:1.3}
-#ramadan-overlay-root .ro-geo-band{position:absolute;left:0;width:100%;overflow:hidden;opacity:.6}
-#ramadan-overlay-root .ro-geo-band--top{top:0}
-#ramadan-overlay-root .ro-geo-band--bottom{bottom:0}
-#ramadan-overlay-root .ro-geo-band svg{width:100%;height:100%}
-@keyframes ro-swing{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
-@keyframes ro-float{from{transform:translateY(0) rotate(0deg);opacity:.7}to{transform:translateY(-12px) rotate(10deg);opacity:1}}
-@keyframes ro-glow-pulse{0%,100%{filter:drop-shadow(0 2px 6px var(--ro-glow,rgba(201,168,76,0.5)))}50%{filter:drop-shadow(0 2px 18px var(--ro-glow,rgba(201,168,76,0.9))) drop-shadow(0 0 8px var(--ro-glow,rgba(201,168,76,0.6)))}}
-@media(prefers-reduced-motion:reduce){#ramadan-overlay-root *{animation:none!important;transition:none!important}}
-  `;
-
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = css;
-  document.head.appendChild(style);
-}
-
-// ─── Apply config tokens ──────────────────────────────────────────────────────
-
-function applyTokens(root: HTMLElement, config: ResolvedConfig): void {
-  const el = root.style;
-  el.setProperty("--ro-opacity", String(config.opacity));
-  el.setProperty("--ro-z", String(config.zIndex));
-  el.setProperty("--ro-glow", config.glowColor);
-  config.colors.forEach((c, i) => {
-    el.setProperty(`--ro-color-${i + 1}`, c);
-  });
 }
 
 // ─── Public: init ─────────────────────────────────────────────────────────────
@@ -128,7 +71,11 @@ function applyTokens(root: HTMLElement, config: ResolvedConfig): void {
  * ```ts
  * import { init } from 'ramadan-overlay';
  * const overlay = init({ variant: 'lanterns', previewMode: true });
- * // later:
+ *
+ * // Update styling dynamically:
+ * overlay.update({ opacity: 0.5 });
+ *
+ * // Destroy when done:
  * overlay.destroy();
  * ```
  */
@@ -137,6 +84,7 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
     // SSR — return a no-op instance
     return {
       destroy: () => undefined,
+      update: () => undefined,
       container: null,
       state: {
         isRamadan: false,
@@ -146,66 +94,91 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
     };
   }
 
-  const config = resolveConfig(userConfig);
-  const state = getRamadanState(new Date(), config.hijriAdjustment);
+  let currentConfig = resolveConfig(userConfig);
+  const state = getRamadanState({
+    date: new Date(),
+    region: currentConfig.region,
+    hijriAdjustment: currentConfig.hijriAdjustment,
+  });
 
   const shouldMount =
-    config.previewMode || !config.autoTrigger || state.isRamadan;
+    currentConfig.previewMode || !currentConfig.autoTrigger || state.isRamadan;
 
   if (!shouldMount) {
-    return { destroy: () => undefined, container: null, state };
+    return {
+      destroy: () => undefined,
+      update: () => undefined,
+      container: null,
+      state,
+    };
   }
 
-  // Inject base styles once
-  injectStyles();
-
-  // Build root container
-  const root = document.createElement("div");
-  root.id = "ramadan-overlay-root";
-  root.setAttribute("aria-hidden", "true");
-  root.setAttribute("role", "presentation");
-  applyTokens(root, config);
-
-  document.body.appendChild(root);
-
-  // Mount the chosen variant
-  const mountFn = VARIANT_MAP[config.variant] ?? mountLanterns;
-  const cleanupVariant = mountFn(root, config);
-
-  // Pause rendering while the tab is hidden (no paint cost)
-  const onVisibilityChange = (): void => {
-    root.style.visibility = document.hidden ? "hidden" : "";
-  };
-  document.addEventListener("visibilitychange", onVisibilityChange);
+  // Mount the host DOM structure
+  let hostMount = mountHost(currentConfig);
 
   // Callbacks
-  if (state.isRamadan || config.previewMode) {
-    config.onRamadanStart?.(state);
+  if (state.isRamadan || currentConfig.previewMode) {
+    currentConfig.onRamadanStart?.(state);
   }
 
   // Confetti — runs async, non-blocking
-  if (shouldFireConfetti(state, config.confetti)) {
+  if (shouldFireConfetti(state, currentConfig.confetti)) {
     const confettiYear = state.hijriYear || 1447;
-    void fireRamadanConfetti(confettiYear, config.colors);
+    void fireRamadanConfetti(confettiYear, currentConfig.colors);
   }
 
-  // Cleanup
-  const destroy = (): void => {
-    cleanupVariant();
-    document.removeEventListener("visibilitychange", onVisibilityChange);
-    root.remove();
-    config.onRamadanEnd?.();
+  const instance: OverlayInstance = {
+    destroy: () => {
+      hostMount.cleanup();
+      instance.container = null;
+      currentConfig.onRamadanEnd?.();
+    },
+    update: (partialConfig: Partial<RamadanOverlayConfig>) => {
+      const newConfig = resolveConfig({
+        ...currentConfig,
+        ...partialConfig,
+      });
+
+      const bannerChanged =
+        newConfig.variant === "banner" &&
+        (newConfig.bannerBg !== currentConfig.bannerBg ||
+          newConfig.bannerTextColor !== currentConfig.bannerTextColor ||
+          newConfig.bannerTextEn !== currentConfig.bannerTextEn ||
+          newConfig.bannerTextAr !== currentConfig.bannerTextAr ||
+          newConfig.bannerIconColor !== currentConfig.bannerIconColor ||
+          newConfig.locale !== currentConfig.locale);
+
+      const structuralChange =
+        newConfig.variant !== currentConfig.variant ||
+        newConfig.position !== currentConfig.position ||
+        newConfig.density !== currentConfig.density ||
+        newConfig.lanternStyle !== currentConfig.lanternStyle ||
+        bannerChanged;
+
+      if (structuralChange) {
+        hostMount.cleanup();
+        hostMount = mountHost(newConfig);
+        instance.container = hostMount.container;
+      } else {
+        hostMount.updateTokens(newConfig);
+      }
+
+      currentConfig = newConfig;
+    },
+    container: hostMount.container,
+    state,
   };
 
-  return { destroy, container: root, state };
+  return instance;
 }
 
-// ─── Public: isRamadan helper ─────────────────────────────────────────────────
+// ─── Public: exports ──────────────────────────────────────────────────────────
 
 export type {
   OverlayInstance,
   OverlayPosition,
   OverlayVariant,
+  RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
 } from "../types";

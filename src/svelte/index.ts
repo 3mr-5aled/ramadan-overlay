@@ -2,6 +2,7 @@ import { onDestroy, onMount } from "svelte";
 import { getRamadanState, init } from "../core/index";
 import type {
   OverlayInstance,
+  RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
 } from "../types";
@@ -19,14 +20,17 @@ import type {
  */
 export function ramadanOverlay(
   _node: HTMLElement,
-  config: RamadanOverlayConfig = {},
+  config: RamadanOverlayConfig = {}
 ) {
   let instance: OverlayInstance | null = init(config);
 
   return {
     update(newConfig: RamadanOverlayConfig) {
-      instance?.destroy();
-      instance = init(newConfig);
+      if (!instance) {
+        instance = init(newConfig);
+      } else {
+        instance.update(newConfig);
+      }
     },
     destroy() {
       instance?.destroy();
@@ -51,7 +55,7 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
   state: { subscribe: (fn: (v: RamadanState) => void) => () => void };
 } {
   let subscribers: Array<(v: RamadanState) => void> = [];
-  let currentState: RamadanState = getRamadanState();
+  let currentState: RamadanState = getRamadanState(config);
 
   const store = {
     subscribe(fn: (v: RamadanState) => void) {
@@ -83,4 +87,9 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
 }
 
 export { getRamadanState };
-export type { OverlayInstance, RamadanOverlayConfig, RamadanState };
+export type {
+  OverlayInstance,
+  RamadanDateQuery,
+  RamadanOverlayConfig,
+  RamadanState,
+};

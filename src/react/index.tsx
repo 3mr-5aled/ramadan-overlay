@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { getRamadanState, init } from "../core/index";
 import type {
   OverlayInstance,
+  RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
 } from "../types";
@@ -25,20 +26,35 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
   instance: OverlayInstance | null;
 } {
   const instanceRef = useRef<OverlayInstance | null>(null);
-  const [state, setState] = useState<RamadanState>(() => getRamadanState());
+  const [state, setState] = useState<RamadanState>(() =>
+    getRamadanState(config)
+  );
 
-  // Serialize config to a stable key to avoid unnecessary re-mounts
+  // Stabilize update calls across renders
   const configKey = JSON.stringify(config);
+  const isMountedRef = useRef(false);
 
+  // Lifetime effect: mount, cleanup on unmount, and support React 18 StrictMode re-mount
   useEffect(() => {
-    const overlay = init(config);
-    instanceRef.current = overlay;
-    setState(overlay.state);
-
+    isMountedRef.current = true;
+    if (!instanceRef.current) {
+      const overlay = init(config);
+      instanceRef.current = overlay;
+      setState(overlay.state);
+    }
     return () => {
-      overlay.destroy();
+      isMountedRef.current = false;
+      instanceRef.current?.destroy();
       instanceRef.current = null;
     };
+  }, []);
+
+  // Update effect: in-place update when config props change
+  useEffect(() => {
+    if (!isMountedRef.current) return;
+    if (instanceRef.current) {
+      instanceRef.current.update(config);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configKey]);
 
@@ -81,4 +97,9 @@ export const RamadanOverlay: FC<RamadanOverlayProps> = (props) => {
 };
 
 export { getRamadanState };
-export type { OverlayInstance, RamadanOverlayConfig, RamadanState };
+export type {
+  OverlayInstance,
+  RamadanDateQuery,
+  RamadanOverlayConfig,
+  RamadanState,
+};
