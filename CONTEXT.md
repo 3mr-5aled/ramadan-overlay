@@ -95,3 +95,19 @@ _Avoid_: Error listener, crash reporter, failure event
 **Diagnostic Logger**:
 The internal, prefix-standardized developer notice mechanism that activates in development or debug mode to explain dormant states (e.g. `autoTrigger` outside Ramadan/Eid) while maintaining complete silence in production.
 _Avoid_: Console wrapper, debug printer, log util
+
+**Floating Motifs**:
+Festive SVG visual items (crescents, stars, sheep, Kaaba, balloons, and gifts) that float and drift across the viewport in celebratory animation variants.
+_Avoid_: Floating icons, particles, decoration elements, floating shapes
+
+**Content Safe Zone**:
+The central viewport corridor intentionally kept sterile of floating motifs to prevent obscuring host application text, forms, and interactive controls.
+_Avoid_: Exclusion area, text buffer, central clearance, reading zone
+
+**Peripheral Gutters**:
+The dedicated lateral margin channels along the viewport edges where floating motifs are constrained when clearance is active.
+_Avoid_: Side columns, edge strips, side channels
+
+**Layer Stacking**:
+The z-plane placement mode (`'foreground'` or `'background'`) governing whether the overlay mounts on top of website elements or behind them as ambient page backdrops.
+_Avoid_: Z-index mode, display layer, backdrop mode
