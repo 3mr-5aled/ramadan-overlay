@@ -19,6 +19,9 @@ import type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  ThemeOption,
+  ThemePreset,
+  ThemeDefinition,
 } from "../types";
 
 // ─── Directive ────────────────────────────────────────────────────────────────
@@ -41,6 +44,7 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   @Input() ramadanConfig: RamadanOverlayConfig = {};
 
   // Individual input overrides
+  @Input() theme?: ThemeOption;
   @Input() variant?: OverlayVariant;
   @Input() position?: OverlayPosition;
   @Input() mobileSideBehavior?: MobileSideBehavior;
@@ -91,6 +95,7 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
 
   private buildConfig(): RamadanOverlayConfig {
     const inputKeys = [
+      "theme",
       "variant",
       "position",
       "mobileSideBehavior",
@@ -163,4 +168,7 @@ export type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  ThemePreset,
+  ThemeDefinition,
+  ThemeOption,
 };

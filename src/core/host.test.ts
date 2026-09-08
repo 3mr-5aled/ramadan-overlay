@@ -123,4 +123,68 @@ describe("HostMount and Overlay Lifecycle", () => {
 
     overlay.destroy();
   });
+
+  it("applies theme custom properties and data-theme to #ramadan-overlay-root", () => {
+    const overlay = init({
+      variant: "lanterns",
+      theme: "midnight",
+      previewMode: true,
+    });
+
+    const root = overlay.container!;
+    expect(root.getAttribute("data-theme")).toBe("midnight");
+    expect(root.style.getPropertyValue("--ro-color-1")).toBe("#fbbf24");
+    expect(root.style.getPropertyValue("--ro-color-2")).toBe("#e2e8f0");
+    expect(root.style.getPropertyValue("--ro-glow")).toBe(
+      "rgba(56, 189, 248, 0.55)"
+    );
+    expect(root.style.getPropertyValue("--ro-ceiling")).toBe("#1e293b");
+    expect(root.style.getPropertyValue("--ro-rope")).toBe("#64748b");
+    expect(root.style.getPropertyValue("--ro-banner-bg")).toBe(
+      "rgba(15, 23, 42, 0.95)"
+    );
+    expect(root.style.getPropertyValue("--ro-banner-text")).toBe("#f8fafc");
+    expect(root.style.getPropertyValue("--ro-banner-icon")).toBe("#fbbf24");
+    expect(root.style.getPropertyValue("--ro-countdown-bg")).toBe(
+      "rgba(15, 23, 42, 0.95)"
+    );
+    expect(root.style.getPropertyValue("--ro-countdown-border")).toBe(
+      "rgba(56, 189, 248, 0.35)"
+    );
+    expect(root.style.getPropertyValue("--ro-countdown-gold")).toBe("#fbbf24");
+
+    overlay.destroy();
+  });
+
+  it("dynamically hot-swaps theme CSS variables in-place without rebuilding the DOM", () => {
+    const overlay = init({
+      variant: "lanterns",
+      theme: "classic",
+      previewMode: true,
+    });
+
+    const originalContainer = overlay.container;
+    expect(originalContainer?.getAttribute("data-theme")).toBe("classic");
+    expect(originalContainer?.style.getPropertyValue("--ro-color-1")).toBe(
+      "#c9a84c"
+    );
+
+    // Call setTheme('royal')
+    overlay.setTheme("royal");
+
+    // Same container in DOM:
+    expect(overlay.container).toBe(originalContainer);
+    expect(originalContainer?.getAttribute("data-theme")).toBe("royal");
+    expect(originalContainer?.style.getPropertyValue("--ro-color-1")).toBe(
+      "#fcd34d"
+    );
+    expect(originalContainer?.style.getPropertyValue("--ro-ceiling")).toBe(
+      "#4c1d95"
+    );
+    expect(originalContainer?.style.getPropertyValue("--ro-glow")).toBe(
+      "rgba(167, 139, 250, 0.55)"
+    );
+
+    overlay.destroy();
+  });
 });

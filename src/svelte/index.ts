@@ -9,6 +9,9 @@ import type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  ThemePreset,
+  ThemeDefinition,
+  ThemeOption,
 } from "../types";
 
 /**
@@ -106,4 +109,7 @@ export type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  ThemePreset,
+  ThemeDefinition,
+  ThemeOption,
 };

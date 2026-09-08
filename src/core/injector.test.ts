@@ -319,4 +319,140 @@ describe("init orchestration & live transition", () => {
       overlay.destroy();
     });
   });
+
+  describe("predefined visual themes & dynamic hot-swapping", () => {
+    it("initializes with default classic theme and sets data-theme attribute", () => {
+      const overlay = init({ previewMode: true });
+      expect(overlay.config.theme).toBe("classic");
+      expect(overlay.config.themeName).toBe("classic");
+      expect(overlay.container?.getAttribute("data-theme")).toBe("classic");
+      expect(overlay.container?.style.getPropertyValue("--ro-color-1")).toBe(
+        "#c9a84c"
+      );
+      overlay.destroy();
+    });
+
+    it("supports switching through all 5 preset themes via setTheme() without DOM remount", () => {
+      const overlay = init({ previewMode: true, theme: "classic" });
+      const originalContainer = overlay.container;
+
+      const presets: Array<{ name: string; color1: string; ceiling: string }> =
+        [
+          { name: "midnight", color1: "#fbbf24", ceiling: "#1e293b" },
+          { name: "emerald", color1: "#f59e0b", ceiling: "#064e3b" },
+          { name: "royal", color1: "#fcd34d", ceiling: "#4c1d95" },
+          { name: "desert-dusk", color1: "#f97316", ceiling: "#7c2d12" },
+          { name: "classic", color1: "#c9a84c", ceiling: "#8b4513" },
+        ];
+
+      for (const preset of presets) {
+        // @ts-expect-error preset name string
+        overlay.setTheme(preset.name);
+        expect(overlay.container).toBe(originalContainer);
+        expect(overlay.container?.getAttribute("data-theme")).toBe(preset.name);
+        expect(overlay.container?.style.getPropertyValue("--ro-color-1")).toBe(
+          preset.color1
+        );
+        expect(overlay.container?.style.getPropertyValue("--ro-ceiling")).toBe(
+          preset.ceiling
+        );
+      }
+
+      overlay.destroy();
+    });
+
+    it("supports custom theme object extending a preset with partial overrides", () => {
+      const overlay = init({
+        previewMode: true,
+        theme: {
+          name: "custom-emerald-gold",
+          extends: "emerald",
+          colors: ["#ffd700", "#ffae00"],
+          glowColor: "rgba(255, 215, 0, 0.7)",
+        },
+      });
+
+      expect(overlay.container?.getAttribute("data-theme")).toBe(
+        "custom-emerald-gold"
+      );
+      expect(overlay.container?.style.getPropertyValue("--ro-color-1")).toBe(
+        "#ffd700"
+      );
+      expect(overlay.container?.style.getPropertyValue("--ro-color-2")).toBe(
+        "#ffae00"
+      );
+      // Inherited from emerald preset:
+      expect(overlay.container?.style.getPropertyValue("--ro-ceiling")).toBe(
+        "#064e3b"
+      );
+      expect(overlay.container?.style.getPropertyValue("--ro-glow")).toBe(
+        "rgba(255, 215, 0, 0.7)"
+      );
+
+      overlay.destroy();
+    });
+
+    it("respects precedence: explicit user prop overrides custom theme prop overrides preset default", () => {
+      const overlay = init({
+        previewMode: true,
+        glowColor: "rgba(255, 0, 0, 0.9)", // Explicit user prop
+        theme: {
+          extends: "midnight",
+          glowColor: "rgba(0, 0, 255, 0.5)", // Custom theme prop
+          ceilingColor: "#112233", // Custom theme prop overriding midnight
+        },
+      });
+
+      // Explicit user prop wins over custom theme prop:
+      expect(overlay.container?.style.getPropertyValue("--ro-glow")).toBe(
+        "rgba(255, 0, 0, 0.9)"
+      );
+      // Custom theme prop wins over preset default:
+      expect(overlay.container?.style.getPropertyValue("--ro-ceiling")).toBe(
+        "#112233"
+      );
+      // Preset default applies where neither specified:
+      expect(overlay.container?.style.getPropertyValue("--ro-color-1")).toBe(
+        "#fbbf24"
+      );
+
+      overlay.destroy();
+    });
+
+    it("hot-swaps banner colors when theme changes without remounting banner bar", () => {
+      const overlay = init({
+        previewMode: true,
+        variant: "banner",
+        theme: "classic",
+      });
+
+      const originalBanner = overlay.container;
+      expect(originalBanner).not.toBeNull();
+      expect(originalBanner?.style.getPropertyValue("--ro-banner-bg")).toBe(
+        "rgba(24, 19, 8, 0.95)"
+      );
+
+      // Switch to emerald
+      overlay.setTheme("emerald");
+      expect(overlay.container).toBe(originalBanner);
+      expect(originalBanner?.style.getPropertyValue("--ro-banner-bg")).toBe(
+        "rgba(2, 44, 34, 0.95)"
+      );
+      expect(originalBanner?.style.getPropertyValue("--ro-banner-text")).toBe(
+        "#fef3c7"
+      );
+
+      // Switch to royal
+      overlay.update({ theme: "royal" });
+      expect(overlay.container).toBe(originalBanner);
+      expect(originalBanner?.style.getPropertyValue("--ro-banner-bg")).toBe(
+        "rgba(30, 11, 64, 0.95)"
+      );
+      expect(originalBanner?.style.getPropertyValue("--ro-banner-text")).toBe(
+        "#fef08a"
+      );
+
+      overlay.destroy();
+    });
+  });
 });

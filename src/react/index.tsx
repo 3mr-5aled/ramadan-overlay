@@ -10,6 +10,9 @@ import type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  ThemePreset,
+  ThemeDefinition,
+  ThemeOption,
 } from "../types";
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -116,4 +119,7 @@ export type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  ThemePreset,
+  ThemeDefinition,
+  ThemeOption,
 };

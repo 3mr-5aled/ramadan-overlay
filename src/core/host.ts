@@ -118,9 +118,24 @@ export function applyTokens(root: HTMLElement, config: ResolvedConfig): void {
   el.setProperty("--ro-glow", config.glowColor);
   el.setProperty("--ro-ceiling", config.ceilingColor);
   el.setProperty("--ro-rope", config.ropeColor);
+  el.setProperty("--ro-banner-bg", config.bannerBg);
+  el.setProperty("--ro-banner-text", config.bannerTextColor);
+  el.setProperty("--ro-banner-icon", config.bannerIconColor);
+
+  if (config.countdownBg) {
+    el.setProperty("--ro-countdown-bg", config.countdownBg);
+  }
+  if (config.countdownBorder) {
+    el.setProperty("--ro-countdown-border", config.countdownBorder);
+  }
+  if (config.countdownAccent) {
+    el.setProperty("--ro-countdown-gold", config.countdownAccent);
+  }
+
   config.colors.forEach((c, i) => {
     el.setProperty(`--ro-color-${i + 1}`, c);
   });
+  root.setAttribute("data-theme", config.themeName ?? "classic");
   root.setAttribute("data-mobile-side", config.mobileSideBehavior);
   root.setAttribute("data-position", config.position);
   if (resolveSidePositions(config.position).length > 0) {
@@ -191,8 +206,12 @@ function mountBannerHost(
   );
   const container = elements[0] ?? document.body;
 
-  const updateTokens = (_newConfig: ResolvedConfig): void => {
-    // Banner styling is set on individual elements during mount
+  const updateTokens = (newConfig: ResolvedConfig): void => {
+    for (const el of elements) {
+      el.style.setProperty("--ro-banner-bg", newConfig.bannerBg);
+      el.style.setProperty("--ro-banner-text", newConfig.bannerTextColor);
+      el.style.setProperty("--ro-banner-icon", newConfig.bannerIconColor);
+    }
   };
 
   return { container, cleanup: cleanupBanner, updateTokens };

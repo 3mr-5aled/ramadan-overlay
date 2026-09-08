@@ -10,6 +10,8 @@ describe("mountEid", () => {
     overrides: Partial<ResolvedConfig> = {}
   ): ResolvedConfig => ({
     variant: "eid",
+    theme: "classic",
+    themeName: "classic",
     position: "both",
     mobileSideBehavior: "hide",
     opacity: 0.85,
@@ -35,6 +37,9 @@ describe("mountEid", () => {
     eidVariant: "eid",
     liveTransition: true,
     countdown: false,
+    countdownBg: "#1a162b",
+    countdownBorder: "rgba(201,168,76,0.25)",
+    countdownAccent: "#c9a84c",
     onRamadanStart: undefined,
     onRamadanEnd: undefined,
     onEidStart: undefined,
@@ -125,6 +130,8 @@ describe("mountBannerElements with Eid occasion", () => {
     overrides: Partial<ResolvedConfig> = {}
   ): ResolvedConfig => ({
     variant: "banner",
+    theme: "classic",
+    themeName: "classic",
     position: "top",
     mobileSideBehavior: "hide",
     opacity: 0.85,
@@ -150,6 +157,9 @@ describe("mountBannerElements with Eid occasion", () => {
     eidVariant: "eid",
     liveTransition: true,
     countdown: false,
+    countdownBg: "#1a162b",
+    countdownBorder: "rgba(201,168,76,0.25)",
+    countdownAccent: "#c9a84c",
     onRamadanStart: undefined,
     onRamadanEnd: undefined,
     onEidStart: undefined,

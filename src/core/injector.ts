@@ -5,6 +5,7 @@ import type {
   RamadanOverlayConfig,
   RamadanState,
   ResolvedConfig,
+  ThemeOption,
 } from "../types";
 import { fireRamadanConfetti, shouldFireConfetti } from "./confetti";
 import { getRamadanState, resolveHijriOffset } from "./detector";
@@ -13,6 +14,7 @@ import {
   createCountdownManager,
   type IftarCountdownManager,
 } from "./countdown";
+import { resolveTheme } from "./themes";
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -29,7 +31,7 @@ const DEFAULT_COLORS = [
 
 function getMsUntilNextMidnight(): number {
   const now = new Date();
-  const nextMidnight = new Date(
+  const tomorrow = new Date(
     now.getFullYear(),
     now.getMonth(),
     now.getDate() + 1,
@@ -37,7 +39,16 @@ function getMsUntilNextMidnight(): number {
     0,
     1
   );
-  return Math.max(1000, nextMidnight.getTime() - now.getTime());
+  return tomorrow.getTime() - now.getTime();
+}
+
+function isCountdownActive(
+  state: RamadanState,
+  config: ResolvedConfig
+): boolean {
+  if (!config.countdown) return false;
+  if (config.previewMode) return true;
+  return state.isRamadan;
 }
 
 function resolveEffectiveVariant(
@@ -46,7 +57,7 @@ function resolveEffectiveVariant(
 ): OverlayVariant {
   if (
     state.isEid &&
-    (config.variant === "lanterns" || config.variant === "eid")
+    (state.occasion === "eid-fitr" || state.occasion === "eid-adha")
   ) {
     return config.eidVariant;
   }
@@ -77,10 +88,7 @@ function isOccasionActive(
 // ─── Config resolution ────────────────────────────────────────────────────────
 
 function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
-  const colors =
-    userConfig.colors && userConfig.colors.length > 0
-      ? userConfig.colors
-      : [...DEFAULT_COLORS];
+  const resolvedTheme = resolveTheme(userConfig.theme, userConfig);
 
   let position = userConfig.position ?? "both";
   if (
@@ -96,27 +104,27 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
   }
 
   return {
+    theme: userConfig.theme ?? "classic",
+    themeName: resolvedTheme.name ?? "classic",
     variant: userConfig.variant ?? "lanterns",
     position,
     mobileSideBehavior: userConfig.mobileSideBehavior ?? "hide",
     opacity: userConfig.opacity ?? 0.85,
-    colors,
+    colors: resolvedTheme.colors,
     zIndex: userConfig.zIndex ?? 9999,
     autoTrigger: userConfig.autoTrigger ?? true,
     previewMode: userConfig.previewMode ?? false,
     confetti: userConfig.confetti ?? "on",
     locale: userConfig.locale ?? "en",
-    bannerBg: userConfig.bannerBg ?? "rgba(15,15,20,0.92)",
-    bannerTextColor:
-      userConfig.bannerTextColor ?? userConfig.colors?.[0] ?? DEFAULT_COLORS[0],
+    bannerBg: resolvedTheme.bannerBg,
+    bannerTextColor: resolvedTheme.bannerTextColor,
     bannerTextEn: userConfig.bannerTextEn ?? "",
     bannerTextAr: userConfig.bannerTextAr ?? "",
-    bannerIconColor:
-      userConfig.bannerIconColor ?? userConfig.colors?.[1] ?? DEFAULT_COLORS[1],
+    bannerIconColor: resolvedTheme.bannerIconColor,
     lanternStyle: userConfig.lanternStyle ?? 0,
-    glowColor: userConfig.glowColor ?? "rgba(201,168,76,0.55)",
-    ceilingColor: userConfig.ceilingColor ?? "#c9a84c",
-    ropeColor: userConfig.ropeColor ?? "#c9a84c",
+    glowColor: resolvedTheme.glowColor,
+    ceilingColor: resolvedTheme.ceilingColor,
+    ropeColor: resolvedTheme.ropeColor,
     region: userConfig.region ?? "standard",
     hijriAdjustment: resolveHijriOffset(
       userConfig.region,
@@ -131,6 +139,9 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     eidVariant: userConfig.eidVariant ?? "eid",
     liveTransition: userConfig.liveTransition ?? true,
     countdown: userConfig.countdown ?? false,
+    countdownBg: resolvedTheme.countdownBg,
+    countdownBorder: resolvedTheme.countdownBorder,
+    countdownAccent: resolvedTheme.countdownAccent,
     onRamadanStart: userConfig.onRamadanStart,
     onRamadanEnd: userConfig.onRamadanEnd,
     onEidStart: userConfig.onEidStart,
@@ -161,6 +172,7 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
     return {
       destroy: () => undefined,
       update: () => undefined,
+      setTheme: () => undefined,
       container: null,
       config: resolveConfig(userConfig),
       state: {
@@ -176,7 +188,8 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
     };
   }
 
-  let currentConfig = resolveConfig(userConfig);
+  let currentUserConfig: RamadanOverlayConfig = { ...userConfig };
+  let currentConfig = resolveConfig(currentUserConfig);
   let currentState = getRamadanState({
     date: new Date(),
     region: currentConfig.region,
@@ -356,10 +369,11 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
       }
     },
     update: (partialConfig: Partial<RamadanOverlayConfig>) => {
-      const newConfig = resolveConfig({
-        ...currentConfig,
+      currentUserConfig = {
+        ...currentUserConfig,
         ...partialConfig,
-      });
+      };
+      const newConfig = resolveConfig(currentUserConfig);
 
       const shouldBeMounted = isOccasionActive(currentState, newConfig);
       const wasMounted = !!hostMount;
@@ -382,11 +396,8 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
 
         const bannerChanged =
           newConfig.variant === "banner" &&
-          (newConfig.bannerBg !== currentConfig.bannerBg ||
-            newConfig.bannerTextColor !== currentConfig.bannerTextColor ||
-            newConfig.bannerTextEn !== currentConfig.bannerTextEn ||
+          (newConfig.bannerTextEn !== currentConfig.bannerTextEn ||
             newConfig.bannerTextAr !== currentConfig.bannerTextAr ||
-            newConfig.bannerIconColor !== currentConfig.bannerIconColor ||
             newConfig.locale !== currentConfig.locale);
 
         const oldEffectivePosition = resolveEffectivePosition(currentConfig);
@@ -438,6 +449,9 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
         }
       }
     },
+    setTheme: (theme: ThemeOption) => {
+      instance.update({ theme });
+    },
     container: null,
     state: currentState,
     get config() {
@@ -473,6 +487,9 @@ export type {
   IftarTimeResolver,
   IftarTimeValue,
   CountdownAnchorPosition,
+  ThemePreset,
+  ThemeDefinition,
+  ThemeOption,
 } from "../types";
 export { getOccasionState, getRamadanState } from "./detector";
 export * from "./countdown";

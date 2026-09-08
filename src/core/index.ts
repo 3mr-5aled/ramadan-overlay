@@ -15,16 +15,21 @@
 
 export { getOccasionState, getRamadanState, init } from "./injector";
 export { createCountdownManager } from "./countdown";
+export { THEME_PRESETS, themes, resolveTheme } from "./themes";
 
 export type {
   Occasion,
   OverlayInstance,
+  RamadanOverlayInstance,
   OverlayPosition,
   MobileSideBehavior,
   OverlayVariant,
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  ThemePreset,
+  ThemeDefinition,
+  ThemeOption,
   IftarCountdownConfig,
   IftarCountdownController,
   IftarCountdownLabels,

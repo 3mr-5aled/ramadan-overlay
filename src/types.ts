@@ -64,9 +64,59 @@ export type OverlayPosition =
 
 export type MobileSideBehavior = "hide" | "top" | "show";
 
+// ─── Visual Theme Types ──────────────────────────────────────────────────────
+
+/**
+ * Built-in cultural theme presets.
+ */
+export type ThemePreset =
+  "classic" | "midnight" | "emerald" | "royal" | "desert-dusk";
+
+/**
+ * Complete visual theme definition schema.
+ */
+export interface ThemeDefinition {
+  /** Optional theme identifier name */
+  name?: string;
+  /** Optional preset name to inherit unprovided tokens from (defaults to 'classic') */
+  extends?: ThemePreset;
+  /** Primary 6-slot color palette for multi-variant rendering */
+  colors: [string, string, string, string, string, string] | string[];
+  /** Drop-shadow halo and ambient particle glow (rgba) */
+  glowColor: string;
+  /** Ceiling mounting line and vertical spine cord color */
+  ceilingColor: string;
+  /** Individual lantern dropline cord color */
+  ropeColor: string;
+  /** Banner bar background color (rgba) */
+  bannerBg: string;
+  /** Banner greeting text typography color */
+  bannerTextColor: string;
+  /** Banner icon accent color */
+  bannerIconColor: string;
+  /** Countdown widget card background */
+  countdownBg?: string;
+  /** Countdown widget border outline */
+  countdownBorder?: string;
+  /** Countdown widget tabular digits & milestone celebration flare */
+  countdownAccent?: string;
+}
+
+/**
+ * Theme configuration option: either a preset name or a partial/complete custom theme.
+ */
+export type ThemeOption = ThemePreset | Partial<ThemeDefinition>;
+
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 export interface RamadanOverlayConfig {
+  /**
+   * Predefined visual theme preset or custom theme object.
+   * Harmonizes colors, glow, ceiling, rope, banner, and countdown tokens across all variants.
+   * @default 'classic'
+   */
+  theme?: ThemeOption;
+
   /**
    * Visual decoration variant.
    * @default 'lanterns'
@@ -299,6 +349,8 @@ export interface OverlayInstance {
   destroy: () => void;
   /** Update overlay configuration dynamically without full re-creation where possible. */
   update: (config: Partial<RamadanOverlayConfig>) => void;
+  /** Dynamically switch the active visual theme. Equivalent to `update({ theme })`. */
+  setTheme: (theme: ThemeOption) => void;
   /** The root container element (null if overlay was not mounted). */
   container: HTMLElement | null;
   /** The detected Ramadan state at mount time. */
@@ -459,6 +511,7 @@ export type VariantMountFn = (
 export interface ResolvedConfig extends Required<
   Omit<
     RamadanOverlayConfig,
+    | "theme"
     | "onRamadanStart"
     | "onRamadanEnd"
     | "onEidStart"
@@ -466,6 +519,8 @@ export interface ResolvedConfig extends Required<
     | "countdown"
   >
 > {
+  theme: ThemeOption;
+  themeName: string;
   lanternStyle: LanternStyle;
   glowColor: string;
   region: HijriRegion;
@@ -474,8 +529,13 @@ export interface ResolvedConfig extends Required<
   eidVariant: OverlayVariant;
   liveTransition: boolean;
   countdown: boolean | IftarCountdownConfig;
+  countdownBg?: string;
+  countdownBorder?: string;
+  countdownAccent?: string;
   onRamadanStart: RamadanOverlayConfig["onRamadanStart"];
   onRamadanEnd: RamadanOverlayConfig["onRamadanEnd"];
   onEidStart: RamadanOverlayConfig["onEidStart"];
   onOccasionChange: RamadanOverlayConfig["onOccasionChange"];
 }
+
+export type RamadanOverlayInstance = OverlayInstance;

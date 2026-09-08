@@ -17,6 +17,9 @@ import type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  ThemeOption,
+  ThemePreset,
+  ThemeDefinition,
 } from "../types";
 
 // ─── Composable ───────────────────────────────────────────────────────────────
@@ -80,6 +83,10 @@ export const RamadanOverlay = defineComponent({
     config: {
       type: Object as PropType<RamadanOverlayConfig>,
       default: () => ({}),
+    },
+    theme: {
+      type: [String, Object] as PropType<ThemeOption>,
+      default: undefined,
     },
     variant: {
       type: String as PropType<OverlayVariant>,
@@ -194,4 +201,7 @@ export type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  ThemePreset,
+  ThemeDefinition,
+  ThemeOption,
 };
