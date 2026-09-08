@@ -47,3 +47,11 @@ _Avoid_: Fast-breaking, breakfast, Maghrib meal
 **Iftar Time Resolver**:
 A dynamic callback function or static definition that provides the target Iftar time for a given calendar date.
 _Avoid_: Time calculator, sunset provider
+
+**Dormant Scheduler**:
+The low-power single-timeout scheduling mechanism that arms until the alert window threshold without executing active per-second ticks.
+_Avoid_: Sleeping timer, long interval, background polling
+
+**Active Tick Loop**:
+The self-correcting 1-second timing cycle that drives countdown digit rendering and tab-visibility resynchronization.
+_Avoid_: Animation frame, second ticker, interval loop
