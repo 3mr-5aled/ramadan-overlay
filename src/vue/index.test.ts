@@ -44,4 +44,34 @@ describe("Vue RamadanOverlay adapter", () => {
     app.unmount();
     expect(document.getElementById("ramadan-overlay-root")).toBeNull();
   });
+
+  it("forwards ropeStyle and ropeSag props to overlay instance", async () => {
+    const TestHost = defineComponent({
+      setup() {
+        return () =>
+          h(RamadanOverlay, {
+            previewMode: true,
+            variant: "lanterns",
+            ropeStyle: "u-shaped",
+            ropeSag: 32,
+          });
+      },
+    });
+
+    const app = createApp(TestHost);
+    app.mount(appContainer);
+    await nextTick();
+
+    const root = document.getElementById("ramadan-overlay-root");
+    expect(root).not.toBeNull();
+    const svg = root?.querySelector("svg.ro-lantern-ropes");
+    expect(svg).not.toBeNull();
+    const path = svg?.querySelector("path.ro-rope-path");
+    expect(path).not.toBeNull();
+    // 4 + 2 * 32 = 68
+    expect(path?.getAttribute("d")).toContain(" 68.0");
+
+    app.unmount();
+    expect(document.getElementById("ramadan-overlay-root")).toBeNull();
+  });
 });

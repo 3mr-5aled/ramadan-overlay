@@ -19,6 +19,7 @@ import type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  RopeStyle,
   ThemeOption,
   ThemePreset,
   ThemeDefinition,
@@ -62,6 +63,8 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   @Input() hijriAdjustment?: number;
   @Input() density?: "low" | "normal" | "high";
   @Input() lanternStyle?: LanternStyle;
+  @Input() ropeStyle?: RopeStyle;
+  @Input() ropeSag?: number;
   @Input() bannerBg?: string;
   @Input() bannerTextColor?: string;
   @Input() bannerTextEn?: string;
@@ -117,6 +120,8 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
       "hijriAdjustment",
       "density",
       "lanternStyle",
+      "ropeStyle",
+      "ropeSag",
       "bannerBg",
       "bannerTextColor",
       "bannerTextEn",
@@ -172,6 +177,7 @@ export type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  RopeStyle,
   ThemePreset,
   ThemeDefinition,
   ThemeOption,

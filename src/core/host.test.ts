@@ -109,6 +109,35 @@ describe("HostMount and Overlay Lifecycle", () => {
     expect(document.querySelector('[role="banner"]')).toBeNull();
   });
 
+  it("updates lantern rope styles dynamically during overlay.update()", () => {
+    const overlay = init({
+      variant: "lanterns",
+      ropeStyle: "straight",
+      previewMode: true,
+    });
+    expect(
+      overlay.container?.querySelector("svg.ro-lantern-ropes line.ro-rope-path")
+    ).not.toBeNull();
+    expect(
+      overlay.container?.querySelector("svg.ro-lantern-ropes path.ro-rope-path")
+    ).toBeNull();
+
+    // Update to u-shaped:
+    overlay.update({ ropeStyle: "u-shaped", ropeSag: 25 });
+    expect(
+      overlay.container?.querySelector("svg.ro-lantern-ropes path.ro-rope-path")
+    ).not.toBeNull();
+
+    // Update to dual:
+    overlay.update({ ropeStyle: "dual" });
+    const paths = overlay.container?.querySelectorAll(
+      "svg.ro-lantern-ropes path.ro-rope-path"
+    );
+    expect(paths?.length).toBe(2);
+
+    overlay.destroy();
+  });
+
   it("reflects data-mobile-side and data-is-side tokens on the overlay container for side positions", () => {
     const overlay = init({
       variant: "lanterns",

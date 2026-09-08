@@ -64,6 +64,14 @@ export type OverlayPosition =
 
 export type MobileSideBehavior = "hide" | "top" | "show";
 
+/**
+ * Advanced lantern suspension rope styles.
+ * - 'straight': Linear horizontal ceiling rail with vertical cords (default).
+ * - 'u-shaped': Multi-scallop festoon swag dipping between adjacent lanterns.
+ * - 'dual': Dual parallel catenary cables mimicking night-market festival stringing.
+ */
+export type RopeStyle = "straight" | "u-shaped" | "dual";
+
 // ─── Visual Theme Types ──────────────────────────────────────────────────────
 
 /**
@@ -203,6 +211,22 @@ export interface RamadanOverlayConfig {
    * @default '#c9a84c'
    */
   ropeColor?: string;
+  /**
+   * Visual style for lantern suspension strings/ropes (lanterns variant only).
+   * - 'straight': Linear horizontal ceiling rail with vertical cords (default).
+   * - 'u-shaped': Multi-scallop festoon swag dipping between adjacent lanterns.
+   * - 'dual': Dual parallel catenary cables mimicking night-market festival stringing.
+   * On vertical side positions ('left', 'right', 'sides'), gracefully falls back to 'straight'.
+   * @default 'straight'
+   */
+  ropeStyle?: RopeStyle;
+
+  /**
+   * Sag depth in pixels for curved rope styles ('u-shaped' and 'dual').
+   * Clamped between 6 and 60. Automatically scaled down on compact screens (<600px).
+   * @default 20
+   */
+  ropeSag?: number;
 
   /**
    * CSS color used for the glow / drop-shadow effect on decorations.

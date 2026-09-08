@@ -444,68 +444,242 @@ export const mountLanterns: VariantMountFn = (
     };
   }
 
-  // Responsive lantern count
-  const count = Math.max(4, Math.min(12, Math.round(window.innerWidth / 120)));
+  function buildSwagPath(
+    W: number,
+    lanternX: number[],
+    yElev: number,
+    sag: number
+  ): string {
+    const N = lanternX.length;
+    let d = `M 0 ${yElev}`;
+    const leadInXc = lanternX[0] / 2;
+    const leadInYc = yElev + sag * 1.5;
+    d += ` Q ${leadInXc.toFixed(1)} ${leadInYc.toFixed(1)}, ${lanternX[0].toFixed(1)} ${yElev}`;
+    for (let i = 0; i < N - 1; i++) {
+      const x0 = lanternX[i];
+      const x1 = lanternX[i + 1];
+      const xc = (x0 + x1) / 2;
+      const yc = yElev + sag * 2;
+      d += ` Q ${xc.toFixed(1)} ${yc.toFixed(1)}, ${x1.toFixed(1)} ${yElev}`;
+    }
+    const lastX = lanternX[N - 1];
+    const leadOutXc = (lastX + W) / 2;
+    const leadOutYc = yElev + sag * 1.5;
+    d += ` Q ${leadOutXc.toFixed(1)} ${leadOutYc.toFixed(1)}, ${W} ${yElev}`;
+    return d;
+  }
+
+  function renderDroplines(
+    svg: SVGSVGElement,
+    lanternX: number[],
+    yTop: number,
+    yBottom: number
+  ): void {
+    lanternX.forEach((x) => {
+      const drop = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "line"
+      );
+      drop.setAttribute("x1", x.toFixed(1));
+      drop.setAttribute("y1", String(yTop));
+      drop.setAttribute("x2", x.toFixed(1));
+      drop.setAttribute("y2", yBottom.toFixed(1));
+      drop.setAttribute("stroke", "var(--ro-rope)");
+      drop.setAttribute("stroke-width", "1.5");
+      drop.setAttribute("class", "ro-dropline-path");
+      svg.appendChild(drop);
+    });
+  }
+
+  function renderStraightStrings(
+    svg: SVGSVGElement,
+    W: number,
+    lanternX: number[],
+    dropline: number
+  ): number {
+    const yTop = 2;
+    const ceilingLine = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "line"
+    );
+    ceilingLine.setAttribute("x1", "0");
+    ceilingLine.setAttribute("y1", String(yTop));
+    ceilingLine.setAttribute("x2", String(W));
+    ceilingLine.setAttribute("y2", String(yTop));
+    ceilingLine.setAttribute("stroke", "var(--ro-ceiling)");
+    ceilingLine.setAttribute("stroke-width", "3");
+    ceilingLine.setAttribute("stroke-opacity", "0.75");
+    ceilingLine.setAttribute("class", "ro-rope-path");
+    svg.appendChild(ceilingLine);
+
+    renderDroplines(svg, lanternX, yTop, yTop + dropline);
+    return yTop + dropline;
+  }
+
+  function renderScallopStrings(
+    svg: SVGSVGElement,
+    W: number,
+    lanternX: number[],
+    sag: number,
+    dropline: number
+  ): number {
+    const yTop = 4;
+    const swagPath = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "path"
+    );
+    swagPath.setAttribute("d", buildSwagPath(W, lanternX, yTop, sag));
+    swagPath.setAttribute("stroke", "var(--ro-ceiling)");
+    swagPath.setAttribute("stroke-width", "2.2");
+    swagPath.setAttribute("stroke-opacity", "0.85");
+    swagPath.setAttribute("class", "ro-rope-path");
+    svg.appendChild(swagPath);
+
+    renderDroplines(svg, lanternX, yTop, yTop + dropline);
+    return yTop + dropline;
+  }
+
+  function renderDualStrings(
+    svg: SVGSVGElement,
+    W: number,
+    lanternX: number[],
+    sag: number,
+    dropline: number
+  ): number {
+    const yTop1 = 2;
+    const deltaY = 14;
+    const yTop2 = yTop1 + deltaY;
+
+    const path1 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "path"
+    );
+    path1.setAttribute("d", buildSwagPath(W, lanternX, yTop1, sag));
+    path1.setAttribute("stroke", "var(--ro-ceiling)");
+    path1.setAttribute("stroke-width", "2.0");
+    path1.setAttribute("stroke-opacity", "0.85");
+    path1.setAttribute("class", "ro-rope-path");
+    svg.appendChild(path1);
+
+    const path2 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "path"
+    );
+    path2.setAttribute("d", buildSwagPath(W, lanternX, yTop2, sag));
+    path2.setAttribute("stroke", "var(--ro-ceiling)");
+    path2.setAttribute("stroke-width", "1.6");
+    path2.setAttribute("stroke-opacity", "0.65");
+    path2.setAttribute("class", "ro-rope-path");
+    svg.appendChild(path2);
+
+    renderDroplines(svg, lanternX, yTop1, yTop2 + dropline);
+    return yTop2 + dropline;
+  }
+
+  const DROPLINE_LENGTH = 28;
+  const ropeStyle = config.ropeStyle ?? "straight";
+  const ropeSag = config.ropeSag ?? 20;
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "ro-lantern-ropes");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("width", "100%");
+  svg.setAttribute("height", "100%");
 
   const row = document.createElement("div");
   row.className = "ro-lantern-row";
 
-  // Connecting rope across the top
-  const rope = document.createElement("div");
-  rope.style.cssText = `
-    position:absolute;top:0;left:0;width:100%;height:3px;
-    background:linear-gradient(90deg,transparent 0%,${ceilingColor} 10%,${ceilingColor} 90%,transparent 100%);
-    opacity:0.6;
-  `;
-  container.appendChild(rope);
+  let currentCount = 0;
+  let lanternWraps: HTMLElement[] = [];
 
-  for (let i = 0; i < count; i++) {
-    // lanternStyle 1-12 → pin to that design (0-indexed); 0 → cycle all
-    const svgIndex =
-      config.lanternStyle > 0
-        ? (config.lanternStyle - 1) % LANTERN_SVG_DATA.length
-        : i % LANTERN_SVG_DATA.length;
-    const color = palette[i % palette.length];
-    const duration = (2.5 + ((i * 0.17) % 1.5)).toFixed(1);
-    // Negative delay starts each lantern mid-swing so they all appear
-    // immediately on load, just at different phases of the animation.
-    const phase = -((i * 0.37) % parseFloat(duration));
+  const renderHorizontal = () => {
+    const W =
+      (typeof window !== "undefined" && window.innerWidth) ||
+      (typeof document !== "undefined" &&
+        document.documentElement?.clientWidth) ||
+      1024;
+    const count = Math.max(4, Math.min(12, Math.round(W / 120)));
 
-    const wrap = document.createElement("div");
-    wrap.className = "ro-lantern";
-    wrap.style.setProperty("--ro-swing-duration", `${duration}s`);
-    wrap.style.animationDelay = `${phase.toFixed(2)}s`;
+    const effectiveSag =
+      W < 600 ? Math.max(6, Math.round(ropeSag * (W / 600))) : ropeSag;
 
-    const stringEl = document.createElement("div");
-    stringEl.className = "ro-lantern-string";
-    stringEl.style.background = ropeColor;
+    const lanternX: number[] = [];
+    for (let i = 0; i < count; i++) {
+      lanternX.push((i + 0.5) * (W / count));
+    }
 
-    const svgWrap = document.createElement("div");
-    svgWrap.innerHTML = buildLanternSVG(svgIndex, color);
+    svg.innerHTML = "";
 
-    wrap.appendChild(stringEl);
-    wrap.appendChild(svgWrap);
-    row.appendChild(wrap);
-  }
+    let lanternTopY = 2 + DROPLINE_LENGTH;
+    if (ropeStyle === "u-shaped") {
+      lanternTopY = renderScallopStrings(
+        svg,
+        W,
+        lanternX,
+        effectiveSag,
+        DROPLINE_LENGTH
+      );
+    } else if (ropeStyle === "dual") {
+      lanternTopY = renderDualStrings(
+        svg,
+        W,
+        lanternX,
+        effectiveSag,
+        DROPLINE_LENGTH
+      );
+    } else {
+      lanternTopY = renderStraightStrings(svg, W, lanternX, DROPLINE_LENGTH);
+    }
 
+    if (count !== currentCount || lanternWraps.length !== count) {
+      row.innerHTML = "";
+      lanternWraps = [];
+      currentCount = count;
+
+      for (let i = 0; i < count; i++) {
+        const svgIndex =
+          config.lanternStyle > 0
+            ? (config.lanternStyle - 1) % LANTERN_SVG_DATA.length
+            : i % LANTERN_SVG_DATA.length;
+        const color = palette[i % palette.length];
+        const duration = (2.5 + ((i * 0.17) % 1.5)).toFixed(1);
+        const phase = -((i * 0.37) % parseFloat(duration));
+
+        const wrap = document.createElement("div");
+        wrap.className = "ro-lantern";
+        wrap.style.setProperty("--ro-swing-duration", `${duration}s`);
+        wrap.style.animationDelay = `${phase.toFixed(2)}s`;
+        wrap.style.left = `${lanternX[i].toFixed(1)}px`;
+        wrap.style.top = `${lanternTopY}px`;
+
+        const svgWrap = document.createElement("div");
+        svgWrap.innerHTML = buildLanternSVG(svgIndex, color);
+
+        wrap.appendChild(svgWrap);
+        row.appendChild(wrap);
+        lanternWraps.push(wrap);
+      }
+    } else {
+      for (let i = 0; i < count; i++) {
+        lanternWraps[i].style.left = `${lanternX[i].toFixed(1)}px`;
+        lanternWraps[i].style.top = `${lanternTopY}px`;
+      }
+    }
+  };
+
+  container.appendChild(svg);
   container.appendChild(row);
 
+  renderHorizontal();
+
   const onResize = () => {
-    const newCount = Math.max(
-      4,
-      Math.min(12, Math.round(window.innerWidth / 120))
-    );
-    if (newCount !== count) {
-      row.remove();
-      rope.remove();
-      mountLanterns(container, config);
-    }
+    renderHorizontal();
   };
   window.addEventListener("resize", onResize, { passive: true });
 
   return () => {
+    svg.remove();
     row.remove();
-    rope.remove();
     window.removeEventListener("resize", onResize);
   };
 };

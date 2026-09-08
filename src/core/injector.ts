@@ -116,6 +116,11 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     glowColor: resolvedTheme.glowColor,
     ceilingColor: resolvedTheme.ceilingColor,
     ropeColor: resolvedTheme.ropeColor,
+    ropeStyle: userConfig.ropeStyle ?? "straight",
+    ropeSag:
+      typeof userConfig.ropeSag === "number"
+        ? Math.max(6, Math.min(60, userConfig.ropeSag))
+        : 20,
     region: userConfig.region ?? "standard",
     hijriAdjustment: resolveHijriOffset(
       userConfig.region,
@@ -409,6 +414,8 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
           newConfig.mobileSideBehavior !== currentConfig.mobileSideBehavior ||
           newConfig.density !== currentConfig.density ||
           newConfig.lanternStyle !== currentConfig.lanternStyle ||
+          newConfig.ropeStyle !== currentConfig.ropeStyle ||
+          newConfig.ropeSag !== currentConfig.ropeSag ||
           bannerChanged;
 
         currentConfig = newConfig;
