@@ -821,6 +821,22 @@
           </select>
         </div>
 
+        <div class="control-group" id="clearanceGroup" style="display: none">
+          <label>Motif Clearance</label>
+          <select id="clearanceSelect">
+            <option value="edges" selected>Edges (Safe Zone)</option>
+            <option value="full">Full Screen (Scatter)</option>
+          </select>
+        </div>
+
+        <div class="control-group" id="layerGroup">
+          <label>Layer Stacking</label>
+          <select id="layerSelect">
+            <option value="foreground" selected>Foreground (On Top)</option>
+            <option value="background">Background (Behind Content)</option>
+          </select>
+        </div>
+
         <div class="control-group">
           <label>Theme</label>
           <select id="themeSelect">
@@ -1230,6 +1246,7 @@
           <select id="countdownSelect">
             <option value="off" selected>Disabled</option>
             <option value="auto">Auto Maghrib (18:15)</option>
+            <option value="1min">⏱️ 1-Minute Countdown Demo (+60s)</option>
             <option value="demo-alert">Demo Celebration Flare (+10s)</option>
           </select>
         </div>
@@ -1251,6 +1268,19 @@
             <option value="unmuted">Unmuted (Play Alert Sound)</option>
           </select>
         </div>
+      </div>
+      <div class="actions" style="margin-top: 14px">
+        <button
+          class="btn"
+          id="btnCountdown1Min"
+          style="
+            background: rgba(201, 168, 76, 0.15);
+            border-color: #c9a84c;
+            color: #f5d061;
+          "
+        >
+          ⏱️ Show 1-Minute Countdown
+        </button>
       </div>
     </div>
 
@@ -1494,6 +1524,13 @@
           const variant = document.getElementById("variantSelect").value;
           const isLanterns = variant === "lanterns";
           const isBanner = variant === "banner";
+          const isMotif = [
+            "crescent-stars",
+            "eid",
+            "eid-fitr",
+            "eid-adha",
+          ].includes(variant);
+
           document.getElementById("lanternColorPanel").style.display =
             isLanterns ? "" : "none";
           document.getElementById("genericColorPanel").style.display =
@@ -1507,6 +1544,10 @@
           if (ropeStyleEl) ropeStyleEl.style.display = isLanterns ? "" : "none";
           const ropeSagEl = document.getElementById("ropeSagGroup");
           if (ropeSagEl) ropeSagEl.style.display = isLanterns ? "" : "none";
+
+          const clearanceGroup = document.getElementById("clearanceGroup");
+          if (clearanceGroup)
+            clearanceGroup.style.display = isMotif ? "" : "none";
         }
 
         function syncHijriAdjGroup() {
@@ -1531,6 +1572,10 @@
             opacity: parseFloat(document.getElementById("opacityRange").value),
             confetti: document.getElementById("confettiSelect").value,
             locale: document.getElementById("localeSelect").value,
+            clearance:
+              document.getElementById("clearanceSelect")?.value || "edges",
+            layer:
+              document.getElementById("layerSelect")?.value || "foreground",
             previewMode: true,
             debug: isDebugMode,
             onError: (err) => {
@@ -1566,10 +1611,17 @@
           }
           const cdVal = document.getElementById("countdownSelect")?.value;
           if (cdVal && cdVal !== "off") {
-            const isDemo = cdVal === "demo-alert";
+            const is10sDemo = cdVal === "demo-alert";
+            const is1minDemo = cdVal === "1min";
             let maghribTime = "18:15";
-            if (isDemo) {
+            if (is10sDemo) {
               const d = new Date(Date.now() + 10_000);
+              const hh = String(d.getHours()).padStart(2, "0");
+              const mm = String(d.getMinutes()).padStart(2, "0");
+              const ss = String(d.getSeconds()).padStart(2, "0");
+              maghribTime = `${hh}:${mm}:${ss}`;
+            } else if (is1minDemo) {
+              const d = new Date(Date.now() + 60_000);
               const hh = String(d.getHours()).padStart(2, "0");
               const mm = String(d.getMinutes()).padStart(2, "0");
               const ss = String(d.getSeconds()).padStart(2, "0");
@@ -1577,6 +1629,7 @@
             }
             cfg.countdown = {
               maghribTime,
+              iftarTime: maghribTime,
               position:
                 document.getElementById("countdownPosSelect")?.value ||
                 "bottom-right",
@@ -1848,6 +1901,14 @@
               document.getElementById("bannerTextEn").value = cfg.bannerTextEn;
             if (cfg.bannerTextAr)
               document.getElementById("bannerTextAr").value = cfg.bannerTextAr;
+            if (cfg.clearance) {
+              const el = document.getElementById("clearanceSelect");
+              if (el) el.value = cfg.clearance;
+            }
+            if (cfg.layer) {
+              const el = document.getElementById("layerSelect");
+              if (el) el.value = cfg.layer;
+            }
             if (cfg.occasions) {
               const occStr = Array.isArray(cfg.occasions)
                 ? cfg.occasions.join(",")
@@ -1872,6 +1933,29 @@
           getOccasionState ? getOccasionState() : getRamadanState()
         );
         mount(true);
+
+        // ── 1-Minute Countdown Demo Trigger ──
+        document
+          .getElementById("btnCountdown1Min")
+          ?.addEventListener("click", () => {
+            const cdSel = document.getElementById("countdownSelect");
+            if (cdSel) cdSel.value = "1min";
+            if (!overlayOn) {
+              overlayOn = true;
+              const toggleBtn = document.getElementById("toggleBtn");
+              if (toggleBtn) {
+                toggleBtn.textContent = "Overlay ON";
+                toggleBtn.classList.add("active");
+              }
+            }
+            mount();
+            if (typeof logSafety === "function") {
+              logSafety(
+                "⏱️ Triggered 1-minute countdown demo. Countdown card mounted with live 60s tick down!",
+                "#f5d061"
+              );
+            }
+          });
 
         // ── Toggle overlay ──
         document

@@ -1,5 +1,5 @@
 import type { Occasion, ResolvedConfig, VariantMountFn } from "../../types";
-import { calculateParticleCoords } from "../host";
+import { calculateMotifCoords } from "../host";
 
 function buildBalloonSVG(
   color: string,
@@ -89,6 +89,8 @@ export const mountEid: VariantMountFn = (
 
   const DENSITY_MAP = { low: 6, normal: 14, high: 24 };
   const totalItems = DENSITY_MAP[config.density] ?? 14;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const sizeScale = isMobile ? 0.7 : 1.0;
 
   for (let i = 0; i < totalItems; i++) {
     const el = document.createElement("div");
@@ -104,30 +106,50 @@ export const mountEid: VariantMountFn = (
       const motifRand = Math.random();
       if (motifRand < 0.4) {
         el.className = "ro-sheep";
-        el.innerHTML = buildSheepSVG("#f8f9fa", color3, 36);
+        el.innerHTML = buildSheepSVG(
+          "#f8f9fa",
+          color3,
+          Math.round(36 * sizeScale)
+        );
       } else if (motifRand < 0.7) {
         el.className = "ro-kaaba";
-        el.innerHTML = buildKaabaSVG("#1a1a1a", color1, 28);
+        el.innerHTML = buildKaabaSVG(
+          "#1a1a1a",
+          color1,
+          Math.round(28 * sizeScale)
+        );
       } else {
         el.className = "ro-crescent";
-        el.innerHTML = buildCrescentSVG(color2, 30);
+        el.innerHTML = buildCrescentSVG(color2, Math.round(30 * sizeScale));
       }
     } else {
       // Fitr motifs: Balloons, Gifts, Stars
       const motifRand = Math.random();
       if (motifRand < 0.45) {
         el.className = "ro-balloon";
-        el.innerHTML = buildBalloonSVG(randomColor, color1, 26);
+        el.innerHTML = buildBalloonSVG(
+          randomColor,
+          color1,
+          Math.round(26 * sizeScale)
+        );
       } else if (motifRand < 0.75) {
         el.className = "ro-gift";
-        el.innerHTML = buildGiftSVG(randomColor, color2, 24);
+        el.innerHTML = buildGiftSVG(
+          randomColor,
+          color2,
+          Math.round(24 * sizeScale)
+        );
       } else {
         el.className = "ro-star";
-        el.innerHTML = buildTwinkleStarSVG(color2, 18);
+        el.innerHTML = buildTwinkleStarSVG(color2, Math.round(18 * sizeScale));
       }
     }
 
-    const { x, y } = calculateParticleCoords(config.position);
+    const { x, y } = calculateMotifCoords(
+      config.position,
+      config.clearance,
+      isMobile
+    );
 
     const duration = (4 + Math.random() * 4).toFixed(1);
     const delay = (Math.random() * 3).toFixed(1);

@@ -1,5 +1,7 @@
 import type {
+  ClearanceMode,
   HijriRegion,
+  LayerStacking,
   MobileSideBehavior,
   Occasion,
   OverlayInstance,
@@ -82,6 +84,11 @@ const VALID_MOBILE_SIDE_BEHAVIORS: readonly MobileSideBehavior[] = [
 ];
 const VALID_CONFETTI_OPTIONS = ["on", "off"] as const;
 const VALID_LOCALES = ["en", "ar"] as const;
+const VALID_CLEARANCE_MODES: readonly ClearanceMode[] = ["edges", "full"];
+const VALID_LAYER_STACKINGS: readonly LayerStacking[] = [
+  "foreground",
+  "background",
+];
 
 // ─── Defensive Helpers ────────────────────────────────────────────────────────
 
@@ -380,6 +387,44 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
   const zIndex = clampNumber(userConfig.zIndex, -2147483648, 2147483647, 9999);
   const ropeSag = clampNumber(userConfig.ropeSag, 6, 60, 20);
 
+  const defaultClearance: ClearanceMode = [
+    "crescent-stars",
+    "eid",
+    "eid-fitr",
+    "eid-adha",
+  ].includes(variant)
+    ? "edges"
+    : "full";
+
+  const clearance = sanitizeStringUnion(
+    userConfig.clearance,
+    VALID_CLEARANCE_MODES,
+    defaultClearance,
+    "clearance",
+    debug
+  );
+
+  const layer = sanitizeStringUnion(
+    userConfig.layer,
+    VALID_LAYER_STACKINGS,
+    "foreground",
+    "layer",
+    debug
+  );
+
+  let mountTarget: string | HTMLElement | undefined;
+  if (
+    typeof userConfig.mountTarget === "string" &&
+    userConfig.mountTarget.trim().length > 0
+  ) {
+    mountTarget = userConfig.mountTarget.trim();
+  } else if (
+    typeof HTMLElement !== "undefined" &&
+    userConfig.mountTarget instanceof HTMLElement
+  ) {
+    mountTarget = userConfig.mountTarget;
+  }
+
   let occasions: Occasion[] = ["ramadan", "eid-fitr", "eid-adha"];
   if (Array.isArray(userConfig.occasions)) {
     const filtered = userConfig.occasions.filter((occ) =>
@@ -409,6 +454,9 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     themeName: resolvedTheme.name ?? "classic",
     variant,
     position,
+    clearance,
+    layer,
+    mountTarget,
     mobileSideBehavior,
     opacity,
     colors: resolvedTheme.colors,
@@ -753,6 +801,8 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
               newConfig.lanternStyle !== currentConfig.lanternStyle ||
               newConfig.ropeStyle !== currentConfig.ropeStyle ||
               newConfig.ropeSag !== currentConfig.ropeSag ||
+              newConfig.clearance !== currentConfig.clearance ||
+              newConfig.mountTarget !== currentConfig.mountTarget ||
               bannerChanged;
 
             currentConfig = newConfig;

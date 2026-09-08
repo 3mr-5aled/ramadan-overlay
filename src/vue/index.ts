@@ -8,7 +8,9 @@ import {
 } from "vue";
 import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
+  ClearanceMode,
   LanternStyle,
+  LayerStacking,
   MobileSideBehavior,
   Occasion,
   OverlayInstance,
@@ -104,6 +106,18 @@ export const RamadanOverlay = defineComponent({
     opacity: { type: Number as PropType<number>, default: undefined },
     colors: { type: Array as PropType<string[]>, default: undefined },
     zIndex: { type: Number as PropType<number>, default: undefined },
+    clearance: {
+      type: String as PropType<ClearanceMode>,
+      default: undefined,
+    },
+    layer: {
+      type: String as PropType<LayerStacking>,
+      default: undefined,
+    },
+    mountTarget: {
+      type: [String, Object] as PropType<string | HTMLElement>,
+      default: undefined,
+    },
     autoTrigger: { type: Boolean as PropType<boolean>, default: undefined },
     previewMode: { type: Boolean as PropType<boolean>, default: undefined },
     confetti: {
@@ -231,6 +245,8 @@ export const RamadanOverlay = defineComponent({
 
 export { getOccasionState, getRamadanState };
 export type {
+  ClearanceMode,
+  LayerStacking,
   MobileSideBehavior,
   Occasion,
   OverlayInstance,

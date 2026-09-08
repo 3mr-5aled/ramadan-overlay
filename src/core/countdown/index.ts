@@ -45,8 +45,14 @@ export function createCountdownManager(
 
   const { isBannerActive = false, hijriYear = 1447, colors } = options;
 
-  const resolvedConfig: IftarCountdownConfig =
-    typeof config === "boolean" ? { iftarTime: "18:45" } : { ...config };
+  const rawConfig: IftarCountdownConfig =
+    typeof config === "boolean" ? {} : config;
+  const iftarTime = rawConfig.iftarTime ?? rawConfig.maghribTime ?? "18:45";
+
+  const resolvedConfig: IftarCountdownConfig = {
+    ...rawConfig,
+    iftarTime,
+  };
 
   const alertWindowMinutes = resolvedConfig.alertWindowMinutes ?? 30;
   const autoDismissMinutes =

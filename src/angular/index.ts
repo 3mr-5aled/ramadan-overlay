@@ -9,8 +9,10 @@ import {
 } from "@angular/core";
 import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
+  ClearanceMode,
   HijriRegion,
   LanternStyle,
+  LayerStacking,
   MobileSideBehavior,
   Occasion,
   OverlayInstance,
@@ -52,6 +54,9 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   @Input() opacity?: number;
   @Input() colors?: string[];
   @Input() zIndex?: number;
+  @Input() clearance?: ClearanceMode;
+  @Input() layer?: LayerStacking;
+  @Input() mountTarget?: string | HTMLElement;
   @Input() autoTrigger?: boolean;
   @Input() previewMode?: boolean;
   @Input() confetti?: "on" | "off";
@@ -111,6 +116,9 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
       "opacity",
       "colors",
       "zIndex",
+      "clearance",
+      "layer",
+      "mountTarget",
       "autoTrigger",
       "previewMode",
       "confetti",
@@ -173,6 +181,8 @@ export class RamadanOverlayModule {}
 
 export { getOccasionState, getRamadanState };
 export type {
+  ClearanceMode,
+  LayerStacking,
   MobileSideBehavior,
   Occasion,
   OverlayInstance,

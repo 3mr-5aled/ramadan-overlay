@@ -19,6 +19,8 @@ export { createCountdownManager } from "./countdown";
 export { THEME_PRESETS, themes, resolveTheme } from "./themes";
 
 export type {
+  ClearanceMode,
+  LayerStacking,
   Occasion,
   OverlayInstance,
   RamadanOverlayInstance,
@@ -28,6 +30,7 @@ export type {
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
+  RopeStyle,
   ThemePreset,
   ThemeDefinition,
   ThemeOption,

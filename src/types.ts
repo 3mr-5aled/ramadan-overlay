@@ -65,6 +65,20 @@ export type OverlayPosition =
 export type MobileSideBehavior = "hide" | "top" | "show";
 
 /**
+ * Content Safe Zone clearance modes for floating festive motifs.
+ * - 'edges': Constrains motifs to peripheral gutters (left 2%–18% and right 82%–98%), keeping the central reading column sterile.
+ * - 'full': Scatters motifs freely across the entire viewport dimensions (0%–95%).
+ */
+export type ClearanceMode = "edges" | "full";
+
+/**
+ * Layer stacking z-plane placement mode.
+ * - 'foreground': Mounts overlay on top with z-index: 9999 (default).
+ * - 'background': Mounts overlay in the background with z-index: -1 as ambient backdrop.
+ */
+export type LayerStacking = "foreground" | "background";
+
+/**
  * Advanced lantern suspension rope styles.
  * - 'straight': Linear horizontal ceiling rail with vertical cords (default).
  * - 'u-shaped': Multi-scallop festoon swag dipping between adjacent lanterns.
@@ -159,6 +173,28 @@ export interface RamadanOverlayConfig {
    * @default 9999
    */
   zIndex?: number;
+
+  /**
+   * Content safe zone clearance mode for floating motifs (crescent-stars, eid).
+   * - 'edges': Constrains motifs to lateral peripheral gutters, keeping central reading area sterile.
+   * - 'full': Unconstrained full-viewport drift.
+   * @default 'edges' for floating motif variants, 'full' for sparkles
+   */
+  clearance?: ClearanceMode;
+
+  /**
+   * Layer stacking placement mode.
+   * - 'foreground': Positioned above host content with high z-index (default).
+   * - 'background': Positioned behind host content with z-index: -1 as ambient backdrop.
+   * @default 'foreground'
+   */
+  layer?: LayerStacking;
+
+  /**
+   * Optional custom container element or CSS selector string to mount the overlay into.
+   * Constrains the overlay to the scoped boundaries of the target element.
+   */
+  mountTarget?: string | HTMLElement;
 
   /**
    * When true (default), the overlay only shows during the Hijri month of Ramadan.
@@ -463,7 +499,12 @@ export interface IftarCountdownConfig {
   /**
    * Target Iftar time: "HH:mm" string, ISO string, Date object, or dynamic resolver function.
    */
-  iftarTime: IftarTimeValue;
+  iftarTime?: IftarTimeValue;
+
+  /**
+   * Backward-compatible alias for iftarTime.
+   */
+  maghribTime?: IftarTimeValue;
 
   /**
    * Number of minutes prior to Iftar when the countdown widget becomes visible.
@@ -571,8 +612,12 @@ export interface ResolvedConfig extends Required<
     | "onOccasionChange"
     | "countdown"
     | "date"
+    | "mountTarget"
   >
 > {
+  mountTarget?: string | HTMLElement;
+  clearance: ClearanceMode;
+  layer: LayerStacking;
   date?: Date;
   debug: boolean;
   onError?: (error: unknown) => void;

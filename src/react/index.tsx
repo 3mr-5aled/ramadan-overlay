@@ -2,6 +2,8 @@ import type { FC } from "react";
 import { useEffect, useRef, useState } from "react";
 import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
+  ClearanceMode,
+  LayerStacking,
   MobileSideBehavior,
   Occasion,
   OverlayInstance,
@@ -126,6 +128,8 @@ export const RamadanOverlay: FC<RamadanOverlayProps> = (props) => {
 
 export { getOccasionState, getRamadanState };
 export type {
+  ClearanceMode,
+  LayerStacking,
   Occasion,
   OverlayInstance,
   OverlayPosition,

@@ -1,5 +1,5 @@
 import type { VariantMountFn } from "../../types";
-import { calculateParticleCoords } from "../host";
+import { calculateMotifCoords } from "../host";
 
 function buildCrescentSVG(color: string, size: number): string {
   return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -35,13 +35,15 @@ export const mountCrescentStars: VariantMountFn = (
 
   const DENSITY_MAP = { low: 6, normal: 14, high: 24 };
   const totalItems = DENSITY_MAP[config.density] ?? 14;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const sizeScale = isMobile ? 0.7 : 1.0;
 
   for (let i = 0; i < totalItems; i++) {
     const isCrescent = Math.random() < 0.35;
     const color =
       colors[Math.floor(Math.random() * Math.min(colors.length, 4))] ??
       "#c9a84c";
-    const sizeBase = isCrescent ? 32 : 20;
+    const sizeBase = (isCrescent ? 32 : 20) * sizeScale;
     const size = sizeBase + Math.random() * sizeBase * 0.6;
 
     const el = document.createElement("div");
@@ -50,7 +52,11 @@ export const mountCrescentStars: VariantMountFn = (
       ? buildCrescentSVG(color, size)
       : build8StarSVG(color, size);
 
-    const { x, y } = calculateParticleCoords(config.position);
+    const { x, y } = calculateMotifCoords(
+      config.position,
+      config.clearance,
+      isMobile
+    );
 
     const duration = (4 + Math.random() * 4).toFixed(1);
     const delay = (Math.random() * 3).toFixed(1);

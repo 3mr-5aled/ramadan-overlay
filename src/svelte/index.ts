@@ -1,6 +1,8 @@
 import { onDestroy, onMount } from "svelte";
 import { getOccasionState, getRamadanState, init } from "../core/index";
 import type {
+  ClearanceMode,
+  LayerStacking,
   MobileSideBehavior,
   Occasion,
   OverlayInstance,
@@ -106,6 +108,8 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
 
 export { getOccasionState, getRamadanState };
 export type {
+  ClearanceMode,
+  LayerStacking,
   MobileSideBehavior,
   Occasion,
   OverlayInstance,

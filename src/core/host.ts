@@ -1,4 +1,5 @@
 import type {
+  ClearanceMode,
   Occasion,
   OverlayPosition,
   ResolvedConfig,
@@ -61,6 +62,44 @@ export function calculateParticleCoords(position: OverlayPosition): {
   };
 }
 
+/**
+ * Calculate coordinates for festive floating motifs with Content Safe Zone clearance.
+ *
+ * When clearance is 'edges':
+ * - Horizontal X is partitioned into Left Peripheral Gutter (2% to 18%) or Right Peripheral Gutter (82% to 98%).
+ * - Vertical Y defaults to full viewport drift (0% to 95%).
+ * - When isMobile is true (<640px), horizontal gutters are narrow, so vertical placement splits into
+ *   upper quadrant (2% to 22%) or lower quadrant (78% to 96%) to preserve central reading column.
+ *
+ * When clearance is 'full':
+ * - Scatters across full viewport dimensions (delegates to calculateParticleCoords).
+ */
+export function calculateMotifCoords(
+  position: OverlayPosition,
+  clearance: ClearanceMode = "edges",
+  isMobile = typeof window !== "undefined" && window.innerWidth < 640
+): { x: number; y: number } {
+  if (clearance === "edges") {
+    const inLeft = Math.random() < 0.5;
+    const x = inLeft ? 2 + Math.random() * 16 : 82 + Math.random() * 16;
+
+    let y: number;
+    if (isMobile) {
+      const inUpper = Math.random() < 0.5;
+      y = inUpper ? 2 + Math.random() * 20 : 78 + Math.random() * 18;
+    } else {
+      y = Math.random() * 95;
+    }
+
+    return {
+      x: Number(x.toFixed(2)),
+      y: Number(y.toFixed(2)),
+    };
+  }
+
+  return calculateParticleCoords(position);
+}
+
 const VARIANT_MAP: Record<string, VariantMountFn> = {
   lanterns: mountLanterns,
   "crescent-stars": mountCrescentStars,
@@ -111,6 +150,8 @@ export function injectStyles(): void {
 #ramadan-overlay-root .ro-geo-band--top{top:0}
 #ramadan-overlay-root .ro-geo-band--bottom{bottom:0}
 #ramadan-overlay-root .ro-geo-band svg{width:100%;height:100%}
+#ramadan-overlay-root.ro-layer--background{z-index:-1!important}
+#ramadan-overlay-root.ro-scoped-host{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
 @keyframes ro-swing{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
 @keyframes ro-swing-side{0%{transform:translateX(-50%) rotate(-3.5deg)}100%{transform:translateX(-50%) rotate(3.5deg)}}
 @keyframes ro-float{from{transform:translateY(0) rotate(0deg);opacity:.7}to{transform:translateY(-12px) rotate(10deg);opacity:1}}
@@ -128,7 +169,13 @@ export function injectStyles(): void {
 export function applyTokens(root: HTMLElement, config: ResolvedConfig): void {
   const el = root.style;
   el.setProperty("--ro-opacity", String(config.opacity));
-  el.setProperty("--ro-z", String(config.zIndex));
+  if (config.layer === "background") {
+    root.classList.add("ro-layer--background");
+    el.setProperty("--ro-z", "-1");
+  } else {
+    root.classList.remove("ro-layer--background");
+    el.setProperty("--ro-z", String(config.zIndex));
+  }
   el.setProperty("--ro-glow", config.glowColor);
   el.setProperty("--ro-ceiling", config.ceilingColor);
   el.setProperty("--ro-rope", config.ropeColor);
@@ -152,6 +199,8 @@ export function applyTokens(root: HTMLElement, config: ResolvedConfig): void {
   root.setAttribute("data-theme", config.themeName ?? "classic");
   root.setAttribute("data-mobile-side", config.mobileSideBehavior);
   root.setAttribute("data-position", config.position);
+  root.setAttribute("data-clearance", config.clearance);
+  root.setAttribute("data-layer", config.layer);
   if (resolveSidePositions(config.position).length > 0) {
     root.setAttribute("data-is-side", "true");
   } else {
@@ -187,7 +236,34 @@ function mountOverlayHost(
   root.setAttribute("role", "presentation");
   applyTokens(root, config);
 
-  document.body.appendChild(root);
+  let targetParent: HTMLElement = document.body;
+  let isScoped = false;
+
+  if (config.mountTarget) {
+    if (typeof config.mountTarget === "string") {
+      const found = document.querySelector<HTMLElement>(config.mountTarget);
+      if (found) {
+        targetParent = found;
+        isScoped = true;
+      }
+    } else if (
+      typeof HTMLElement !== "undefined" &&
+      config.mountTarget instanceof HTMLElement
+    ) {
+      targetParent = config.mountTarget;
+      isScoped = true;
+    }
+  }
+
+  if (isScoped) {
+    root.classList.add("ro-scoped-host");
+    const targetPos = window.getComputedStyle?.(targetParent)?.position;
+    if (targetPos === "static" || !targetPos) {
+      targetParent.style.position = "relative";
+    }
+  }
+
+  targetParent.appendChild(root);
 
   const mountFn = VARIANT_MAP[config.variant] ?? mountLanterns;
   const cleanupVariant = mountFn(root, config, occasion);

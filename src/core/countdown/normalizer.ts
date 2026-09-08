@@ -11,7 +11,7 @@ const HH_MM_REGEX = /^([01]?\d|2[0-3]):([0-5]\d)$/;
  * @returns Normalized target Date or null if invalid.
  */
 export function resolveTargetIftarTime(
-  value: IftarTimeValue,
+  value: IftarTimeValue | undefined | null,
   baseDate: Date = new Date(),
   autoDismissMinutes: number = 10
 ): Date | null {
