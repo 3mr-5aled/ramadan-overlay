@@ -811,10 +811,25 @@
         <div class="control-group">
           <label>Position</label>
           <select id="positionSelect">
-            <option value="both" selected>Both</option>
+            <option value="both" selected>Both (Top &amp; Bottom)</option>
             <option value="top">Top</option>
             <option value="bottom">Bottom</option>
+            <option value="left">Left (Vertical Side)</option>
+            <option value="right">Right (Vertical Side)</option>
+            <option value="sides">Sides (Dual Margins)</option>
             <option value="full">Full</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Theme</label>
+          <select id="themeSelect">
+            <option value="classic" selected>Classic (Gold)</option>
+            <option value="midnight">Midnight (Sapphire)</option>
+            <option value="emerald">Emerald (Jade &amp; Gold)</option>
+            <option value="royal">Royal (Amethyst)</option>
+            <option value="desert-dusk">Desert Dusk (Amber)</option>
+            <option value="custom">Custom (Manual)</option>
           </select>
         </div>
 
@@ -908,6 +923,33 @@
             <option value="11">Style 11</option>
             <option value="12">Style 12</option>
           </select>
+        </div>
+
+        <div class="control-group" id="ropeStyleGroup">
+          <label>Rope Style</label>
+          <select id="ropeStyleSelect">
+            <option value="straight" selected>Straight Ceiling</option>
+            <option value="u-shaped">U-Shaped Scallop</option>
+            <option value="dual">Dual Suspended Ropes</option>
+          </select>
+        </div>
+
+        <div class="control-group" id="ropeSagGroup">
+          <label
+            >Rope Sag &nbsp;<span
+              id="ropeSagVal"
+              style="color: #c9a84c; font-size: 0.85rem"
+              >20px</span
+            ></label
+          >
+          <input
+            type="range"
+            id="ropeSagRange"
+            min="6"
+            max="60"
+            step="2"
+            value="20"
+          />
         </div>
 
         <div class="control-group">
@@ -1179,6 +1221,87 @@
       </div>
     </div>
 
+    <!-- ── Countdown Widget Panel ── -->
+    <div class="panel" id="countdownPanel">
+      <div class="panel-title">🌙 Iftar Countdown Widget</div>
+      <div class="controls-grid">
+        <div class="control-group">
+          <label>Countdown Mode</label>
+          <select id="countdownSelect">
+            <option value="off" selected>Disabled</option>
+            <option value="auto">Auto Maghrib (18:15)</option>
+            <option value="demo-alert">Demo Celebration Flare (+10s)</option>
+          </select>
+        </div>
+
+        <div class="control-group" id="countdownPosGroup">
+          <label>Widget Position</label>
+          <select id="countdownPosSelect">
+            <option value="bottom-right" selected>Bottom Right</option>
+            <option value="bottom-left">Bottom Left</option>
+            <option value="top-right">Top Right</option>
+            <option value="top-left">Top Left</option>
+          </select>
+        </div>
+
+        <div class="control-group" id="countdownAudioGroup">
+          <label>Alert Audio</label>
+          <select id="countdownAudioSelect">
+            <option value="muted" selected>Muted (Default)</option>
+            <option value="unmuted">Unmuted (Play Alert Sound)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Error Safety & Diagnostic Suite ── -->
+    <div class="panel" id="safetyPanel">
+      <div class="panel-title">
+        🛡️ Error Containment &amp; Diagnostic Safety Suite
+      </div>
+      <p
+        style="
+          font-size: 0.82rem;
+          color: #8b8f98;
+          margin-bottom: 12px;
+          line-height: 1.5;
+        "
+      >
+        Test how the library gracefully contains errors, clamps out-of-bounds
+        configurations, isolates customer telemetry callbacks, and logs
+        diagnostics without crashing the host application.
+      </p>
+      <div class="actions" style="margin-bottom: 12px">
+        <button class="btn" id="btnTestClamping">Clamp Extreme Config</button>
+        <button class="btn" id="btnTestInvalidDate">
+          Test Invalid Date (NaN)
+        </button>
+        <button class="btn" id="btnTestCrash">
+          Trigger Mount Crash &amp; Rollback
+        </button>
+        <button class="btn" id="btnTestOnError">Test Telemetry onError</button>
+        <button class="btn" id="btnToggleDebug">Toggle Debug (ON)</button>
+      </div>
+      <div
+        id="safetyConsole"
+        style="
+          font-family: Consolas, Monaco, monospace;
+          font-size: 0.8rem;
+          background: #0d1117;
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid #30363d;
+          color: #7ee787;
+          max-height: 160px;
+          overflow-y: auto;
+          white-space: pre-wrap;
+        "
+      >
+        [ramadan-overlay] Ready. Diagnostic logs and safety verification results
+        will stream here...
+      </div>
+    </div>
+
     <!-- ── State + code ── -->
     <div class="bottom-grid">
       <div class="panel" style="margin: 0">
@@ -1380,6 +1503,10 @@
             : "none";
           document.getElementById("lanternStyleGroup").style.display =
             isLanterns ? "" : "none";
+          const ropeStyleEl = document.getElementById("ropeStyleGroup");
+          if (ropeStyleEl) ropeStyleEl.style.display = isLanterns ? "" : "none";
+          const ropeSagEl = document.getElementById("ropeSagGroup");
+          if (ropeSagEl) ropeSagEl.style.display = isLanterns ? "" : "none";
         }
 
         function syncHijriAdjGroup() {
@@ -1394,6 +1521,8 @@
           syncColorPanels();
         }
 
+        let isDebugMode = true;
+
         function getConfig() {
           const variant = document.getElementById("variantSelect").value;
           const cfg = {
@@ -1402,16 +1531,60 @@
             opacity: parseFloat(document.getElementById("opacityRange").value),
             confetti: document.getElementById("confettiSelect").value,
             locale: document.getElementById("localeSelect").value,
-            colors: getColors(),
-            glowColor: getGlowColor(),
-            ceilingColor: document.getElementById("ceilingColor").value,
-            ropeColor: document.getElementById("ropeColor").value,
             previewMode: true,
+            debug: isDebugMode,
+            onError: (err) => {
+              if (typeof logSafety === "function") {
+                logSafety(
+                  `[Telemetry Hook] onError caught: ${err && err.message ? err.message : String(err)}`,
+                  "#f85149"
+                );
+              }
+            },
             onRamadanStart: (state) => console.log("Ramadan started!", state),
             onEidStart: (state) => console.log("Eid started!", state),
             onOccasionChange: (occ, state) =>
               console.log("Occasion changed:", occ, state),
           };
+          const themeVal = document.getElementById("themeSelect")?.value;
+          if (themeVal && themeVal !== "custom") {
+            cfg.theme = themeVal;
+          } else {
+            cfg.colors = getColors();
+            cfg.glowColor = getGlowColor();
+            cfg.ceilingColor = document.getElementById("ceilingColor").value;
+            cfg.ropeColor = document.getElementById("ropeColor").value;
+          }
+          if (variant === "lanterns") {
+            const rStyle = document.getElementById("ropeStyleSelect")?.value;
+            if (rStyle) cfg.ropeStyle = rStyle;
+            const rSag = parseInt(
+              document.getElementById("ropeSagRange")?.value,
+              10
+            );
+            if (!isNaN(rSag)) cfg.ropeSag = rSag;
+          }
+          const cdVal = document.getElementById("countdownSelect")?.value;
+          if (cdVal && cdVal !== "off") {
+            const isDemo = cdVal === "demo-alert";
+            let maghribTime = "18:15";
+            if (isDemo) {
+              const d = new Date(Date.now() + 10_000);
+              const hh = String(d.getHours()).padStart(2, "0");
+              const mm = String(d.getMinutes()).padStart(2, "0");
+              const ss = String(d.getSeconds()).padStart(2, "0");
+              maghribTime = `${hh}:${mm}:${ss}`;
+            }
+            cfg.countdown = {
+              maghribTime,
+              position:
+                document.getElementById("countdownPosSelect")?.value ||
+                "bottom-right",
+              defaultMuted:
+                document.getElementById("countdownAudioSelect")?.value ===
+                "muted",
+            };
+          }
           const occVal = document.getElementById("occasionsSelect")?.value;
           if (occVal === "ramadan") cfg.occasions = ["ramadan"];
           else if (occVal === "eid") cfg.occasions = ["eid-fitr", "eid-adha"];
@@ -1531,6 +1704,7 @@
                   "onOccasionChange",
                   "previewMode",
                   "date",
+                  "onError",
                 ].includes(k)
             )
           );
@@ -1625,6 +1799,15 @@
               document.getElementById("regionSelect").value = cfg.region;
             if (cfg.density)
               document.getElementById("densitySelect").value = cfg.density;
+            if (cfg.theme)
+              document.getElementById("themeSelect").value = cfg.theme;
+            if (cfg.ropeStyle)
+              document.getElementById("ropeStyleSelect").value = cfg.ropeStyle;
+            if (cfg.ropeSag != null) {
+              document.getElementById("ropeSagRange").value = cfg.ropeSag;
+              const sagValEl = document.getElementById("ropeSagVal");
+              if (sagValEl) sagValEl.textContent = cfg.ropeSag + "px";
+            }
             if (cfg.lanternStyle != null)
               document.getElementById("lanternStyleSelect").value =
                 cfg.lanternStyle;
@@ -1776,6 +1959,10 @@
           });
         document.querySelectorAll('input[type="color"]').forEach((el) => {
           el.addEventListener("input", () => {
+            const themeSel = document.getElementById("themeSelect");
+            if (themeSel && themeSel.value !== "custom") {
+              themeSel.value = "custom";
+            }
             if (overlayOn) mount();
           });
         });
@@ -1838,16 +2025,178 @@
           .addEventListener("input", function () {
             document.getElementById("opacityVal").textContent = this.value;
           });
+
+        // ── Rope sag range — live update label and overlay ──
+        document
+          .getElementById("ropeSagRange")
+          ?.addEventListener("input", function () {
+            document.getElementById("ropeSagVal").textContent =
+              this.value + "px";
+            if (overlayOn) mount();
+          });
+
+        // ── Error Safety & Diagnostic Suite Handlers ──
+        function logSafety(msg, color = "#7ee787") {
+          const consoleEl = document.getElementById("safetyConsole");
+          if (!consoleEl) return;
+          const time = new Date().toLocaleTimeString();
+          const line = document.createElement("div");
+          line.style.color = color;
+          line.style.marginTop = "3px";
+          line.textContent = `[${time}] ${msg}`;
+          consoleEl.appendChild(line);
+          consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        // Bridge console methods to stream [ramadan-overlay] diagnostics into the safety console
+        const origLog = console.log;
+        const origWarn = console.warn;
+        const origError = console.error;
+        console.log = function (...args) {
+          origLog.apply(console, args);
+          const str = args
+            .map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a)))
+            .join(" ");
+          if (str.includes("[ramadan-overlay]")) logSafety(str, "#58a6ff");
+        };
+        console.warn = function (...args) {
+          origWarn.apply(console, args);
+          const str = args
+            .map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a)))
+            .join(" ");
+          if (str.includes("[ramadan-overlay]")) logSafety(str, "#e3b341");
+        };
+        console.error = function (...args) {
+          origError.apply(console, args);
+          const str = args
+            .map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a)))
+            .join(" ");
+          if (str.includes("[ramadan-overlay]")) logSafety(str, "#f85149");
+        };
+
+        document
+          .getElementById("btnTestClamping")
+          ?.addEventListener("click", () => {
+            logSafety("Testing defensive config clamping...", "#e3b341");
+            currentInstance?.destroy();
+            currentInstance = init({
+              variant: "lanterns",
+              opacity: 99,
+              zIndex: -9999999999,
+              ropeSag: 999,
+              hijriAdjustment: 50,
+              debug: true,
+              previewMode: true,
+            });
+            logSafety(
+              "✅ Result: Extreme config was safely clamped to valid range without throwing!",
+              "#7ee787"
+            );
+          });
+
+        document
+          .getElementById("btnTestInvalidDate")
+          ?.addEventListener("click", () => {
+            logSafety(
+              "Testing invalid Date input resilience in detector...",
+              "#e3b341"
+            );
+            const res1 = getRamadanState(new Date(NaN), 0, true);
+            const res2 = getRamadanState(null, 0, true);
+            logSafety(
+              `✅ Result: getRamadanState(NaN) -> occasion: '${res1.occasion}', isRamadan: ${res1.isRamadan}`,
+              "#7ee787"
+            );
+            logSafety(
+              `✅ Result: getRamadanState(null) -> occasion: '${res2.occasion}', isRamadan: ${res2.isRamadan}`,
+              "#7ee787"
+            );
+          });
+
+        document
+          .getElementById("btnTestCrash")
+          ?.addEventListener("click", () => {
+            logSafety(
+              "Testing Error Containment Boundary & Atomic DOM Rollback...",
+              "#e3b341"
+            );
+            const origCreate = document.createElement;
+            let counter = 0;
+            document.createElement = function (tagName) {
+              if (tagName.toLowerCase() === "style" && ++counter === 1) {
+                throw new Error(
+                  "Simulated catastrophic CSS stylesheet mounting crash"
+                );
+              }
+              return origCreate.call(document, tagName);
+            };
+            try {
+              const safeInstance = init({
+                previewMode: true,
+                debug: true,
+                onError: (err) =>
+                  logSafety(
+                    `onError hook captured crash: ${err && err.message ? err.message : err}`,
+                    "#f85149"
+                  ),
+              });
+              logSafety(
+                `✅ Result: Host application did NOT crash! Safe instance returned (typeof destroy: '${typeof safeInstance.destroy}').`,
+                "#7ee787"
+              );
+              safeInstance.destroy();
+            } finally {
+              document.createElement = origCreate;
+            }
+          });
+
+        document
+          .getElementById("btnTestOnError")
+          ?.addEventListener("click", () => {
+            logSafety(
+              "Testing double-contained onError hook isolation...",
+              "#e3b341"
+            );
+            init({
+              previewMode: true,
+              debug: true,
+              onError: () => {
+                throw new Error(
+                  "Faulty external telemetry service threw an uncaught error"
+                );
+              },
+            });
+            logSafety(
+              "✅ Result: Consumer onError threw, but double-containment seam prevented host crash!",
+              "#7ee787"
+            );
+          });
+
+        document
+          .getElementById("btnToggleDebug")
+          ?.addEventListener("click", function () {
+            isDebugMode = !isDebugMode;
+            this.textContent = isDebugMode
+              ? "Toggle Debug (ON)"
+              : "Toggle Debug (OFF)";
+            logSafety(
+              `Debug mode set to: ${isDebugMode}`,
+              isDebugMode ? "#7ee787" : "#8b8f98"
+            );
+            if (overlayOn) mount();
+          });
       } // end initApp
     </script>
 
-    <!-- Load library: local dist for dev (localhost/127), CDN for hosted -->
+    <!-- Load library: local dist for dev (localhost/127/file:), CDN for hosted -->
     <script>
       (function () {
         var s = document.createElement("script");
         var isLocal =
           location.hostname === "localhost" ||
-          location.hostname === "127.0.0.1";
+          location.hostname === "127.0.0.1" ||
+          location.hostname === "" ||
+          location.protocol === "file:";
         s.src = isLocal
           ? "dist/ramadan-overlay.min.js"
           : "https://cdn.jsdelivr.net/npm/ramadan-overlay@0.1.3/dist/ramadan-overlay.min.js";

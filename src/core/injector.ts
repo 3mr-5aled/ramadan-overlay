@@ -336,8 +336,15 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     debug
   );
 
+  let rawRopeStyle = userConfig.ropeStyle as string | undefined;
+  if (rawRopeStyle === "u-shape" || rawRopeStyle === "curved") {
+    rawRopeStyle = "u-shaped";
+  } else if (rawRopeStyle === "dual-rope") {
+    rawRopeStyle = "dual";
+  }
+
   const ropeStyle = sanitizeStringUnion(
-    userConfig.ropeStyle,
+    rawRopeStyle as RopeStyle | undefined,
     VALID_ROPE_STYLES,
     "straight",
     "ropeStyle",
