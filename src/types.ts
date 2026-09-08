@@ -359,6 +359,8 @@ export interface OverlayInstance {
   readonly config: ResolvedConfig;
   /** Access the active Iftar countdown widget controller, if enabled. */
   getCountdownController: () => IftarCountdownController | null;
+  /** Get the current detected Ramadan and occasion state. */
+  getState: () => RamadanState;
 }
 
 // ─── Countdown Types ─────────────────────────────────────────────────────────

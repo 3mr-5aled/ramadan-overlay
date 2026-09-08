@@ -31,7 +31,7 @@ const DEFAULT_COLORS = [
 
 function getMsUntilNextMidnight(): number {
   const now = new Date();
-  const tomorrow = new Date(
+  const nextMidnight = new Date(
     now.getFullYear(),
     now.getMonth(),
     now.getDate() + 1,
@@ -39,16 +39,7 @@ function getMsUntilNextMidnight(): number {
     0,
     1
   );
-  return tomorrow.getTime() - now.getTime();
-}
-
-function isCountdownActive(
-  state: RamadanState,
-  config: ResolvedConfig
-): boolean {
-  if (!config.countdown) return false;
-  if (config.previewMode) return true;
-  return state.isRamadan;
+  return Math.max(1000, nextMidnight.getTime() - now.getTime());
 }
 
 function resolveEffectiveVariant(
@@ -57,7 +48,7 @@ function resolveEffectiveVariant(
 ): OverlayVariant {
   if (
     state.isEid &&
-    (state.occasion === "eid-fitr" || state.occasion === "eid-adha")
+    (config.variant === "lanterns" || config.variant === "eid")
   ) {
     return config.eidVariant;
   }
@@ -185,6 +176,15 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
         dayNumber: 0,
       },
       getCountdownController: () => null,
+      getState: () => ({
+        isRamadan: false,
+        occasion: "none",
+        isEid: false,
+        hijriYear: 0,
+        hijriMonth: 0,
+        hijriDay: 0,
+        dayNumber: 0,
+      }),
     };
   }
 
@@ -459,6 +459,7 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
     },
     getCountdownController: () =>
       countdownManager ? countdownManager.controller : null,
+    getState: () => currentState,
   };
 
   // Initial evaluation

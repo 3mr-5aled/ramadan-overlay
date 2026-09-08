@@ -171,6 +171,16 @@ export const RamadanOverlay = defineComponent({
     });
 
     watch(
+      () => props.theme,
+      (newTheme) => {
+        if (instance && newTheme !== undefined) {
+          instance.setTheme(newTheme);
+        }
+      },
+      { deep: true }
+    );
+
+    watch(
       () => JSON.stringify(props),
       () => {
         const newConfig = buildConfig();

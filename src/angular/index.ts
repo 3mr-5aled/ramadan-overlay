@@ -79,7 +79,11 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  ngOnChanges(_changes: SimpleChanges): void {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes["theme"] && this.instance && this.theme !== undefined) {
+      this.instance.setTheme(this.theme);
+      return;
+    }
     const cfg = this.buildConfig();
     if (!this.instance) {
       this.instance = init(cfg);

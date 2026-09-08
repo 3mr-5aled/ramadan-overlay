@@ -62,6 +62,20 @@ export function useRamadanOverlay(config: RamadanOverlayConfig = {}): {
     };
   }, []);
 
+  // Dedicated theme hot-swap effect
+  const themeKey =
+    typeof config.theme === "object"
+      ? JSON.stringify(config.theme)
+      : config.theme;
+
+  useEffect(() => {
+    if (!isMountedRef.current) return;
+    if (instanceRef.current && config.theme !== undefined) {
+      instanceRef.current.setTheme(config.theme);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [themeKey]);
+
   // Update effect: in-place update when config props change
   useEffect(() => {
     if (!isMountedRef.current) return;

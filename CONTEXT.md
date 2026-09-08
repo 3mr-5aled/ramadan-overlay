@@ -21,8 +21,16 @@ The Islamic holiday celebrated from the 10th through 13th of Dhu al-Hijjah (Hijr
 _Avoid_: Greater Eid, Feast of Sacrifice, Bakrid
 
 **Overlay Variant**:
-A visual theme and animation style rendered by the overlay container (`'lanterns'`, `'crescent-stars'`, `'geometric'`, `'sparkles'`, `'banner'`, `'eid'`, `'eid-fitr'`, `'eid-adha'`).
-_Avoid_: Style, skin, theme, visual_mode
+The structural decoration layout and animation shape rendered by the overlay container (`'lanterns'`, `'crescent-stars'`, `'geometric'`, `'sparkles'`, `'banner'`, `'eid'`, `'eid-fitr'`, `'eid-adha'`).
+_Avoid_: Style, skin, visual_mode (distinguish from Visual Theme)
+
+**Visual Theme**:
+A curated cultural color palette and CSS token set applied to overlay elements and widgets (`'classic'`, `'midnight'`, `'emerald'`, `'royal'`, `'desert-dusk'`, or a custom `ThemeDefinition`). Distinct from Overlay Variant which dictates DOM geometry and animation physics.
+_Avoid_: Skin, style pack, color template
+
+**Theme Preset**:
+One of the five ratified, built-in visual color harmonies shipped with the core library (`'classic'`, `'midnight'`, `'emerald'`, `'royal'`, `'desert-dusk'`).
+_Avoid_: Built-in palette, default colorway, stock style
 
 **Hijri Adjustment**:
 A day offset applied to the base astronomical calendar to reconcile regional moon-sighting variations.

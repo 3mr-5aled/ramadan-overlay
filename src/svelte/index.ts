@@ -36,8 +36,12 @@ export function ramadanOverlay(
       if (!instance) {
         instance = init(newConfig);
       } else {
+        if (newConfig.theme !== undefined && newConfig.theme !== config.theme) {
+          instance.setTheme(newConfig.theme);
+        }
         instance.update(newConfig);
       }
+      config = newConfig;
     },
     destroy() {
       instance?.destroy();

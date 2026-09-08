@@ -329,6 +329,7 @@ describe("init orchestration & live transition", () => {
       expect(overlay.container?.style.getPropertyValue("--ro-color-1")).toBe(
         "#c9a84c"
       );
+      expect(overlay.getState()).toBe(overlay.state);
       overlay.destroy();
     });
 
