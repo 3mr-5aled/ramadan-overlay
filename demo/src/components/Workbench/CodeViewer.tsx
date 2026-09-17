@@ -3,7 +3,7 @@ import type { RamadanOverlayConfig, ThemePreset } from "ramadan-overlay";
 import type { Translations } from "../../translations/types";
 import type { DemoLocale } from "../../utils/locale";
 import { isOptionVisible } from "../../utils/matrix";
-import type { ThemeChoice } from "./UniversalControls";
+import type { ThemeChoice } from "./TabVariantTheme";
 
 interface CodeViewerProps {
   t: Translations;

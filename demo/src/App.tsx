@@ -20,7 +20,7 @@ import { sanitizeConfigForVariant } from "./utils/matrix";
 import { Navbar, type OccasionPreview } from "./components/Navbar";
 import { HeroCanopy } from "./components/HeroCanopy";
 import { Workbench } from "./components/Workbench/Workbench";
-import type { ThemeChoice } from "./components/Workbench/UniversalControls";
+import type { ThemeChoice } from "./components/Workbench/TabVariantTheme";
 import { AdvancedLab } from "./components/AdvancedLab/AdvancedLab";
 import { Footer } from "./components/Footer";
 

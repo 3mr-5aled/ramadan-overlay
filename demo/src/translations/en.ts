@@ -70,6 +70,23 @@ export const enTranslations: Translations = {
         desc: "Festive motifs with cute sheep silhouettes, festive balloons, and warm holiday blessings.",
       },
     },
+    tabs: {
+      variantTheme: "Variant & Theme",
+      layout: "Layout & Placement",
+      styling: "Styling & Motifs",
+      calendar: "Calendar & Region",
+      countdownBanner: "Countdown & Banner",
+      codeExport: "Code & Export",
+    },
+    stepper: {
+      step: "Step",
+      of: "of",
+      progress: "Complete",
+      back: "← Back",
+      next: "Next Step →",
+      finish: "Finish & Export →",
+      reset: "Reset to Defaults",
+    },
     universal: {
       theme: "Curated Visual Theme",
       themeOptions: {
@@ -100,6 +117,8 @@ export const enTranslations: Translations = {
         foreground: "Foreground (Above page elements)",
         background: "Background (Ambient backdrop)",
       },
+      zIndex: "Root Overlay Z-Index",
+      zIndexHelp: "Stacking order for the overlay host element (default 9999).",
       shadows: "Elevation Shadow Depth",
       shadowOptions: {
         none: "None (Flat minimalist glow)",
@@ -133,17 +152,129 @@ export const enTranslations: Translations = {
       autoTrigger: "Automatic Hijri Calendar Trigger",
       autoTriggerHelp:
         "Automatically displays during Ramadan and Eid periods and sleeps the rest of the year.",
+      previewMode: "Force Preview Mode",
+      previewModeHelp:
+        "Bypasses calendar checks and forces decorations visible for testing.",
+      debug: "Diagnostic Developer Logging",
+      debugHelp:
+        "Emits guidance in developer console when overlay is dormant or values clamped.",
+      overlayLocale: "Library Language & Numerals",
+      overlayLocaleHelp:
+        "Sets language used by greeting banner and countdown numerals ('auto' follows browser language).",
+      overlayLocaleOptions: {
+        auto: "Auto (Browser Locale)",
+        en: "English (en)",
+        ar: "Arabic (العربية - ar)",
+      },
       countdown: "Enable Iftar Countdown Widget",
       countdownHelp:
         "Mounts an accessible floating countdown card with audio chime alerts and confetti flare at Maghrib.",
     },
+    calendar: {
+      heading: "Calendar & Regional Settings",
+      region: "Calculation Region Preset",
+      regionHelp:
+        "Matches regional moon-sighting astronomical calculation conventions.",
+      regions: {
+        standard: "Standard (Umm al-Qura astronomical)",
+        saudi: "Saudi Arabia (Umm al-Qura)",
+        uae: "United Arab Emirates",
+        malaysia: "Malaysia (JAKIM)",
+        egypt: "Egypt (Dar al-Ifta, +1 day)",
+        turkey: "Turkey (Diyanet, +1 day)",
+        pakistan: "Pakistan (Ruet-e-Hilal, +1 day)",
+        indonesia: "Indonesia (BIMAS, +1 day)",
+        morocco: "Morocco (Habous, +1 day)",
+        us: "United States (ISNA / Fiqh Council, +1 day)",
+        uk: "United Kingdom (ISNA / Local sighting, +1 day)",
+      },
+      hijriAdjustment: "Manual Hijri Day Adjustment",
+      hijriAdjustmentHelp:
+        "Shift calendar by -3 to +3 days. Overrides region preset.",
+      days: "Days",
+      astronomicStandard: "Astronomic Standard",
+      clearBtn: "Clear",
+      testDate: "Gregorian Simulation Date",
+      testDateHelp:
+        "Simulate any calendar day live to test Ramadan or Eid triggers.",
+      occasions: "Active Trigger Occasions",
+      occasionsHelp:
+        "Select which holidays activate the overlay when autoTrigger is on.",
+      occasionOptions: {
+        ramadan: "Ramadan (Month 9)",
+        "eid-fitr": "Eid Al-Fitr (Shawwal 1–3)",
+        "eid-adha": "Eid Al-Adha (Dhu al-Hijjah 10–13)",
+      },
+      eidVariant: "Eid Decoration Variant",
+      eidVariantHelp:
+        "Decoration variant to display during Eid Al-Fitr and Eid Al-Adha.",
+      liveTransition: "Midnight Live Transition",
+      liveTransitionHelp:
+        "Hot-swaps occasions automatically at midnight without reloading.",
+    },
+    countdown: {
+      heading: "Iftar Countdown Widget Parameters",
+      enabled: "Enable Countdown Widget",
+      enabledHelp:
+        "Displays floating card counting down to daily sunset fast-breaking.",
+      iftarTime: "Target Iftar Time (HH:mm)",
+      iftarTimeHelp: "24-hour local sunset time (e.g. '18:45').",
+      position: "Screen Anchor Corner",
+      positions: {
+        "bottom-right": "Bottom Right Corner",
+        "bottom-left": "Bottom Left Corner",
+        "top-right": "Top Right Corner",
+        "top-left": "Top Left Corner",
+      },
+      alertWindowMinutes: "Pre-Iftar Alert Window (Minutes)",
+      alertWindowHelp: "Minutes prior to Iftar when widget becomes visible.",
+      minimizable: "Allow Minimizing to Docked Pill",
+      minimizableHelp:
+        "Enables collapse button to tuck widget into compact badge.",
+      initiallyMinimized: "Start Initially Minimized",
+      initiallyMinimizedHelp: "Mounts widget collapsed in docked pill state.",
+      autoDismissAfterMinutes: "Auto-Dismiss After Iftar (Minutes)",
+      autoDismissHelp:
+        "Minutes after Iftar arrives before card automatically closes.",
+      celebrationDurationMs: "Celebration Flare Duration (ms)",
+      celebrationDurationHelp:
+        "Duration of festive confetti flare and pulse at T-0.",
+      sound: "Audio Alert Chime",
+      soundHelp: "Plays chime and provides mute toggle on countdown widget.",
+      defaultMuted: "Default Muted",
+      defaultMutedHelp: "Initial mute state for audio alert chime.",
+      soundUrl: "Custom Sound / Adhan URL",
+      soundUrlHelp:
+        "Custom audio chime file. Leave empty for Web Audio harmonic chime.",
+      soundUrlPlaceholder: "Optional audio URL, e.g. https://.../adhan.mp3",
+    },
+    exportStudio: {
+      heading: "Complete Configuration & Integration",
+      description:
+        "Your active visual setup is synchronized live across all frameworks in the side panel. You can also copy the standalone CDN drop-in script tag or share this exact setup with teammates.",
+      copyLink: "Copy Shareable Studio Link",
+      linkCopied: "Link Copied!",
+      resetDefaults: "Reset to Defaults",
+      cdnHeading: "Standalone CDN Script Drop-in (Drop into any HTML)",
+      copyCdn: "Copy CDN Script",
+      cdnCopied: "Copied!",
+    },
     variantSpecific: {
+      activeVariantBadge: "Active Variant",
       lanternHeading: "Lantern & Rope Parameters",
       lanternStyle: "Lantern SVG Design",
       lanternCycle: "Cycle all 12 distinct designs",
       lanternCount: "Lantern Density / Count",
       lanternCountAuto: "Auto Decorative (Airy 2–6)",
       lanternZIndex: "Lantern Row Z-Index",
+      lanternZIndexOptions: {
+        auto: "Auto (-1 under rope festoon)",
+        "1": "1 (Low / Above festoon)",
+        "2": "2 (Default)",
+        "10": "10 (Elevated)",
+        "100": "100 (High)",
+        "9999": "9999 (Topmost)",
+      },
       ropeStyle: "Suspension String Style",
       ropeStraight: "Straight Ceiling Rail",
       ropeUshaped: "Curved U-Shaped Festoon Swag",
@@ -164,12 +295,18 @@ export const enTranslations: Translations = {
       clearanceEdges: "Constrain to peripheral gutters (Recommended)",
       clearanceFull: "Full viewport scatter",
       intensity: "Motion Cadence & Density",
+      intensityLevel: "Intensity Level",
       intensityLow: "Serene & Gentle Float",
       intensityNormal: "Balanced Festive Ambient",
       intensityHigh: "Festive Surge Stream",
 
       sparklesHeading: "Ambient Sparkle Parameters",
       density: "Particle Density",
+      densityOptions: {
+        low: "Low (Subtle)",
+        normal: "Normal (Balanced)",
+        high: "High (Festive)",
+      },
       glowColor: "Ambient Glow Halo Color",
     },
     colors: {

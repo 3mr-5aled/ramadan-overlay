@@ -39,6 +39,23 @@ export interface Translations {
         desc: string;
       }
     >;
+    tabs: {
+      variantTheme: string;
+      layout: string;
+      styling: string;
+      calendar: string;
+      countdownBanner: string;
+      codeExport: string;
+    };
+    stepper: {
+      step: string;
+      of: string;
+      progress: string;
+      back: string;
+      next: string;
+      finish: string;
+      reset: string;
+    };
     universal: {
       theme: string;
       themeOptions: Record<string, string>;
@@ -47,6 +64,8 @@ export interface Translations {
       opacity: string;
       layer: string;
       layerOptions: Record<string, string>;
+      zIndex: string;
+      zIndexHelp: string;
       shadows: string;
       shadowOptions: Record<string, string>;
       confetti: string;
@@ -60,16 +79,81 @@ export interface Translations {
       mobileSideBehaviorOptions: Record<string, string>;
       autoTrigger: string;
       autoTriggerHelp: string;
+      previewMode: string;
+      previewModeHelp: string;
+      debug: string;
+      debugHelp: string;
+      overlayLocale: string;
+      overlayLocaleHelp: string;
+      overlayLocaleOptions: Record<string, string>;
       countdown: string;
       countdownHelp: string;
     };
+    calendar: {
+      heading: string;
+      region: string;
+      regionHelp: string;
+      regions: Record<string, string>;
+      hijriAdjustment: string;
+      hijriAdjustmentHelp: string;
+      days: string;
+      astronomicStandard: string;
+      clearBtn: string;
+      testDate: string;
+      testDateHelp: string;
+      occasions: string;
+      occasionsHelp: string;
+      occasionOptions: Record<string, string>;
+      eidVariant: string;
+      eidVariantHelp: string;
+      liveTransition: string;
+      liveTransitionHelp: string;
+    };
+    countdown: {
+      heading: string;
+      enabled: string;
+      enabledHelp: string;
+      iftarTime: string;
+      iftarTimeHelp: string;
+      position: string;
+      positions: Record<string, string>;
+      alertWindowMinutes: string;
+      alertWindowHelp: string;
+      minimizable: string;
+      minimizableHelp: string;
+      initiallyMinimized: string;
+      initiallyMinimizedHelp: string;
+      autoDismissAfterMinutes: string;
+      autoDismissHelp: string;
+      celebrationDurationMs: string;
+      celebrationDurationHelp: string;
+      sound: string;
+      soundHelp: string;
+      defaultMuted: string;
+      defaultMutedHelp: string;
+      soundUrl: string;
+      soundUrlHelp: string;
+      soundUrlPlaceholder: string;
+    };
+    exportStudio: {
+      heading: string;
+      description: string;
+      copyLink: string;
+      linkCopied: string;
+      resetDefaults: string;
+      cdnHeading: string;
+      copyCdn: string;
+      cdnCopied: string;
+    };
     variantSpecific: {
+      activeVariantBadge: string;
       lanternHeading: string;
       lanternStyle: string;
       lanternCycle: string;
       lanternCount: string;
       lanternCountAuto: string;
       lanternZIndex: string;
+      lanternZIndexOptions: Record<string, string>;
       ropeStyle: string;
       ropeStraight: string;
       ropeUshaped: string;
@@ -90,12 +174,14 @@ export interface Translations {
       clearanceEdges: string;
       clearanceFull: string;
       intensity: string;
+      intensityLevel: string;
       intensityLow: string;
       intensityNormal: string;
       intensityHigh: string;
 
       sparklesHeading: string;
       density: string;
+      densityOptions: Record<string, string>;
       glowColor: string;
     };
     colors: {

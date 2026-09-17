@@ -1,21 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import type {
   OverlayVariant,
   OverlayPosition,
   RamadanOverlayConfig,
-  LayerStacking,
-  ShadowMode,
   ThemeDefinition,
 } from "ramadan-overlay";
 import type { Translations } from "../../translations/types";
 import type { DemoLocale } from "../../utils/locale";
-import { VariantSelector } from "./VariantSelector";
-import { UniversalControls, type ThemeChoice } from "./UniversalControls";
-import { VariantSpecificControls } from "./VariantSpecificControls";
-import { ColorCustomizer } from "./ColorCustomizer";
+import type { ThemeChoice } from "./TabVariantTheme";
+import {
+  WorkbenchTabs,
+  StepperFooter,
+  type ConfigTabKey,
+  CONFIG_TABS,
+} from "./WorkbenchTabs";
+import { TabVariantTheme } from "./TabVariantTheme";
+import { TabLayout } from "./TabLayout";
+import { TabStyling } from "./TabStyling";
+import { TabCalendar } from "./TabCalendar";
+import { TabCountdownBanner } from "./TabCountdownBanner";
+import { TabCodeExport } from "./TabCodeExport";
 import { CodeViewer } from "./CodeViewer";
 
-interface WorkbenchProps {
+export interface WorkbenchProps {
   t: Translations;
   locale: DemoLocale;
   config: Partial<RamadanOverlayConfig>;
@@ -49,14 +56,66 @@ export const Workbench: React.FC<WorkbenchProps> = ({
   onToggleAutoTrigger,
   onToggleCountdown,
 }) => {
+  const [activeTab, setActiveTab] = useState<ConfigTabKey>("variantTheme");
+
   const activeVariant: OverlayVariant = config.variant || "lanterns";
   const position: OverlayPosition = config.position || "top";
-  const opacity = config.opacity ?? 0.85;
-  const layer: LayerStacking = config.layer || "foreground";
-  const shadows: ShadowMode = config.shadows || "soft";
-  const confetti = config.confetti === "off" ? "off" : "on";
-  const autoTrigger = config.autoTrigger ?? true;
-  const countdownEnabled = Boolean(config.countdown);
+
+  const handlePrevTab = () => {
+    const currentIndex = CONFIG_TABS.indexOf(activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(CONFIG_TABS[currentIndex - 1]);
+    }
+  };
+
+  const handleNextTab = () => {
+    const currentIndex = CONFIG_TABS.indexOf(activeTab);
+    if (currentIndex < CONFIG_TABS.length - 1) {
+      setActiveTab(CONFIG_TABS[currentIndex + 1]);
+    }
+  };
+
+  const handleResetDefaults = () => {
+    onResetCustomColors();
+    onChangeTheme("classic");
+    onChangePosition("top");
+    onSelectVariant("lanterns");
+    onUpdateConfig({
+      variant: "lanterns",
+      position: "top",
+      opacity: 0.85,
+      layer: "foreground",
+      zIndex: 9999,
+      shadows: "soft",
+      autoTrigger: false,
+      previewMode: true,
+      countdown: false,
+      confetti: "on",
+      attachTo: ".celestial-nav",
+      attachEdge: "bottom",
+      lanternStyle: 0,
+      lanternCount: undefined,
+      lanternZIndex: 2,
+      ropeStyle: "straight",
+      ropeSag: 20,
+      ceilingColor: "#c9a84c",
+      ropeColor: "#c9a84c",
+      density: "normal",
+      intensity: "normal",
+      region: "standard",
+      hijriAdjustment: 0,
+      date: undefined,
+      occasions: ["ramadan", "eid-fitr", "eid-adha"],
+      eidVariant: "eid",
+      liveTransition: true,
+      bannerTextAr: "رَمَضَان كَرِيم",
+      bannerTextEn: "Ramadan Mubarak",
+      bannerBg: "rgba(15,15,20,0.92)",
+      bannerTextColor: "#f1f5f9",
+      bannerIconColor: "#c9a84c",
+      clearance: "edges",
+    });
+  };
 
   return (
     <section id="workbench" className="workbench-section">
@@ -66,57 +125,89 @@ export const Workbench: React.FC<WorkbenchProps> = ({
       </div>
 
       <div className="workbench-grid">
-        {/* Left Column: Configurator Controls */}
-        <div className="controls-column">
-          <VariantSelector
+        {/* Left Column: Tab Progress Configurator Studio */}
+        <div className="controls-column ro-controls-column-studio">
+          {/* Progress Header & Horizontal Tabs */}
+          <WorkbenchTabs
             t={t}
-            activeVariant={activeVariant}
-            onSelectVariant={onSelectVariant}
+            locale={locale}
+            activeTab={activeTab}
+            onSelectTab={setActiveTab}
+            onPrevTab={handlePrevTab}
+            onNextTab={handleNextTab}
+            onResetDefaults={handleResetDefaults}
           />
 
-          <UniversalControls
-            t={t}
-            variant={activeVariant}
-            position={position}
-            onChangePosition={onChangePosition}
-            themeName={themeName}
-            onChangeTheme={onChangeTheme}
-            opacity={opacity}
-            onChangeOpacity={(val) => onUpdateConfig({ opacity: val })}
-            layer={layer}
-            onChangeLayer={(val) => onUpdateConfig({ layer: val })}
-            shadows={shadows}
-            onChangeShadows={(val) => onUpdateConfig({ shadows: val })}
-            confetti={confetti}
-            onChangeConfetti={(val) => onUpdateConfig({ confetti: val })}
-            autoTrigger={autoTrigger}
-            onToggleAutoTrigger={onToggleAutoTrigger}
-            countdownEnabled={countdownEnabled}
-            onToggleCountdown={onToggleCountdown}
-            attachTo={config.attachTo}
-            onChangeAttachTo={(val) => onUpdateConfig({ attachTo: val })}
-            attachEdge={config.attachEdge}
-            onChangeAttachEdge={(val) => onUpdateConfig({ attachEdge: val })}
-            mobileSideBehavior={config.mobileSideBehavior}
-            onChangeMobileSideBehavior={(val) =>
-              onUpdateConfig({ mobileSideBehavior: val })
-            }
-          />
+          {/* Active Tab Panel with Internal Scroll Container */}
+          <div className="ro-tab-viewport">
+            {activeTab === "variantTheme" && (
+              <TabVariantTheme
+                t={t}
+                activeVariant={activeVariant}
+                onSelectVariant={onSelectVariant}
+                themeName={themeName}
+                onChangeTheme={onChangeTheme}
+                customTheme={customTheme}
+                onUpdateCustomColor={onUpdateCustomColor}
+                onResetCustomColors={onResetCustomColors}
+                config={config}
+                onUpdateConfig={onUpdateConfig}
+              />
+            )}
 
-          {themeName === "custom" && (
-            <ColorCustomizer
-              customTheme={customTheme}
-              onChangeColor={onUpdateCustomColor}
-              onReset={onResetCustomColors}
-              translations={t.workbench.colors}
+            {activeTab === "layout" && (
+              <TabLayout
+                t={t}
+                variant={activeVariant}
+                position={position}
+                onChangePosition={onChangePosition}
+                config={config}
+                onUpdateConfig={onUpdateConfig}
+              />
+            )}
+
+            {activeTab === "styling" && (
+              <TabStyling
+                t={t}
+                config={config}
+                onUpdateConfig={onUpdateConfig}
+              />
+            )}
+
+            {activeTab === "calendar" && (
+              <TabCalendar
+                t={t}
+                config={config}
+                onUpdateConfig={onUpdateConfig}
+              />
+            )}
+
+            {activeTab === "countdownBanner" && (
+              <TabCountdownBanner
+                t={t}
+                config={config}
+                onUpdateConfig={onUpdateConfig}
+              />
+            )}
+
+            {activeTab === "codeExport" && (
+              <TabCodeExport
+                t={t}
+                locale={locale}
+                config={config}
+                themeName={themeName}
+                onResetDefaults={handleResetDefaults}
+              />
+            )}
+
+            {/* Step Navigation Footer */}
+            <StepperFooter
+              t={t}
+              activeTab={activeTab}
+              onPrevTab={handlePrevTab}
+              onNextTab={handleNextTab}
             />
-          )}
-
-          <VariantSpecificControls
-            t={t}
-            config={config}
-            onUpdateConfig={onUpdateConfig}
-          />
+          </div>
         </div>
 
         {/* Right Column: Code Viewer & Agent Prompt Seam */}
