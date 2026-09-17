@@ -287,17 +287,26 @@ body {
   user-select: none;
 }
 
+.canopy-hero-logo.clickable {
+  cursor: pointer;
+}
+
 .canopy-hero-logo:hover {
   transform: scale(1.06) translateY(-4px);
   filter: drop-shadow(0 0 55px var(--gold-glow-strong))
     drop-shadow(0 16px 36px rgba(0, 0, 0, 0.6));
 }
 
+.canopy-hero-logo.clickable:active {
+  transform: scale(0.97) translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .canopy-hero-logo {
     transition: none;
   }
-  .canopy-hero-logo:hover {
+  .canopy-hero-logo:hover,
+  .canopy-hero-logo.clickable:active {
     transform: none;
   }
 }
@@ -337,8 +346,69 @@ body {
   font-size: clamp(1.05rem, 2vw, 1.25rem);
   color: var(--text-secondary);
   max-width: 820px;
-  margin: 0 auto 36px;
+  margin: 0 auto 28px;
   line-height: 1.7;
+}
+
+/* Quick Package Install Box */
+.quick-install-box {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  background: rgba(10, 15, 26, 0.88);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-md);
+  padding: 6px 8px 6px 16px;
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  gap: 12px;
+  max-width: 90%;
+  margin: 0 auto 32px;
+}
+
+.quick-install-prompt {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  user-select: none;
+  font-size: 0.92rem;
+}
+
+.quick-install-code {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  color: var(--gold-300);
+  letter-spacing: 0.3px;
+  user-select: all;
+}
+
+.quick-install-copy-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(201, 168, 76, 0.15);
+  border: 1px solid var(--border-mid);
+  color: var(--gold-200);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-install-copy-btn:hover {
+  background: var(--gold-500);
+  color: #060911;
+  box-shadow: 0 0 16px var(--gold-glow);
+}
+
+.quick-install-toast {
+  position: absolute;
+  bottom: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.78rem;
+  color: var(--emerald-400);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .canopy-actions {
@@ -348,6 +418,35 @@ body {
   flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 48px;
+}
+
+.btn-celebrate {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  background: linear-gradient(
+    135deg,
+    rgba(201, 168, 76, 0.22),
+    rgba(201, 168, 76, 0.08)
+  );
+  color: var(--gold-300);
+  border: 1px solid var(--border-mid);
+  box-shadow: 0 4px 20px var(--gold-glow);
+  transition: all 0.25s ease;
+}
+
+.btn-celebrate:hover {
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+  color: #060911;
+  border-color: var(--gold-300);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px var(--gold-glow-strong);
 }
 
 .btn-primary {

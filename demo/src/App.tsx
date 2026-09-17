@@ -288,6 +288,9 @@ export const App: React.FC = () => {
       <main>
         <HeroCanopy
           t={t}
+          locale={locale}
+          occasion={occasion}
+          onFireConfetti={handleFireConfetti}
           onScrollToWorkbench={() => {
             document
               .getElementById("workbench")
