@@ -14086,10 +14086,22 @@ const xd = new URL(
         }),
       ],
     }),
-  kd = ({ t: e, onScrollToWorkbench: t, onScrollToLab: n }) =>
+  kd = new URL(
+    "" + new URL("logo-yOUHX95I.png", import.meta.url).href,
+    import.meta.url
+  ).href,
+  Cd = ({ t: e, onScrollToWorkbench: t, onScrollToLab: n }) =>
     s.jsxs("section", {
       className: "canopy-stage",
       children: [
+        s.jsx("div", {
+          className: "canopy-logo-wrap",
+          children: s.jsx("img", {
+            src: kd,
+            alt: "ramadan-overlay logo",
+            className: "canopy-hero-logo",
+          }),
+        }),
         s.jsxs("div", {
           className: "canopy-badge-wrap font-calligraphy",
           children: [
@@ -14155,7 +14167,7 @@ const xd = new URL(
         }),
       ],
     }),
-  Cd = [
+  bd = [
     { id: "lanterns", icon: "🏮" },
     { id: "banner", icon: "🏷️" },
     { id: "crescent-stars", icon: "🌙" },
@@ -14165,7 +14177,7 @@ const xd = new URL(
     { id: "eid-fitr", icon: "🍬" },
     { id: "eid-adha", icon: "🐑" },
   ],
-  bd = ({ t: e, activeVariant: t, onSelectVariant: n }) =>
+  zd = ({ t: e, activeVariant: t, onSelectVariant: n }) =>
     s.jsxs("div", {
       className: "panel-card",
       children: [
@@ -14178,7 +14190,7 @@ const xd = new URL(
         }),
         s.jsx("div", {
           className: "variant-grid",
-          children: Cd.map(({ id: r, icon: o }) => {
+          children: bd.map(({ id: r, icon: o }) => {
             const i = e.workbench.variants[r] || { name: r, desc: "" },
               a = t === r;
             return s.jsxs(
@@ -14214,7 +14226,7 @@ const xd = new URL(
         }),
       ],
     }),
-  zd = ({ variant: e, position: t, onChangePosition: n, translations: r }) => {
+  Td = ({ variant: e, position: t, onChangePosition: n, translations: r }) => {
     const o = pu(e);
     return s.jsxs("div", {
       className: "control-group",
@@ -14236,7 +14248,7 @@ const xd = new URL(
       ],
     });
   },
-  Td = [
+  Ed = [
     "classic",
     "midnight",
     "emerald",
@@ -14245,7 +14257,7 @@ const xd = new URL(
     "platinum-minimal",
     "rose-sahara",
   ],
-  Ed = ({
+  Md = ({
     t: e,
     variant: t,
     position: n,
@@ -14297,7 +14309,7 @@ const xd = new URL(
                   children: [
                     s.jsx("optgroup", {
                       label: "Theme Presets",
-                      children: Td.map((h) =>
+                      children: Ed.map((h) =>
                         s.jsx(
                           "option",
                           {
@@ -14320,7 +14332,7 @@ const xd = new URL(
                 }),
               ],
             }),
-            s.jsx(zd, {
+            s.jsx(Td, {
               variant: t,
               position: n,
               onChangePosition: r,
@@ -14515,7 +14527,7 @@ const xd = new URL(
       ],
     });
   },
-  Md = ({ t: e, config: t, onUpdateConfig: n }) => {
+  Nd = ({ t: e, config: t, onUpdateConfig: n }) => {
     const r = t.variant || "lanterns",
       o = r === "lanterns",
       i = r === "banner",
@@ -14988,7 +15000,7 @@ const xd = new URL(
           ],
         });
   },
-  Nd = ({ customTheme: e, onChangeColor: t, onReset: n, translations: r }) => {
+  jd = ({ customTheme: e, onChangeColor: t, onReset: n, translations: r }) => {
     const o = e.colors || [
         "#c9a84c",
         "#e5c158",
@@ -15170,7 +15182,7 @@ const xd = new URL(
       ],
     });
   },
-  jd = ({ t: e, locale: t, config: n, themeName: r }) => {
+  Ad = ({ t: e, locale: t, config: n, themeName: r }) => {
     const [o, i] = J.useState("react"),
       [a, l] = J.useState(!1),
       u = n.variant || "lanterns",
@@ -15375,7 +15387,7 @@ Please ensure clean lifecycle cleanup on component unmount and smooth z-index in
       ],
     });
   },
-  Ad = ({
+  Ld = ({
     t: e,
     locale: t,
     config: n,
@@ -15421,8 +15433,8 @@ Please ensure clean lifecycle cleanup on component unmount and smooth z-index in
             s.jsxs("div", {
               className: "controls-column",
               children: [
-                s.jsx(bd, { t: e, activeVariant: y, onSelectVariant: i }),
-                s.jsx(Ed, {
+                s.jsx(zd, { t: e, activeVariant: y, onSelectVariant: i }),
+                s.jsx(Md, {
                   t: e,
                   variant: y,
                   position: C,
@@ -15443,25 +15455,25 @@ Please ensure clean lifecycle cleanup on component unmount and smooth z-index in
                   onToggleCountdown: p,
                 }),
                 r === "custom" &&
-                  s.jsx(Nd, {
+                  s.jsx(jd, {
                     customTheme: o,
                     onChangeColor: c,
                     onReset: g,
                     translations: e.workbench.colors,
                   }),
-                s.jsx(Md, { t: e, config: n, onUpdateConfig: u }),
+                s.jsx(Nd, { t: e, config: n, onUpdateConfig: u }),
               ],
             }),
             s.jsx("div", {
               className: "code-column",
-              children: s.jsx(jd, { t: e, locale: t, config: n, themeName: r }),
+              children: s.jsx(Ad, { t: e, locale: t, config: n, themeName: r }),
             }),
           ],
         }),
       ],
     });
   },
-  Ld = ({ t: e, overlayInstance: t }) => {
+  Pd = ({ t: e, overlayInstance: t }) => {
     const [n, r] = J.useState(!0),
       o = t == null ? void 0 : t.countdown,
       i = () => (o == null ? void 0 : o.show()),
@@ -15564,7 +15576,7 @@ Please ensure clean lifecycle cleanup on component unmount and smooth z-index in
       ],
     });
   },
-  Pd = ({ t: e }) => {
+  _d = ({ t: e }) => {
     const [t, n] = J.useState([
         {
           id: "init",
@@ -15809,7 +15821,7 @@ Please ensure clean lifecycle cleanup on component unmount and smooth z-index in
       ],
     });
   },
-  _d = ({ t: e, overlayInstance: t }) => {
+  Dd = ({ t: e, overlayInstance: t }) => {
     const [n, r] = J.useState(!1);
     return s.jsxs("section", {
       id: "lab",
@@ -15845,14 +15857,14 @@ Please ensure clean lifecycle cleanup on component unmount and smooth z-index in
           s.jsxs("div", {
             className: "lab-content",
             children: [
-              s.jsx(Ld, { t: e, overlayInstance: t }),
-              s.jsx(Pd, { t: e }),
+              s.jsx(Pd, { t: e, overlayInstance: t }),
+              s.jsx(_d, { t: e }),
             ],
           }),
       ],
     });
   },
-  Dd = ({ t: e }) =>
+  Id = ({ t: e }) =>
     s.jsxs("footer", {
       className: "celestial-footer",
       children: [
@@ -15899,7 +15911,7 @@ Please ensure clean lifecycle cleanup on component unmount and smooth z-index in
     bannerTextColor: "#f1f5f9",
     bannerIconColor: "#c9a84c",
   },
-  Id = () => {
+  Rd = () => {
     const [e, t] = J.useState(vd),
       n = e === "ar" ? md : hd,
       [r, o] = J.useState(!0),
@@ -16087,7 +16099,7 @@ Please ensure clean lifecycle cleanup on component unmount and smooth z-index in
         }),
         s.jsxs("main", {
           children: [
-            s.jsx(kd, {
+            s.jsx(Cd, {
               t: n,
               onScrollToWorkbench: () => {
                 var j;
@@ -16100,7 +16112,7 @@ Please ensure clean lifecycle cleanup on component unmount and smooth z-index in
                   j.scrollIntoView({ behavior: "smooth" });
               },
             }),
-            s.jsx(Ad, {
+            s.jsx(Ld, {
               t: n,
               locale: e,
               config: S,
@@ -16117,13 +16129,13 @@ Please ensure clean lifecycle cleanup on component unmount and smooth z-index in
               onToggleCountdown: () =>
                 T((j) => ({ ...j, countdown: !j.countdown })),
             }),
-            s.jsx(_d, { t: n, overlayInstance: m }),
+            s.jsx(Dd, { t: n, overlayInstance: m }),
           ],
         }),
-        s.jsx(Dd, { t: n }),
+        s.jsx(Id, { t: n }),
       ],
     });
   },
   Gl = document.getElementById("root");
 Gl &&
-  Ei.createRoot(Gl).render(s.jsx(Ou.StrictMode, { children: s.jsx(Id, {}) }));
+  Ei.createRoot(Gl).render(s.jsx(Ou.StrictMode, { children: s.jsx(Rd, {}) }));

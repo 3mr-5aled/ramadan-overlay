@@ -7,6 +7,8 @@ interface HeroCanopyProps {
   onScrollToLab: () => void;
 }
 
+const logoUrl = new URL("../../../assets/logo.png", import.meta.url).href;
+
 export const HeroCanopy: React.FC<HeroCanopyProps> = ({
   t,
   onScrollToWorkbench,
@@ -14,6 +16,14 @@ export const HeroCanopy: React.FC<HeroCanopyProps> = ({
 }) => {
   return (
     <section className="canopy-stage">
+      <div className="canopy-logo-wrap">
+        <img
+          src={logoUrl}
+          alt="ramadan-overlay logo"
+          className="canopy-hero-logo"
+        />
+      </div>
+
       <div className="canopy-badge-wrap font-calligraphy">
         <span role="img" aria-label="sparkles">
           ✨

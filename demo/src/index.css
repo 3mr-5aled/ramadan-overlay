@@ -268,6 +268,40 @@ body {
   margin: 0 auto;
 }
 
+.canopy-logo-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 28px;
+}
+
+.canopy-hero-logo {
+  width: clamp(180px, 24vw, 260px);
+  height: clamp(180px, 24vw, 260px);
+  object-fit: contain;
+  filter: drop-shadow(0 0 35px var(--gold-glow))
+    drop-shadow(0 10px 25px rgba(0, 0, 0, 0.45));
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.35s ease;
+  user-select: none;
+}
+
+.canopy-hero-logo:hover {
+  transform: scale(1.06) translateY(-4px);
+  filter: drop-shadow(0 0 55px var(--gold-glow-strong))
+    drop-shadow(0 16px 36px rgba(0, 0, 0, 0.6));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canopy-hero-logo {
+    transition: none;
+  }
+  .canopy-hero-logo:hover {
+    transform: none;
+  }
+}
+
 .canopy-badge-wrap {
   display: inline-flex;
   align-items: center;
