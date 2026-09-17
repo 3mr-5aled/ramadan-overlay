@@ -117,7 +117,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 70px;
+  height: 80px;
   padding: 0 clamp(16px, 4vw, 48px);
   background: rgba(8, 12, 20, 0.85);
   backdrop-filter: blur(20px);
@@ -141,10 +141,10 @@ body {
 }
 
 .nav-logo-img {
-  width: 32px;
-  height: 32px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(201, 168, 76, 0.45));
+  filter: drop-shadow(0 0 12px rgba(201, 168, 76, 0.55));
   animation: subtleFloat 4s ease-in-out infinite;
 }
 
