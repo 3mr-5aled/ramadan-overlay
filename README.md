@@ -28,12 +28,18 @@ with support for 10+ regional presets.
 
 - 🗓️ **Auto-detection** — activates automatically during Ramadan, Eid Al-Fitr, and Eid Al-Adha using Hijri calendar conversion
 - 🎨 **8 visual variants** — Lanterns, Sparkles, Crescent & Stars, Geometric, Eid Al-Fitr, Eid Al-Adha, Auto-Eid, and Contextual Banner
+- 🏮 **Crisp Silhouette Lanterns & Stacking** — 12 authentic lantern designs rendered with pure silhouettes, independent `lanternZIndex` elevation control, and glowing pulse halos
+- 🧵 **Curved Festoon Ropes** — Choose between straight rails, scallop swags (`u-shaped`), or dual catenary festival cables (`dual`) with adjustable sag depth
+- 🎭 **7 Cultural Themes & Elevation Shadows** — Designer presets (Classic, Midnight, Emerald, Royal, Desert Dusk, Platinum Minimal, Rose Sahara) and 3 elevation depth levels (`none`, `soft`, `deep`)
+- 🚀 **Ascending Motion & Intensity Engine** — Bottom-to-top ascending animation for crescents, stars, and Eid shapes with configurable intensity scale (1–10)
+- ⏱️ **Iftar Countdown Widget & Melodic Chime** — Interactive countdown card with minimizable docked pill, Web Audio harmonic synthesizer chime, and gesture autoplay priming
+- 🛡️ **Reading Safe-Zone Clearance** — Lateral gutter clearance (`edges`) to preserve central readability, or unconstrained full-viewport drift (`full`)
 - 🕛 **Live midnight transitions** — dynamic transitions and automatic re-synchronization across midnight and tab focus changes
 - 🌍 **Region-aware** — 10+ regional calendar presets with configurable day offsets
-- ⚡ **Zero dependencies** — tree-shakeable, framework-agnostic
-- 🧩 **All frameworks** — React, Vue 3, Angular, Svelte, or plain HTML / CDN
-- 🎊 **Confetti** — celebratory bursts for festive holidays
-- 🖌️ **Fully customizable** — colors, opacity, density, position, and more
+- ⚡ **Zero dependencies** — lightweight, tree-shakeable, and framework-agnostic
+- 🧩 **All frameworks** — First-class wrappers for React, Vue 3, Angular, Svelte, or plain HTML / CDN
+- 🎊 **Festive Confetti** — celebratory bursts for holiday milestones and Iftar T-0
+- 🖌️ **Deeply customizable** — colors, opacity, density, position, custom mount targets, and callbacks
 
 ---
 
@@ -133,19 +139,24 @@ Building with Cursor, Claude Code, GitHub Copilot, Windsurf, or Google Antigravi
 
 ### General
 
-| Option       | Type                         | Default                               | Description                                                                                                                              |
-| ------------ | ---------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `variant`    | `OverlayVariant`             | `'lanterns'`                          | Visual decoration style (`'lanterns'`, `'sparkles'`, `'crescent-stars'`, `'geometric'`, `'eid'`, `'eid-fitr'`, `'eid-adha'`, `'banner'`) |
-| `theme`      | `ThemeOption`                | `'classic'`                           | Predefined visual theme preset or custom theme object (see Theme Presets below)                                                          |
-| `shadows`    | `'none' \| 'soft' \| 'deep'` | `'soft'`                              | Physical elevation shadow depth for lanterns, ropes, and floating motifs (`'none'`, `'soft'`, `'deep'`)                                  |
-| `occasions`  | `Occasion[]`                 | `['ramadan', 'eid-fitr', 'eid-adha']` | Filter which occasions display decorations                                                                                               |
-| `eidVariant` | `OverlayVariant`             | `'eid'`                               | Visual variant to render during Eid when `variant` is Ramadan-specific                                                                   |
-| `position`   | `string`                     | `'both'`                              | `'top'` \| `'bottom'` \| `'both'` \| `'full'`                                                                                            |
-| `opacity`    | `number`                     | `0.85`                                | Overlay opacity `0`–`1`                                                                                                                  |
-| `colors`     | `string[]`                   | Festive palette                       | Custom CSS color array                                                                                                                   |
-| `density`    | `string`                     | auto                                  | `'low'` \| `'normal'` \| `'high'` — defaults to `'low'` on mobile, `'normal'` on desktop                                                 |
-| `zIndex`     | `number`                     | `9999`                                | CSS z-index of the overlay                                                                                                               |
-| `locale`     | `string`                     | `'en'`                                | `'en'` \| `'ar'`                                                                                                                         |
+| Option               | Type                                    | Default                               | Description                                                                                                                               |
+| -------------------- | --------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `variant`            | `OverlayVariant`                        | `'lanterns'`                          | Visual decoration style (`'lanterns'`, `'sparkles'`, `'crescent-stars'`, `'geometric'`, `'eid'`, `'eid-fitr'`, `'eid-adha'`, `'banner'`)  |
+| `theme`              | `ThemeOption`                           | `'classic'`                           | Predefined visual theme preset or custom theme object (see Theme Presets below)                                                           |
+| `shadows`            | `'none' \| 'soft' \| 'deep'`            | `'soft'`                              | Physical elevation occlusion shadow depth for lanterns, ropes, and floating motifs (`'none'`, `'soft'`, `'deep'`)                         |
+| `occasions`          | `Occasion[]`                            | `['ramadan', 'eid-fitr', 'eid-adha']` | Filter which occasions display decorations                                                                                                |
+| `eidVariant`         | `OverlayVariant`                        | `'eid'`                               | Visual variant to render during Eid when `variant` is Ramadan-specific                                                                    |
+| `position`           | `OverlayPosition`                       | `'both'`                              | Viewport placement: `'top'`, `'bottom'`, `'both'`, `'full'`, `'left'`, `'right'`, `'sides'`, `'start'`, `'end'`                           |
+| `mobileSideBehavior` | `'hide' \| 'top' \| 'show'`             | `'hide'`                              | Responsive behavior for side lanterns on screens <768px (`'hide'`, reposition to `'top'`, or force `'show'`)                              |
+| `opacity`            | `number`                                | `0.85`                                | Overlay opacity `0`–`1`                                                                                                                   |
+| `colors`             | `string[]`                              | Festive palette                       | Custom CSS color array                                                                                                                    |
+| `density`            | `'low' \| 'normal' \| 'high'`           | auto                                  | Particle count preset — defaults to `'low'` on mobile, `'normal'` on desktop                                                              |
+| `intensity`          | `'low' \| 'normal' \| 'high' \| number` | `'normal'`                            | Floating shape count and motion cadence for ascending variants (`crescent-stars`, `eid`). Accepts preset or `1`–`10` scale                |
+| `clearance`          | `'edges' \| 'full'`                     | `'edges'`                             | Safe zone clearance: `'edges'` constrains motifs to peripheral gutters (leaving center sterile); `'full'` scatters motifs across viewport |
+| `layer`              | `'foreground' \| 'background'`          | `'foreground'`                        | Stacking layer: `'foreground'` (`z-index: 9999`) or `'background'` (`z-index: -1`) as an ambient backdrop behind web content              |
+| `mountTarget`        | `string \| HTMLElement`                 | `undefined`                           | Optional container element or CSS selector to mount into (defaults to `document.body`)                                                    |
+| `zIndex`             | `number`                                | `9999`                                | CSS z-index of the overlay container                                                                                                      |
+| `locale`             | `'en' \| 'ar'`                          | `'en'`                                | Display locale for greetings and widgets (`'en'`, `'ar'`)                                                                                 |
 
 ### Theme Presets
 
@@ -197,23 +208,42 @@ Harmonize lanterns, ropes, glowing halos, banners, and widgets with 7 designer p
 
 ### Lanterns variant
 
-| Option          | Type     | Default                   | Description                                                                    |
-| --------------- | -------- | ------------------------- | ------------------------------------------------------------------------------ |
-| `lanternStyle`  | `number` | `0`                       | `1`–`12` pins a single design; `0` cycles through all                          |
-| `lanternZIndex` | `number` | `2`                       | Stacking elevation (`z-index`) specifically for lantern rows and hanging units |
-| `ceilingColor`  | `string` | `'#c9a84c'`               | Color of the horizontal ceiling bar                                            |
-| `ropeColor`     | `string` | `'#c9a84c'`               | Color of the lantern strings                                                   |
-| `glowColor`     | `string` | `'rgba(201,168,76,0.55)'` | Drop-shadow / glow color                                                       |
+| Option          | Type                                 | Default                   | Description                                                                                                  |
+| --------------- | ------------------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `lanternStyle`  | `LanternStyle`                       | `0`                       | `1`–`12` pins a single design; `0` cycles through all 12 authentic designs                                   |
+| `lanternZIndex` | `number`                             | `2`                       | Stacking elevation (`z-index`) specifically for lantern rows and hanging units (maps to `--ro-lantern-z`)    |
+| `ropeStyle`     | `'straight' \| 'u-shaped' \| 'dual'` | `'straight'`              | Linear rail (`'straight'`), multi-scallop festoon swag (`'u-shaped'`), or dual catenary cables (`'dual'`)    |
+| `ropeSag`       | `number`                             | `20`                      | Sag depth in pixels for curved rope styles (`6`–`60`, automatically scaled down on compact mobile viewports) |
+| `ceilingColor`  | `string`                             | `'#c9a84c'`               | Color of the horizontal ceiling mounting rail                                                                |
+| `ropeColor`     | `string`                             | `'#c9a84c'`               | Color of the lantern suspension strings                                                                      |
+| `glowColor`     | `string`                             | `'rgba(201,168,76,0.55)'` | Drop-shadow / glowing pulse halo color                                                                       |
 
 ### Banner variant
 
-| Option            | Type     | Default                   | Description                                                   |
-| ----------------- | -------- | ------------------------- | ------------------------------------------------------------- |
-| `bannerBg`        | `string` | `'rgba(15,15,20,0.92)'`   | Background color of the banner bar                            |
-| `bannerTextColor` | `string` | `colors[0]`               | Greeting text color                                           |
-| `bannerIconColor` | `string` | `colors[1]`               | Color of the icon beside the text                             |
-| `bannerTextEn`    | `string` | built-in English greeting | Custom English greeting (defaults to Ramadan or Eid Mubarak)  |
-| `bannerTextAr`    | `string` | built-in Arabic greeting  | Custom Arabic greeting (defaults to رمضان مبارك or عيد مبارك) |
+| Option            | Type                                          | Default                   | Description                                                                                      |
+| ----------------- | --------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| `bannerBg`        | `string`                                      | `'rgba(15,15,20,0.92)'`   | Background color of the banner bar                                                               |
+| `bannerTextColor` | `string`                                      | `colors[0]`               | Greeting text typography color                                                                   |
+| `bannerIconColor` | `string`                                      | `colors[1]`               | Color of the contextual decorative icon beside the text                                          |
+| `bannerTextEn`    | `string \| Partial<Record<Occasion, string>>` | built-in English greeting | Custom English greeting string, or occasion dictionary (`'ramadan'`, `'eid-fitr'`, `'eid-adha'`) |
+| `bannerTextAr`    | `string \| Partial<Record<Occasion, string>>` | built-in Arabic greeting  | Custom Arabic greeting string, or occasion dictionary (`'ramadan'`, `'eid-fitr'`, `'eid-adha'`)  |
+
+```ts
+// Custom greetings mapped per occasion:
+init({
+  variant: "banner",
+  bannerTextEn: {
+    ramadan: "Ramadan Kareem! Wishing you peace & blessings.",
+    "eid-fitr": "Eid Mubarak! May your celebration be joyful.",
+    "eid-adha": "Eid Al-Adha Mubarak! Warmest wishes.",
+  },
+  bannerTextAr: {
+    ramadan: "رمضان كريم مبارك عليكم الشهر",
+    "eid-fitr": "عيد فطر مبارك وكل عام وأنتم بخير",
+    "eid-adha": "عيد أضحى مبارك أعاده الله عليكم بالخير",
+  },
+});
+```
 
 ### Iftar Countdown Widget
 
@@ -230,15 +260,19 @@ Display an interactive countdown card and docked pill prior to daily Iftar / Mag
 | `minimizable`        | `boolean`                    | `true`           | Whether the widget can collapse into a compact docked pill (`🌙 18:45 · 14m 20s`) |
 | `initiallyMinimized` | `boolean`                    | `false`          | Start in the docked pill state (persisted in `sessionStorage`)                    |
 | `position`           | `string`                     | `'bottom-right'` | Anchor corner: `'bottom-right'`, `'bottom-left'`, `'top-right'`, `'top-left'`     |
-| `soundUrl`           | `string`                     | `undefined`      | Optional audio chime or Adhan URL triggered at T-0                                |
-| `defaultMuted`       | `boolean`                    | `true`           | Whether audio alerts start muted by default                                       |
+| `soundUrl`           | `string`                     | `undefined`      | Custom audio chime or Adhan URL triggered at T-0                                  |
+| `defaultMuted`       | `boolean`                    | `true`           | Whether audio alerts start muted by default (toggleable via speaker badge)        |
 | `confetti`           | `boolean`                    | `true`           | Celebrate T-0 with celebratory confetti flare                                     |
+
+> 🎵 **Harmonic Web Audio Synthesizer:** When `soundUrl` is omitted, `ramadan-overlay` automatically synthesizes a gentle 4-chord melodic chime (F5, A5, C6, E6) directly in the browser via the Web Audio API without requiring any external audio files or network requests. Includes gesture autoplay priming so clicks unlock audio seamlessly.
 
 ```ts
 init({
   variant: "lanterns",
   theme: "classic",
   shadows: "soft",
+  ropeStyle: "u-shaped",
+  lanternZIndex: 3,
   countdown: {
     iftarTime: "18:45",
     alertWindowMinutes: 30,
@@ -320,7 +354,12 @@ console.log(eidAdhaState.occasion); // 'eid-adha'
 import { useRamadanOverlay } from "ramadan-overlay/react";
 
 function App() {
-  const { state } = useRamadanOverlay({ variant: "lanterns" });
+  const { state } = useRamadanOverlay({
+    variant: "lanterns",
+    theme: "royal",
+    ropeStyle: "u-shaped",
+    lanternZIndex: 3,
+  });
   return state.isRamadan ? <p>Ramadan Mubarak!</p> : null;
 }
 ```
@@ -333,7 +372,14 @@ import { RamadanOverlay } from "ramadan-overlay/react";
 function App() {
   return (
     <>
-      <RamadanOverlay variant="lanterns" previewMode />
+      <RamadanOverlay
+        variant="lanterns"
+        theme="classic"
+        shadows="soft"
+        ropeStyle="u-shaped"
+        lanternZIndex={3}
+        previewMode
+      />
       <YourApp />
     </>
   );
@@ -345,7 +391,14 @@ function App() {
 ```tsx
 function App() {
   return (
-    <RamadanOverlay config={{ variant: "lanterns", previewMode: true }}>
+    <RamadanOverlay
+      config={{
+        variant: "lanterns",
+        theme: "midnight",
+        countdown: { iftarTime: "18:45", minimizable: true },
+        previewMode: true,
+      }}
+    >
       {(state) => state.isRamadan && <p>Ramadan Mubarak!</p>}
     </RamadanOverlay>
   );
@@ -362,7 +415,11 @@ function App() {
 ```vue
 <script setup>
 import { useRamadanOverlay } from "ramadan-overlay/vue";
-const { state } = useRamadanOverlay({ variant: "lanterns" });
+const { state } = useRamadanOverlay({
+  variant: "lanterns",
+  theme: "emerald",
+  ropeStyle: "dual",
+});
 </script>
 
 <template>
@@ -374,7 +431,14 @@ const { state } = useRamadanOverlay({ variant: "lanterns" });
 
 ```vue
 <template>
-  <RamadanOverlay variant="crescent-stars" :previewMode="true" />
+  <RamadanOverlay
+    variant="lanterns"
+    theme="emerald"
+    rope-style="dual"
+    :rope-sag="25"
+    :lantern-z-index="3"
+    :previewMode="true"
+  />
 </template>
 
 <script setup>
@@ -387,7 +451,13 @@ import { RamadanOverlay } from "ramadan-overlay/vue";
 ```vue
 <template>
   <RamadanOverlay
-    :config="{ variant: 'geometric', previewMode: true }"
+    :config="{
+      variant: 'lanterns',
+      theme: 'rose-sahara',
+      shadows: 'deep',
+      ropeStyle: 'u-shaped',
+      previewMode: true,
+    }"
     @ramadan-start="onStart"
     @ramadan-end="onEnd"
   />
@@ -411,7 +481,14 @@ import { RamadanOverlayDirective } from "ramadan-overlay/angular";
 @Component({
   imports: [RamadanOverlayDirective],
   template: `
-    <div ramadanOverlay variant="sparkles" [previewMode]="true"></div>
+    <div
+      ramadanOverlay
+      variant="lanterns"
+      theme="desert-dusk"
+      ropeStyle="u-shaped"
+      [lanternZIndex]="3"
+      [previewMode]="true"
+    ></div>
   `,
 })
 export class AppComponent {}
@@ -425,7 +502,13 @@ export class AppComponent {}
   template: `
     <div
       ramadanOverlay
-      [ramadanConfig]="{ variant: 'lanterns', previewMode: true }"
+      [ramadanConfig]="{
+        variant: 'lanterns',
+        theme: 'midnight',
+        ropeStyle: 'dual',
+        ropeSag: 24,
+        previewMode: true,
+      }"
     ></div>
   `,
 })
@@ -453,7 +536,15 @@ export class AppModule {}
   import { ramadanOverlay } from "ramadan-overlay/svelte";
 </script>
 
-<div use:ramadanOverlay={{ variant: "geometric", previewMode: true }}></div>
+<div
+  use:ramadanOverlay={{
+    variant: "lanterns",
+    theme: "royal",
+    ropeStyle: "u-shaped",
+    lanternZIndex: 3,
+    previewMode: true,
+  }}
+></div>
 ```
 
 **Composable (`useRamadanOverlay`)**
@@ -461,7 +552,7 @@ export class AppModule {}
 ```svelte
 <script>
   import { useRamadanOverlay } from "ramadan-overlay/svelte";
-  const { state } = useRamadanOverlay({ variant: "geometric" });
+  const { state } = useRamadanOverlay({ variant: "crescent-stars", theme: "midnight" });
 </script>
 
 {#if $state.isRamadan}<p>Ramadan Mubarak!</p>{/if}
@@ -477,6 +568,8 @@ export class AppModule {}
 <script>
   RamadanOverlay.init({
     variant: "lanterns",
+    theme: "classic",
+    ropeStyle: "u-shaped",
     region: "egypt",
     previewMode: true,
   });
@@ -484,6 +577,12 @@ export class AppModule {}
 ```
 
 </details>
+
+---
+
+## 📝 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes and version history.
 
 ---
 

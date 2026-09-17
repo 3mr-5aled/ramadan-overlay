@@ -52,7 +52,10 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "CHANGELOG.md",
+    "LICENSE",
+    "assets/logo.png",
+    "assets/previews"
   ],
   "sideEffects": false,
   "scripts": {
