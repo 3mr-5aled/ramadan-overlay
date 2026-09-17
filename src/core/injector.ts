@@ -292,6 +292,19 @@ function isOccasionActive(
   return config.occasions.includes(state.occasion);
 }
 
+function resolveConfettiOccasion(
+  state: RamadanState,
+  config: ResolvedConfig
+): Occasion {
+  if (state.occasion && state.occasion !== "none") {
+    return state.occasion;
+  }
+  if (config.variant === "eid-adha") return "eid-adha";
+  if (config.variant === "eid-fitr" || config.variant === "eid")
+    return "eid-fitr";
+  return "ramadan";
+}
+
 // ─── Config resolution ────────────────────────────────────────────────────────
 
 function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
@@ -652,7 +665,8 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
         )
       ) {
         const confettiYear = newState.hijriYear || 1447;
-        void fireRamadanConfetti(confettiYear, currentConfig.colors);
+        const occasion = resolveConfettiOccasion(newState, currentConfig);
+        void fireRamadanConfetti(confettiYear, currentConfig.colors, occasion);
       }
     };
 
@@ -908,9 +922,12 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
         return countdownManager ? countdownManager.controller : null;
       },
       getState: () => currentState,
-      fireConfetti: async () => {
+      fireConfetti: async (overrideOccasion?: Occasion | string) => {
         const confettiYear = currentState.hijriYear || 1447;
-        await fireRamadanConfetti(confettiYear, currentConfig.colors);
+        const occasion =
+          (overrideOccasion as Occasion) ||
+          resolveConfettiOccasion(currentState, currentConfig);
+        await fireRamadanConfetti(confettiYear, currentConfig.colors, occasion);
       },
     };
 

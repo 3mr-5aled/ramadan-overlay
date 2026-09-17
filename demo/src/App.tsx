@@ -180,7 +180,7 @@ export const App: React.FC = () => {
 
   const handleFireConfetti = () => {
     if (overlayInstance?.fireConfetti) {
-      overlayInstance.fireConfetti();
+      overlayInstance.fireConfetti(occasion);
     }
   };
 

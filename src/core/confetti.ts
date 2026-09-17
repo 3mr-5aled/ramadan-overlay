@@ -1,5 +1,5 @@
 import confetti from "canvas-confetti";
-import type { RamadanState } from "../types";
+import type { Occasion, RamadanState } from "../types";
 import { isMotionAllowed } from "./motion";
 
 const DEFAULT_GOLD = "#c9a84c";
@@ -17,13 +17,35 @@ export function isCanvasSupported(): boolean {
 }
 
 /**
- * Fire a 3-burst Ramadan confetti sequence on day 1 or on demand.
- * Uses crescent moon + star emoji shapes via canvas-confetti's shapeFromText API,
+ * Resolves the primary and secondary festive emojis tailored to the active holiday.
+ * - Ramadan: ['🌙', '✨'] (crescent moon + star)
+ * - Eid Al-Fitr: ['🎁', '✨'] (gift box + sparkles)
+ * - Eid Al-Adha: ['🐑', '🎁'] (sacrificial sheep + gift box)
+ */
+export function getOccasionConfettiEmojis(
+  occasion?: Occasion | "none" | string
+): [string, string] {
+  if (occasion === "eid-adha") {
+    return ["🐑", "🎁"];
+  }
+  if (occasion === "eid-fitr" || occasion === "eid") {
+    return ["🎁", "✨"];
+  }
+  return ["🌙", "✨"];
+}
+
+/**
+ * Fire a 3-burst festive celebration confetti sequence.
+ * Uses occasion-specific emoji shapes:
+ * - Ramadan: crescent moon ("🌙") and star ("✨")
+ * - Eid Al-Fitr: gift box ("🎁") and star ("✨")
+ * - Eid Al-Adha: sheep ("🐑") and gift box ("🎁")
  * with graceful fallback to standard geometric confetti shapes when OffscreenCanvas is unavailable.
  */
 export async function fireRamadanConfetti(
   hijriYear: number,
-  colors?: string[]
+  colors?: string[],
+  occasion?: Occasion | "none" | string
 ): Promise<void> {
   if (!isMotionAllowed()) return;
   if (!isCanvasSupported()) return;
@@ -39,14 +61,16 @@ export async function fireRamadanConfetti(
         "#ffffff",
       ];
 
+  const [primaryEmoji, secondaryEmoji] = getOccasionConfettiEmojis(occasion);
+
   let shapes: confetti.Shape[] | undefined;
   if (typeof OffscreenCanvas !== "undefined") {
     try {
-      const crescentShape = buildEmojiShape("🌙");
-      const starShape = buildEmojiShape("✨");
+      const primaryShape = buildEmojiShape(primaryEmoji);
+      const secondaryShape = buildEmojiShape(secondaryEmoji);
       const yearStr = (hijriYear || 1447).toString();
       const yearShape = buildYearShape(yearStr);
-      shapes = [crescentShape, starShape, yearShape];
+      shapes = [primaryShape, secondaryShape, yearShape];
     } catch {
       // Fallback to default confetti shapes if canvas shape generation fails
       shapes = undefined;
@@ -257,3 +281,5 @@ export function shouldFireConfetti(
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export { fireRamadanConfetti as fireOccasionConfetti };

@@ -14,7 +14,12 @@
  */
 
 export { getOccasionState, getRamadanState, init } from "./injector";
-export { fireRamadanConfetti, shouldFireConfetti } from "./confetti";
+export {
+  fireRamadanConfetti,
+  fireRamadanConfetti as fireOccasionConfetti,
+  getOccasionConfettiEmojis,
+  shouldFireConfetti,
+} from "./confetti";
 export { createCountdownManager, playSynthesizedChime } from "./countdown";
 export { THEME_PRESETS, themes, resolveTheme } from "./themes";
 

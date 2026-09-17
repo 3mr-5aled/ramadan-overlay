@@ -187,7 +187,7 @@ export function createCountdownManager(
       // Fire confetti if enabled
       if (resolvedConfig.confetti !== false) {
         try {
-          void fireRamadanConfetti(hijriYear, colors);
+          void fireRamadanConfetti(hijriYear, colors, "ramadan");
         } catch {
           // Non-critical confetti error
         }

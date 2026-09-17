@@ -501,7 +501,7 @@ export interface OverlayInstance {
   /** Get the current detected Ramadan and occasion state. */
   getState: () => RamadanState;
   /** Programmatically fire the festive Ramadan / Eid celebration confetti burst. */
-  fireConfetti: () => Promise<void>;
+  fireConfetti: (occasion?: Occasion | string) => Promise<void>;
 }
 
 // ─── Countdown Types ─────────────────────────────────────────────────────────
