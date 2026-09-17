@@ -712,18 +712,88 @@ body {
   box-shadow: 0 0 10px var(--gold-glow);
 }
 
-/* ── Tab Buttons Navigation ── */
+/* ── Tab Buttons Navigation with Static Arrows ── */
+.ro-config-tabs-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  width: 100%;
+  direction: ltr; /* Keeps left arrow on the physical left and right arrow on the physical right */
+}
+
+.ro-tab-arrow-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dark);
+  color: var(--gold-300);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  padding: 0;
+}
+
+.ro-tab-arrow-btn:hover:not(:disabled) {
+  background: rgba(201, 168, 76, 0.15);
+  border-color: var(--border-gold-glow);
+  color: var(--gold-100);
+  box-shadow: 0 0 12px rgba(201, 168, 76, 0.25);
+  transform: translateY(-1px);
+}
+
+.ro-tab-arrow-btn:active:not(:disabled) {
+  transform: translateY(0);
+  background: rgba(201, 168, 76, 0.25);
+}
+
+.ro-tab-arrow-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: var(--border-dark);
+  color: var(--text-muted);
+  box-shadow: none;
+  transform: none;
+}
+
+.ro-tabs-scroll-track {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge */
+  padding: 4px 2px;
+}
+
+.ro-tabs-scroll-track::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .ro-config-tabs-nav {
   display: flex;
   align-items: center;
   gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: thin;
+  width: max-content;
+  min-width: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .ro-config-tabs-nav::-webkit-scrollbar {
-  height: 4px;
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .ro-config-tab-btn {

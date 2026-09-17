@@ -86,6 +86,8 @@ export const enTranslations: Translations = {
       next: "Next Step →",
       finish: "Finish & Export →",
       reset: "Reset to Defaults",
+      scrollLeft: "Scroll tabs left",
+      scrollRight: "Scroll tabs right",
     },
     universal: {
       theme: "Curated Visual Theme",

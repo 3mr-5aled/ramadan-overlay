@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import type { Translations } from "../../translations/types";
 import type { DemoLocale } from "../../utils/locale";
 
@@ -89,8 +89,94 @@ export const WorkbenchTabs: React.FC<WorkbenchTabsProps> = ({
   const currentStep = activeIndex >= 0 ? activeIndex + 1 : 1;
   const progressPercent = Math.round((currentStep / totalSteps) * 100);
 
-  const isFirst = activeIndex === 0;
-  const isLast = activeIndex === totalSteps - 1;
+  const scrollTrackRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const isRtl = locale === "ar";
+
+  const updateScrollState = useCallback(() => {
+    const el = scrollTrackRef.current;
+    if (!el) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+
+    // Headless / jsdom test environment fallback: keep buttons interactive
+    if (scrollWidth === 0 && clientWidth === 0) {
+      setCanScrollLeft(true);
+      setCanScrollRight(true);
+      return;
+    }
+
+    if (scrollWidth <= clientWidth + 2) {
+      setCanScrollLeft(false);
+      setCanScrollRight(false);
+      return;
+    }
+
+    if (isRtl) {
+      // In RTL across modern Chromium / Gecko / WebKit:
+      const maxScroll = scrollWidth - clientWidth;
+      const absScroll = Math.abs(scrollLeft);
+      const atRight = absScroll <= 2 || scrollLeft >= maxScroll - 2;
+      const atLeft = absScroll >= maxScroll - 2 || scrollLeft <= 2;
+      setCanScrollLeft(!atLeft);
+      setCanScrollRight(!atRight);
+    } else {
+      setCanScrollLeft(scrollLeft > 2);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 2);
+    }
+  }, [isRtl]);
+
+  useEffect(() => {
+    updateScrollState();
+    const handleResize = () => updateScrollState();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [updateScrollState]);
+
+  // Center active tab into view whenever activeTab changes
+  useEffect(() => {
+    const el = scrollTrackRef.current?.querySelector<HTMLElement>(
+      ".ro-config-tab-btn.active"
+    );
+    if (el && typeof el.scrollIntoView === "function") {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+    const timer = setTimeout(updateScrollState, 350);
+    return () => clearTimeout(timer);
+  }, [activeTab, updateScrollState]);
+
+  const handleScrollLeft = () => {
+    const el = scrollTrackRef.current;
+    if (el) {
+      if (typeof el.scrollBy === "function") {
+        el.scrollBy({ left: -220, behavior: "smooth" });
+      } else {
+        el.scrollLeft -= 220;
+      }
+      setTimeout(updateScrollState, 300);
+    }
+  };
+
+  const handleScrollRight = () => {
+    const el = scrollTrackRef.current;
+    if (el) {
+      if (typeof el.scrollBy === "function") {
+        el.scrollBy({ left: 220, behavior: "smooth" });
+      } else {
+        el.scrollLeft += 220;
+      }
+      setTimeout(updateScrollState, 300);
+    }
+  };
+
+  const scrollLeftText = t.workbench.stepper.scrollLeft || "Scroll Left";
+  const scrollRightText = t.workbench.stepper.scrollRight || "Scroll Right";
 
   return (
     <div className="ro-config-tabs-container">
@@ -126,29 +212,91 @@ export const WorkbenchTabs: React.FC<WorkbenchTabsProps> = ({
         </div>
       </div>
 
-      {/* ── Horizontal Navigation Tabs ── */}
-      <nav className="ro-config-tabs-nav" aria-label="Configuration Steps">
-        {tabDefs.map((tab) => {
-          const isActive = tab.key === activeTab;
-          const isPassed = tab.step < currentStep;
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              className={`ro-config-tab-btn ${isActive ? "active" : ""} ${
-                isPassed ? "passed" : ""
-              }`}
-              onClick={() => onSelectTab(tab.key)}
-              aria-selected={isActive}
-              role="tab"
-            >
-              <span className="ro-tab-step-badge">{tab.step}</span>
-              <span className="ro-tab-icon">{tab.icon}</span>
-              <span className="ro-tab-title">{tab.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+      {/* ── Horizontal Navigation Tabs with Static End Arrows ── */}
+      <div className="ro-config-tabs-wrapper">
+        <button
+          type="button"
+          className="ro-tab-arrow-btn ro-tab-arrow-left"
+          onClick={handleScrollLeft}
+          disabled={!canScrollLeft}
+          aria-label={scrollLeftText}
+          title={scrollLeftText}
+          data-testid="tab-arrow-left"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+
+        <div
+          className="ro-tabs-scroll-track"
+          ref={scrollTrackRef}
+          onScroll={updateScrollState}
+          dir={isRtl ? "rtl" : "ltr"}
+          data-testid="tabs-scroll-track"
+        >
+          <nav
+            className="ro-config-tabs-nav"
+            aria-label="Configuration Steps"
+            role="tablist"
+          >
+            {tabDefs.map((tab) => {
+              const isActive = tab.key === activeTab;
+              const isPassed = tab.step < currentStep;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  className={`ro-config-tab-btn ${isActive ? "active" : ""} ${
+                    isPassed ? "passed" : ""
+                  }`}
+                  onClick={() => onSelectTab(tab.key)}
+                  aria-selected={isActive}
+                  role="tab"
+                >
+                  <span className="ro-tab-step-badge">{tab.step}</span>
+                  <span className="ro-tab-icon">{tab.icon}</span>
+                  <span className="ro-tab-title">{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        <button
+          type="button"
+          className="ro-tab-arrow-btn ro-tab-arrow-right"
+          onClick={handleScrollRight}
+          disabled={!canScrollRight}
+          aria-label={scrollRightText}
+          title={scrollRightText}
+          data-testid="tab-arrow-right"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 };

@@ -86,6 +86,8 @@ export const arTranslations: Translations = {
       next: "الخطوة التالية →",
       finish: "إنهاء وتصدير الكود →",
       reset: "إعادة ضبط للافتراضي",
+      scrollLeft: "تمرير التبويبات لليسار",
+      scrollRight: "تمرير التبويبات لليمين",
     },
     universal: {
       theme: "السمة اللونية المعتمدة (Theme Preset)",

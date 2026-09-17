@@ -100,6 +100,83 @@ describe("Workbench 6-Tab Progress Configurator Seam", () => {
     expect(progressLabel).toBeTruthy();
     expect(progressLabel?.textContent).toContain("Step 1 of 6");
 
+    // Verify static scroll arrow buttons and scroll track exist
+    const leftArrow = container.querySelector('[data-testid="tab-arrow-left"]');
+    const rightArrow = container.querySelector(
+      '[data-testid="tab-arrow-right"]'
+    );
+    const scrollTrack = container.querySelector(
+      '[data-testid="tabs-scroll-track"]'
+    );
+    expect(leftArrow).toBeTruthy();
+    expect(rightArrow).toBeTruthy();
+    expect(scrollTrack).toBeTruthy();
+
+    act(() => {
+      root.unmount();
+    });
+    container.remove();
+  });
+
+  it("supports static left and right scroll navigation arrows without horizontal scrollbar", async () => {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <Workbench
+          t={enTranslations}
+          locale="en"
+          config={initialConfig}
+          themeName="classic"
+          customTheme={defaultThemeDef}
+          onSelectVariant={vi.fn()}
+          onChangePosition={vi.fn()}
+          onChangeTheme={vi.fn()}
+          onUpdateConfig={vi.fn()}
+          onUpdateCustomColor={vi.fn()}
+          onResetCustomColors={vi.fn()}
+          onToggleAutoTrigger={vi.fn()}
+          onToggleCountdown={vi.fn()}
+        />
+      );
+    });
+
+    const leftArrow = container.querySelector(
+      '[data-testid="tab-arrow-left"]'
+    ) as HTMLButtonElement;
+    const rightArrow = container.querySelector(
+      '[data-testid="tab-arrow-right"]'
+    ) as HTMLButtonElement;
+    const scrollTrack = container.querySelector(
+      '[data-testid="tabs-scroll-track"]'
+    ) as HTMLDivElement;
+
+    expect(leftArrow).toBeTruthy();
+    expect(rightArrow).toBeTruthy();
+    expect(scrollTrack).toBeTruthy();
+
+    // Mock scrollBy on the track
+    const scrollByMock = vi.fn();
+    scrollTrack.scrollBy = scrollByMock;
+
+    await act(async () => {
+      rightArrow.click();
+    });
+
+    expect(scrollByMock).toHaveBeenCalledWith(
+      expect.objectContaining({ left: 220, behavior: "smooth" })
+    );
+
+    await act(async () => {
+      leftArrow.click();
+    });
+
+    expect(scrollByMock).toHaveBeenCalledWith(
+      expect.objectContaining({ left: -220, behavior: "smooth" })
+    );
+
     act(() => {
       root.unmount();
     });

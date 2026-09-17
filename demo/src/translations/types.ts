@@ -55,6 +55,8 @@ export interface Translations {
       next: string;
       finish: string;
       reset: string;
+      scrollLeft: string;
+      scrollRight: string;
     };
     universal: {
       theme: string;
