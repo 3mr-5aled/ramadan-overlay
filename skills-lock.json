@@ -37,6 +37,13 @@
       "skillPath": "skills/engineering/domain-modeling/SKILL.md",
       "computedHash": "336547f3ff285e822fc70b69b170dc58bceef9c8ed5fad18de0046287d6be837"
     },
+    "frontend-design": {
+      "source": "anthropics/claude-code",
+      "ref": "main",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend-design/skills/frontend-design/SKILL.md",
+      "computedHash": "b8c8329ad9b98fa57f4a279e37bdf4a0d55743140e54bb7da3e340d754d75b43"
+    },
     "git-guardrails-claude-code": {
       "source": "mattpocock/skills",
       "sourceType": "github",
