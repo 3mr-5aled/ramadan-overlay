@@ -54,6 +54,7 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   @Input() opacity?: number;
   @Input() colors?: string[];
   @Input() zIndex?: number;
+  @Input() lanternZIndex?: number;
   @Input() clearance?: ClearanceMode;
   @Input() layer?: LayerStacking;
   @Input() mountTarget?: string | HTMLElement;
@@ -116,6 +117,7 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
       "opacity",
       "colors",
       "zIndex",
+      "lanternZIndex",
       "clearance",
       "layer",
       "mountTarget",

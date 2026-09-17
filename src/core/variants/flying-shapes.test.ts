@@ -29,6 +29,7 @@ describe("Ascending Flying Shapes & Intensity", () => {
     shadows: "soft",
     lanternStyle: 0,
     zIndex: 9999,
+    lanternZIndex: 2,
     glowColor: "rgba(201,168,76,0.5)",
     ceilingColor: "#c9a84c",
     ropeColor: "#c9a84c",

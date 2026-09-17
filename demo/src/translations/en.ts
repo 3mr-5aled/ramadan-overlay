@@ -3,7 +3,7 @@ import type { Translations } from "./types";
 export const enTranslations: Translations = {
   nav: {
     brandTitle: "ramadan-overlay",
-    versionBadge: "v0.1.3",
+    versionBadge: "v0.7.0",
     occasionBadge: "Festive Occasion",
     occasionSelectLabel: "Preview Occasion",
     occasions: {

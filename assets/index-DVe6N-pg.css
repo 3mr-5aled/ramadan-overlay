@@ -121,6 +121,13 @@ body {
   filter: drop-shadow(0 0 12px var(--gold-glow));
   animation: subtleFloat 4s ease-in-out infinite;
 }
+.nav-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(201, 168, 76, 0.45));
+  animation: subtleFloat 4s ease-in-out infinite;
+}
 .nav-title {
   font-size: 1.25rem;
   font-weight: 700;

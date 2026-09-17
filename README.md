@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo.png" alt="ramadan-overlay logo" width="120" />
+
 # 🌙 ramadan-overlay
 
 **Beautiful, auto-triggering Ramadan and Eid decorations for any website**
@@ -114,16 +116,16 @@ Building with Cursor, Claude Code, GitHub Copilot, Windsurf, or Google Antigravi
 
 ## 🎨 Variants
 
-| Variant          | Description                                                                         |
-| ---------------- | ----------------------------------------------------------------------------------- |
-| `lanterns`       | Classic hanging lanterns with customizable colors and styles (12 designs)           |
-| `sparkles`       | Glittering sparkle particles                                                        |
-| `crescent-stars` | Crescent moon and star motifs                                                       |
-| `geometric`      | Decorative Islamic geometric patterns                                               |
-| `eid`            | Auto-adapting Eid variant: mounts `eid-fitr` or `eid-adha` based on current holiday |
-| `eid-fitr`       | Eid Al-Fitr celebration with floating festive balloons, gift boxes, and stars       |
-| `eid-adha`       | Eid Al-Adha celebration with geometric sheep and crescents                          |
-| `banner`         | Fixed greeting bar prepended to the page (contextually adapts for Ramadan and Eids) |
+| Variant          |                                           Preview                                           | Description                                                                                                 |
+| :--------------- | :-----------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------- |
+| `lanterns`       |    <img src="assets/previews/lanterns.png" width="300" alt="Lanterns variant preview" />    | Classic hanging lanterns with customizable colors, rope styles, and authentic silhouette fills (12 designs) |
+| `sparkles`       |    <img src="assets/previews/sparkles.png" width="300" alt="Sparkles variant preview" />    | Glittering sparkle particles with natural ambient drift                                                     |
+| `crescent-stars` | <img src="assets/previews/crescent-stars.png" width="300" alt="Crescent & Stars preview" /> | Ascending crescent moon and star motifs with content-safe edge gutters                                      |
+| `geometric`      |   <img src="assets/previews/geometric.png" width="300" alt="Geometric variant preview" />   | Decorative Islamic geometric borders at top and bottom margins                                              |
+| `eid-fitr`       |      <img src="assets/previews/eid-fitr.png" width="300" alt="Eid Al-Fitr preview" />       | Eid Al-Fitr celebration with floating festive balloons, gift boxes, and stars                               |
+| `eid-adha`       |      <img src="assets/previews/eid-adha.png" width="300" alt="Eid Al-Adha preview" />       | Eid Al-Adha celebration with geometric sheep, crescents, and festive stars                                  |
+| `banner`         |      <img src="assets/previews/banner.png" width="300" alt="Banner variant preview" />      | Fixed greeting bar prepended to the page (contextually adapts for Ramadan and Eids)                         |
+| `eid`            |                                          _(Auto)_                                           | Auto-adapting Eid variant: dynamically mounts `eid-fitr` or `eid-adha` based on current holiday             |
 
 ---
 
@@ -195,12 +197,13 @@ Harmonize lanterns, ropes, glowing halos, banners, and widgets with 7 designer p
 
 ### Lanterns variant
 
-| Option         | Type     | Default                   | Description                                           |
-| -------------- | -------- | ------------------------- | ----------------------------------------------------- |
-| `lanternStyle` | `number` | `0`                       | `1`–`12` pins a single design; `0` cycles through all |
-| `ceilingColor` | `string` | `'#c9a84c'`               | Color of the horizontal ceiling bar                   |
-| `ropeColor`    | `string` | `'#c9a84c'`               | Color of the lantern strings                          |
-| `glowColor`    | `string` | `'rgba(201,168,76,0.55)'` | Drop-shadow / glow color                              |
+| Option          | Type     | Default                   | Description                                                                    |
+| --------------- | -------- | ------------------------- | ------------------------------------------------------------------------------ |
+| `lanternStyle`  | `number` | `0`                       | `1`–`12` pins a single design; `0` cycles through all                          |
+| `lanternZIndex` | `number` | `2`                       | Stacking elevation (`z-index`) specifically for lantern rows and hanging units |
+| `ceilingColor`  | `string` | `'#c9a84c'`               | Color of the horizontal ceiling bar                                            |
+| `ropeColor`     | `string` | `'#c9a84c'`               | Color of the lantern strings                                                   |
+| `glowColor`     | `string` | `'rgba(201,168,76,0.55)'` | Drop-shadow / glow color                                                       |
 
 ### Banner variant
 
@@ -213,6 +216,10 @@ Harmonize lanterns, ropes, glowing halos, banners, and widgets with 7 designer p
 | `bannerTextAr`    | `string` | built-in Arabic greeting  | Custom Arabic greeting (defaults to رمضان مبارك or عيد مبارك) |
 
 ### Iftar Countdown Widget
+
+<p align="center">
+  <img src="assets/previews/countdown.png" width="560" alt="Iftar Countdown Card preview" />
+</p>
 
 Display an interactive countdown card and docked pill prior to daily Iftar / Maghrib:
 

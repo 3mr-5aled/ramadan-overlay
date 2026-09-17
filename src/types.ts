@@ -214,6 +214,13 @@ export interface RamadanOverlayConfig {
   zIndex?: number;
 
   /**
+   * Stacking elevation (z-index) specifically applied to lantern rows, hanging units, and side bands (lanterns variant).
+   * Maps to the `--ro-lantern-z` CSS custom property.
+   * @default 2
+   */
+  lanternZIndex?: number;
+
+  /**
    * Content safe zone clearance mode for floating motifs (crescent-stars, eid).
    * - 'edges': Constrains motifs to lateral peripheral gutters, keeping central reading area sterile.
    * - 'full': Unconstrained full-viewport drift.

@@ -17,6 +17,8 @@ interface NavbarProps {
   onToggleDrawer?: () => void;
 }
 
+const logoUrl = new URL("../../../assets/logo.png", import.meta.url).href;
+
 export const Navbar: React.FC<NavbarProps> = ({
   t,
   locale,
@@ -35,9 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         className="nav-brand"
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       >
-        <span className="nav-crescent-icon" role="img" aria-label="crescent">
-          🌙
-        </span>
+        <img src={logoUrl} alt="ramadan-overlay" className="nav-logo-img" />
         <span className="nav-title font-display">{t.nav.brandTitle}</span>
         <span className="nav-version-badge">{t.nav.versionBadge}</span>
         <span className="nav-occasion-badge" title={t.nav.occasionBadge}>

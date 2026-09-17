@@ -273,4 +273,26 @@ describe("Advanced Lantern String Styles - SVG Overlay Rendering", () => {
 
     overlay.destroy();
   });
+
+  it("renders crisp silhouette fill without yellow flame radialGradient", () => {
+    const overlay = init({
+      variant: "lanterns",
+      previewMode: true,
+      colors: ["#123456"],
+    });
+
+    const lantern = overlay.container?.querySelector(".ro-lantern svg");
+    expect(lantern).not.toBeNull();
+    const svgHtml = lantern?.outerHTML || "";
+
+    // Radial gradient flame with yellow stop should be completely absent
+    expect(svgHtml).not.toContain("radialGradient");
+    expect(svgHtml).not.toContain("#fde047");
+    expect(svgHtml).not.toContain("#fffbe8");
+
+    // Inner group or paths should use clean solid color
+    expect(svgHtml).toContain('fill="#123456"');
+
+    overlay.destroy();
+  });
 });

@@ -392,6 +392,12 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
 
   const opacity = clampNumber(userConfig.opacity, 0.0, 1.0, 0.85);
   const zIndex = clampNumber(userConfig.zIndex, -2147483648, 2147483647, 9999);
+  const lanternZIndex = clampNumber(
+    userConfig.lanternZIndex,
+    -2147483648,
+    2147483647,
+    2
+  );
   const ropeSag = clampNumber(userConfig.ropeSag, 6, 60, 20);
 
   const shadows = sanitizeStringUnion(
@@ -494,6 +500,7 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     shadows,
     colors: resolvedTheme.colors,
     zIndex,
+    lanternZIndex,
     autoTrigger: userConfig.autoTrigger ?? true,
     previewMode: userConfig.previewMode ?? false,
     confetti,

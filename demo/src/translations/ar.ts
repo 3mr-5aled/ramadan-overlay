@@ -3,7 +3,7 @@ import type { Translations } from "./types";
 export const arTranslations: Translations = {
   nav: {
     brandTitle: "زينة رمضان",
-    versionBadge: "الإصدار 0.1.3",
+    versionBadge: "الإصدار 0.7.0",
     occasionBadge: "المناسبة الحالية",
     occasionSelectLabel: "معاينة المناسبة",
     occasions: {

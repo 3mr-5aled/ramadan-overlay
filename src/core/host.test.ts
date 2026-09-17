@@ -216,4 +216,38 @@ describe("HostMount and Overlay Lifecycle", () => {
 
     overlay.destroy();
   });
+
+  it("resolves and updates lanternZIndex via --ro-lantern-z CSS custom property", () => {
+    const overlay = init({
+      variant: "lanterns",
+      lanternZIndex: 5,
+      previewMode: true,
+    });
+
+    const container = overlay.container;
+    expect(overlay.config.lanternZIndex).toBe(5);
+    expect(container?.style.getPropertyValue("--ro-lantern-z")).toBe("5");
+
+    // Live update
+    overlay.update({ lanternZIndex: 12 });
+    expect(overlay.config.lanternZIndex).toBe(12);
+    expect(container?.style.getPropertyValue("--ro-lantern-z")).toBe("12");
+
+    overlay.destroy();
+  });
+
+  it("applies --ro-lantern-z stacking rules in injected stylesheet", () => {
+    const overlay = init({ previewMode: true });
+    const styles = Array.from(document.querySelectorAll("style"))
+      .map((s) => s.textContent || "")
+      .join("\n");
+
+    expect(styles).toContain("--ro-lantern-z");
+    expect(styles).toMatch(
+      /\.ro-lantern-row\{[^}]*z-index:var\(--ro-lantern-z/
+    );
+    expect(styles).toMatch(/\.ro-lantern\{[^}]*z-index:var\(--ro-lantern-z/);
+
+    overlay.destroy();
+  });
 });

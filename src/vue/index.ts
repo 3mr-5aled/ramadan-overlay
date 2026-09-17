@@ -107,6 +107,7 @@ export const RamadanOverlay = defineComponent({
     opacity: { type: Number as PropType<number>, default: undefined },
     colors: { type: Array as PropType<string[]>, default: undefined },
     zIndex: { type: Number as PropType<number>, default: undefined },
+    lanternZIndex: { type: Number as PropType<number>, default: undefined },
     clearance: {
       type: String as PropType<ClearanceMode>,
       default: undefined,
