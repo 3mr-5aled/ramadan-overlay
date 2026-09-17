@@ -81,6 +81,31 @@ export const VariantSpecificControls: React.FC<
 
             <div className="form-group">
               <label className="form-label">
+                {t.workbench.variantSpecific.lanternCount}
+              </label>
+              <select
+                className="form-select"
+                value={config.lanternCount ?? 0}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  onUpdateConfig({
+                    lanternCount: val === 0 ? undefined : val,
+                  });
+                }}
+              >
+                <option value={0}>
+                  {t.workbench.variantSpecific.lanternCountAuto}
+                </option>
+                {[2, 3, 4, 5, 6, 8, 10].map((num) => (
+                  <option key={num} value={num}>
+                    {num}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
                 {t.workbench.variantSpecific.ropeStyle}
               </label>
               <select

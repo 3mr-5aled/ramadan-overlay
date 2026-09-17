@@ -134,6 +134,10 @@ export const RamadanOverlay = defineComponent({
       type: Number as PropType<LanternStyle>,
       default: undefined,
     },
+    lanternCount: {
+      type: Number as PropType<number>,
+      default: undefined,
+    },
     ropeStyle: {
       type: String as PropType<RopeStyle>,
       default: undefined,

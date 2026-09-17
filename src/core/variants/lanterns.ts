@@ -598,7 +598,18 @@ export const mountLanterns: VariantMountFn = (
       (typeof document !== "undefined" &&
         document.documentElement?.clientWidth) ||
       1024;
-    const count = Math.max(4, Math.min(12, Math.round(W / 120)));
+    const densityFactor =
+      config.density === "low" ? 360 : config.density === "high" ? 180 : 260;
+    const maxDefault =
+      config.density === "low" ? 4 : config.density === "high" ? 8 : 6;
+    const defaultCount = Math.max(
+      2,
+      Math.min(maxDefault, Math.round(W / densityFactor))
+    );
+    const count =
+      typeof config.lanternCount === "number" && config.lanternCount > 0
+        ? Math.min(12, Math.max(1, Math.round(config.lanternCount)))
+        : defaultCount;
 
     const effectiveSag =
       W < 600 ? Math.max(6, Math.round(ropeSag * (W / 600))) : ropeSag;

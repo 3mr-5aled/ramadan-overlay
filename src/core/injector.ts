@@ -412,6 +412,10 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     2
   );
   const ropeSag = clampNumber(userConfig.ropeSag, 6, 60, 20);
+  const lanternCount =
+    typeof userConfig.lanternCount === "number"
+      ? clampNumber(userConfig.lanternCount, 1, 12, 4)
+      : undefined;
 
   const shadows = sanitizeStringUnion(
     userConfig.shadows,
@@ -524,6 +528,7 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     bannerTextAr: userConfig.bannerTextAr ?? "",
     bannerIconColor: resolvedTheme.bannerIconColor,
     lanternStyle: userConfig.lanternStyle ?? 0,
+    lanternCount,
     glowColor: resolvedTheme.glowColor,
     ceilingColor: resolvedTheme.ceilingColor,
     ropeColor: resolvedTheme.ropeColor,

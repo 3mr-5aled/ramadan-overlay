@@ -109,7 +109,7 @@
       .celestial-nav {
         position: sticky;
         top: 0;
-        z-index: 1000;
+        z-index: 10001;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -236,24 +236,31 @@
       .canopy-stage {
         position: relative;
         text-align: center;
-        padding: 130px clamp(20px, 6vw, 80px) 70px;
-        max-width: 1200px;
+        min-height: calc(100vh - 66px);
+        min-height: calc(100dvh - 66px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(16px, 2.5vh, 36px) clamp(16px, 4vw, 48px);
+        max-width: 1150px;
         margin: 0 auto;
+        box-sizing: border-box;
       }
 
       .canopy-logo-wrap {
         display: flex;
         justify-content: center;
         align-items: center;
-        margin: 0 auto 28px;
+        margin: 0 auto clamp(8px, 1.5vh, 16px);
       }
 
       .canopy-hero-logo {
-        width: clamp(180px, 24vw, 260px);
-        height: clamp(180px, 24vw, 260px);
+        width: clamp(100px, 14vh, 150px);
+        height: clamp(100px, 14vh, 150px);
         object-fit: contain;
-        filter: drop-shadow(0 0 35px var(--gold-glow))
-          drop-shadow(0 10px 25px rgba(0, 0, 0, 0.45));
+        filter: drop-shadow(0 0 28px var(--gold-glow))
+          drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
         transition:
           transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
           filter 0.35s ease;
@@ -261,9 +268,9 @@
       }
 
       .canopy-hero-logo:hover {
-        transform: scale(1.06) translateY(-4px);
-        filter: drop-shadow(0 0 55px var(--gold-glow-strong))
-          drop-shadow(0 16px 36px rgba(0, 0, 0, 0.6));
+        transform: scale(1.06) translateY(-3px);
+        filter: drop-shadow(0 0 45px var(--gold-glow-strong))
+          drop-shadow(0 12px 28px rgba(0, 0, 0, 0.6));
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -321,11 +328,11 @@
 
       .canopy-title {
         font-family: var(--font-display);
-        font-size: clamp(2.6rem, 6.5vw, 5.2rem);
+        font-size: clamp(1.8rem, 4vw, 3rem);
         font-weight: 800;
-        line-height: 1.08;
+        line-height: 1.15;
         letter-spacing: -0.5px;
-        margin-bottom: 18px;
+        margin-bottom: clamp(6px, 1.2vh, 12px);
         background: linear-gradient(
           135deg,
           #ffffff 0%,
@@ -340,9 +347,9 @@
 
       .canopy-sub {
         max-width: 680px;
-        margin: 0 auto 36px;
-        font-size: clamp(1rem, 1.3vw, 1.15rem);
-        line-height: 1.7;
+        margin: 0 auto clamp(10px, 1.8vh, 18px);
+        font-size: clamp(0.88rem, 1.2vw, 1.05rem);
+        line-height: 1.55;
         color: var(--text-secondary);
         font-weight: 400;
       }
@@ -354,26 +361,26 @@
         background: rgba(10, 15, 26, 0.88);
         border: 1px solid var(--border-mid);
         border-radius: var(--radius-md);
-        padding: 6px 6px 6px 16px;
+        padding: 5px 6px 5px 14px;
         box-shadow:
           0 10px 30px -10px rgba(0, 0, 0, 0.6),
           inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        gap: 12px;
+        gap: 10px;
         max-width: 90%;
-        margin-bottom: 28px;
+        margin-bottom: clamp(12px, 2vh, 20px);
       }
       .quick-install-code {
         font-family: var(--font-mono);
-        font-size: 0.88rem;
+        font-size: 0.85rem;
         color: var(--gold-300);
       }
       .quick-install-copy-btn {
-        padding: 7px 16px;
+        padding: 5px 12px;
         border-radius: 8px;
         background: rgba(201, 168, 76, 0.15);
         border: 1px solid var(--border-mid);
         color: var(--gold-200);
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.2s;
@@ -389,7 +396,7 @@
         justify-content: center;
         flex-wrap: wrap;
         gap: 8px;
-        margin-bottom: 48px;
+        margin-bottom: clamp(14px, 2.2vh, 24px);
       }
       .framework-chip {
         padding: 4px 12px;

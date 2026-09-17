@@ -60,6 +60,8 @@ export interface Translations {
       lanternHeading: string;
       lanternStyle: string;
       lanternCycle: string;
+      lanternCount: string;
+      lanternCountAuto: string;
       ropeStyle: string;
       ropeStraight: string;
       ropeUshaped: string;

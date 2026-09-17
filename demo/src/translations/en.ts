@@ -122,6 +122,8 @@ export const enTranslations: Translations = {
       lanternHeading: "Lantern & Rope Parameters",
       lanternStyle: "Lantern SVG Design",
       lanternCycle: "Cycle all 12 distinct designs",
+      lanternCount: "Lantern Density / Count",
+      lanternCountAuto: "Auto Decorative (3–6)",
       ropeStyle: "Suspension String Style",
       ropeStraight: "Straight Ceiling Rail",
       ropeUshaped: "Curved U-Shaped Festoon Swag",

@@ -122,6 +122,8 @@ export const arTranslations: Translations = {
       lanternHeading: "خيارات الفوانيس والحبال",
       lanternStyle: "تصميم الفانوس",
       lanternCycle: "عرض جميع التصاميم الـ 12 بالتناوب",
+      lanternCount: "كثافة وعدد الفوانيس",
+      lanternCountAuto: "تلقائي هادئ (3-6)",
       ropeStyle: "نمط حبل التعليق",
       ropeStraight: "حبل مستقيم أفقي",
       ropeUshaped: "حبال متدلية ومنحنية (U-Shaped Swag)",

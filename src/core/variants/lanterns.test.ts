@@ -295,4 +295,55 @@ describe("Advanced Lantern String Styles - SVG Overlay Rendering", () => {
 
     overlay.destroy();
   });
+
+  it("renders a tasteful, fewer decorative count by default (2-6 lanterns)", () => {
+    const overlay = init({
+      variant: "lanterns",
+      previewMode: true,
+    });
+
+    const lanterns = overlay.container?.querySelectorAll(".ro-lantern");
+    expect(lanterns?.length).toBeGreaterThanOrEqual(2);
+    expect(lanterns?.length).toBeLessThanOrEqual(6);
+
+    overlay.destroy();
+  });
+
+  it("supports explicit lanternCount configuration", () => {
+    const overlay = init({
+      variant: "lanterns",
+      lanternCount: 3,
+      previewMode: true,
+    });
+
+    const lanterns = overlay.container?.querySelectorAll(".ro-lantern");
+    expect(lanterns?.length).toBe(3);
+
+    const droplines = overlay.container?.querySelectorAll(".ro-dropline-path");
+    expect(droplines?.length).toBe(3);
+
+    overlay.destroy();
+  });
+
+  it("adjusts decorative count based on density preset", () => {
+    const overlayLow = init({
+      variant: "lanterns",
+      density: "low",
+      previewMode: true,
+    });
+    const lowCount =
+      overlayLow.container?.querySelectorAll(".ro-lantern").length ?? 0;
+    overlayLow.destroy();
+
+    const overlayHigh = init({
+      variant: "lanterns",
+      density: "high",
+      previewMode: true,
+    });
+    const highCount =
+      overlayHigh.container?.querySelectorAll(".ro-lantern").length ?? 0;
+    overlayHigh.destroy();
+
+    expect(lowCount).toBeLessThanOrEqual(highCount);
+  });
 });

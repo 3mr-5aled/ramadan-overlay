@@ -283,6 +283,14 @@ export interface RamadanOverlayConfig {
   onRamadanStart?: (state: RamadanState) => void;
 
   /**
+   * Maximum or explicit count of hanging lanterns rendered along the ceiling (lanterns variant).
+   * If omitted, calculates an airy decorative count (2–6 lanterns based on viewport width).
+   * Clamped between 1 and 12.
+   * @default undefined (auto-calculated: 2–6 based on screen width and density)
+   */
+  lanternCount?: number;
+
+  /**
    * Which of the 12 lantern SVG designs to show (lanterns variant only).
    * 1–12 pins a single design; 0 or omitted cycles through all designs.
    * @default 0
@@ -696,9 +704,11 @@ export interface ResolvedConfig extends Required<
     | "countdown"
     | "date"
     | "mountTarget"
+    | "lanternCount"
   >
 > {
   mountTarget?: string | HTMLElement;
+  lanternCount?: number;
   clearance: ClearanceMode;
   layer: LayerStacking;
   date?: Date;

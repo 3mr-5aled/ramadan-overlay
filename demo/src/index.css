@@ -113,7 +113,7 @@ body {
 .celestial-nav {
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 10001;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -263,24 +263,31 @@ body {
 .canopy-stage {
   position: relative;
   text-align: center;
-  padding: 100px clamp(20px, 6vw, 80px) 60px;
-  max-width: 1200px;
+  min-height: calc(100vh - 80px);
+  min-height: calc(100dvh - 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 2.5vh, 36px) clamp(16px, 4vw, 48px);
+  max-width: 1150px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .canopy-logo-wrap {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto 28px;
+  margin: 0 auto clamp(8px, 1.5vh, 16px);
 }
 
 .canopy-hero-logo {
-  width: clamp(180px, 24vw, 260px);
-  height: clamp(180px, 24vw, 260px);
+  width: clamp(100px, 14vh, 150px);
+  height: clamp(100px, 14vh, 150px);
   object-fit: contain;
-  filter: drop-shadow(0 0 35px var(--gold-glow))
-    drop-shadow(0 10px 25px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 0 28px var(--gold-glow))
+    drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
   transition:
     transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
     filter 0.35s ease;
@@ -292,9 +299,9 @@ body {
 }
 
 .canopy-hero-logo:hover {
-  transform: scale(1.06) translateY(-4px);
-  filter: drop-shadow(0 0 55px var(--gold-glow-strong))
-    drop-shadow(0 16px 36px rgba(0, 0, 0, 0.6));
+  transform: scale(1.06) translateY(-3px);
+  filter: drop-shadow(0 0 45px var(--gold-glow-strong))
+    drop-shadow(0 12px 28px rgba(0, 0, 0, 0.6));
 }
 
 .canopy-hero-logo.clickable:active {
@@ -315,22 +322,22 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 18px;
+  padding: 5px 16px;
   border-radius: 30px;
   background: rgba(201, 168, 76, 0.08);
   border: 1px solid var(--border-mid);
   color: var(--gold-300);
-  font-size: 0.95rem;
+  font-size: clamp(0.82rem, 1.1vw, 0.92rem);
   font-weight: 600;
-  margin-bottom: 24px;
+  margin-bottom: clamp(8px, 1.5vh, 14px);
   box-shadow: 0 0 20px var(--gold-glow);
 }
 
 .canopy-title {
-  font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+  font-size: clamp(1.8rem, 4vw, 2.9rem);
   font-weight: 800;
-  line-height: 1.25;
-  margin-bottom: 20px;
+  line-height: 1.2;
+  margin-bottom: clamp(6px, 1.2vh, 12px);
   background: linear-gradient(
     135deg,
     var(--gold-100) 0%,
@@ -343,11 +350,11 @@ body {
 }
 
 .canopy-subtitle {
-  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  font-size: clamp(0.88rem, 1.2vw, 1.05rem);
   color: var(--text-secondary);
-  max-width: 820px;
-  margin: 0 auto 28px;
-  line-height: 1.7;
+  max-width: 760px;
+  margin: 0 auto clamp(10px, 1.8vh, 18px);
+  line-height: 1.55;
 }
 
 /* Quick Package Install Box */
@@ -358,37 +365,37 @@ body {
   background: rgba(10, 15, 26, 0.88);
   border: 1px solid var(--border-mid);
   border-radius: var(--radius-md);
-  padding: 6px 8px 6px 16px;
+  padding: 5px 8px 5px 14px;
   box-shadow:
     0 10px 30px -10px rgba(0, 0, 0, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  gap: 12px;
+  gap: 10px;
   max-width: 90%;
-  margin: 0 auto 32px;
+  margin: 0 auto clamp(12px, 2vh, 20px);
 }
 
 .quick-install-prompt {
   color: var(--text-muted);
   font-family: var(--font-mono);
   user-select: none;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
 }
 
 .quick-install-code {
   font-family: var(--font-mono);
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: var(--gold-300);
   letter-spacing: 0.3px;
   user-select: all;
 }
 
 .quick-install-copy-btn {
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 8px;
   background: rgba(201, 168, 76, 0.15);
   border: 1px solid var(--border-mid);
   color: var(--gold-200);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -402,10 +409,10 @@ body {
 
 .quick-install-toast {
   position: absolute;
-  bottom: -26px;
+  bottom: -24px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--emerald-400);
   font-weight: 600;
   white-space: nowrap;
@@ -416,17 +423,17 @@ body {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 48px;
+  gap: 12px;
+  margin-bottom: clamp(14px, 2.2vh, 24px);
 }
 
 .btn-celebrate {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 28px;
+  gap: 8px;
+  padding: 10px 22px;
   border-radius: var(--radius-md);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
@@ -452,10 +459,10 @@ body {
 .btn-primary {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 28px;
+  gap: 8px;
+  padding: 10px 22px;
   border-radius: var(--radius-md);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
@@ -474,10 +481,10 @@ body {
 .btn-secondary {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 28px;
+  gap: 8px;
+  padding: 10px 22px;
   border-radius: var(--radius-md);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -498,21 +505,53 @@ body {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: clamp(16px, 4vw, 40px);
-  padding-top: 24px;
+  gap: clamp(14px, 3vw, 32px);
+  padding-top: clamp(12px, 2vh, 20px);
   border-top: 1px solid var(--border-dark);
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
+  gap: 6px;
+  font-size: clamp(0.8rem, 1vw, 0.9rem);
   color: var(--text-secondary);
   font-weight: 500;
 }
 .stat-item .stat-icon {
   color: var(--gold-400);
+}
+
+@media (max-height: 720px) {
+  .canopy-stage {
+    padding: 14px clamp(12px, 3vw, 28px);
+  }
+  .canopy-hero-logo {
+    width: clamp(80px, 12vh, 105px);
+    height: clamp(80px, 12vh, 105px);
+  }
+  .canopy-title {
+    font-size: clamp(1.4rem, 3.2vw, 2rem);
+    margin-bottom: 6px;
+  }
+  .canopy-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+  }
+  .quick-install-box {
+    margin-bottom: 12px;
+    padding: 3px 6px 3px 12px;
+  }
+  .canopy-actions {
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+  .btn-primary,
+  .btn-secondary,
+  .btn-celebrate {
+    padding: 8px 16px;
+    font-size: 0.88rem;
+  }
 }
 
 /* ── Workbench Container ── */

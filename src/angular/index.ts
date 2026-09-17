@@ -69,6 +69,7 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   @Input() hijriAdjustment?: number;
   @Input() density?: "low" | "normal" | "high";
   @Input() lanternStyle?: LanternStyle;
+  @Input() lanternCount?: number;
   @Input() ropeStyle?: RopeStyle;
   @Input() ropeSag?: number;
   @Input() bannerBg?: string;
@@ -132,6 +133,7 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
       "hijriAdjustment",
       "density",
       "lanternStyle",
+      "lanternCount",
       "ropeStyle",
       "ropeSag",
       "bannerBg",
