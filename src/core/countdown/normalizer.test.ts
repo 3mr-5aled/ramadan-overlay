@@ -16,6 +16,16 @@ describe("resolveTargetIftarTime", () => {
     expect(result?.getMilliseconds()).toBe(0);
   });
 
+  it("resolves HH:mm:ss string with custom seconds", () => {
+    const baseDate = new Date(2026, 2, 10, 15, 0, 0);
+    const result = resolveTargetIftarTime("18:45:30", baseDate);
+
+    expect(result).not.toBeNull();
+    expect(result?.getHours()).toBe(18);
+    expect(result?.getMinutes()).toBe(45);
+    expect(result?.getSeconds()).toBe(30);
+  });
+
   it("retains today if time passed within the autoDismiss window", () => {
     const baseDate = new Date(2026, 2, 10, 18, 50, 0); // 5 minutes after 18:45
     const result = resolveTargetIftarTime("18:45", baseDate, 10);

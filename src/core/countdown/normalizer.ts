@@ -1,11 +1,11 @@
 import type { IftarTimeValue } from "../../types";
 
-const HH_MM_REGEX = /^([01]?\d|2[0-3]):([0-5]\d)$/;
+const HH_MM_REGEX = /^([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/;
 
 /**
  * Resolves an IftarTimeValue into a valid Date object.
  *
- * @param value "HH:mm" string, ISO string, Date instance, or dynamic resolver callback.
+ * @param value "HH:mm" or "HH:mm:ss" string, ISO string, Date instance, or dynamic resolver callback.
  * @param baseDate The current reference time (defaults to new Date()).
  * @param autoDismissMinutes The post-Iftar auto-dismiss window in minutes (default 10).
  * @returns Normalized target Date or null if invalid.
@@ -38,8 +38,10 @@ export function resolveTargetIftarTime(
     if (hhMmMatch) {
       const hours = parseInt(hhMmMatch[1], 10);
       const minutes = parseInt(hhMmMatch[2], 10);
+      const seconds =
+        hhMmMatch[3] !== undefined ? parseInt(hhMmMatch[3], 10) : 0;
       const target = new Date(baseDate.getTime());
-      target.setHours(hours, minutes, 0, 0);
+      target.setHours(hours, minutes, seconds, 0);
 
       // Auto-rollover to next day if target has passed beyond the auto-dismiss window
       const autoDismissMs = autoDismissMinutes * 60000;

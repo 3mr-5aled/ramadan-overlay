@@ -237,6 +237,7 @@ export function createSafeNoopInstance(
     state,
     getState: () => ({ ...state }),
     getCountdownController: () => null,
+    countdown: null,
     fireConfetti: async () => undefined,
   };
 }
@@ -874,6 +875,9 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
       },
       getCountdownController: () =>
         countdownManager ? countdownManager.controller : null,
+      get countdown() {
+        return countdownManager ? countdownManager.controller : null;
+      },
       getState: () => currentState,
       fireConfetti: async () => {
         const confettiYear = currentState.hijriYear || 1447;

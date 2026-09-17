@@ -13,6 +13,7 @@
     <style>
       html {
         scroll-behavior: smooth;
+        background: #0d1117;
       }
 
       *,
@@ -28,7 +29,7 @@
           system-ui,
           -apple-system,
           sans-serif;
-        background: #0d1117;
+        background: transparent;
         color: #e6edf3;
         min-height: 100vh;
         padding: 0 20px 80px;
@@ -97,9 +98,43 @@
         cursor: pointer;
         min-width: 140px;
       }
-      select:focus {
+      select:focus,
+      input[type="date"]:focus,
+      input[type="time"]:focus,
+      input[type="number"]:focus,
+      input[type="text"]:focus {
         outline: none;
         border-color: #c9a84c;
+      }
+
+      input[type="date"],
+      input[type="time"],
+      input[type="number"],
+      input[type="text"] {
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+        background: #0d1117;
+        color: #e6edf3;
+        font-size: 0.88rem;
+      }
+
+      .checkbox-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 0.82rem;
+        color: #e6edf3;
+        text-transform: none;
+        user-select: none;
+      }
+
+      .checkbox-label input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #c9a84c;
+        cursor: pointer;
       }
 
       input[type="range"] {
@@ -799,12 +834,43 @@
         </div>
 
         <div class="control-group">
-          <label>Occasion Preview</label>
+          <label>Detection Mode</label>
+          <select id="calendarModeSelect">
+            <option value="auto">Auto-detect (Current Date)</option>
+            <option value="preview" selected>
+              Preview Mode (Force Display)
+            </option>
+            <option value="simulate">Simulate Calendar Date</option>
+          </select>
+        </div>
+
+        <div class="control-group" id="simDateGroup" style="display: none">
+          <label>Simulated Date</label>
+          <input type="date" id="simulatedDatePicker" value="2026-02-25" />
+        </div>
+
+        <div class="control-group" id="simPresetGroup" style="display: none">
+          <label>Quick Presets (1447 AH)</label>
           <select id="occasionPreviewSelect">
-            <option value="auto" selected>Auto (Current Date)</option>
-            <option value="ramadan">Simulate Ramadan (1446 AH)</option>
-            <option value="eid-fitr">Simulate Eid Al-Fitr (1446 AH)</option>
-            <option value="eid-adha">Simulate Eid Al-Adha (1446 AH)</option>
+            <option value="ramadan" selected>
+              Ramadan 1447 (Feb 25, 2026)
+            </option>
+            <option value="eid-fitr">Eid Al-Fitr 1447 (Mar 21, 2026)</option>
+            <option value="eid-adha">Eid Al-Adha 1447 (May 28, 2026)</option>
+            <option value="none">Normal Day (Aug 15, 2026)</option>
+          </select>
+        </div>
+
+        <div class="control-group" id="eidVariantGroup">
+          <label>Eid Variant</label>
+          <select id="eidVariantSelect">
+            <option value="eid" selected>Auto (Fitr / Adha)</option>
+            <option value="eid-fitr">Eid Al-Fitr (Balloons &amp; Gifts)</option>
+            <option value="eid-adha">Eid Al-Adha (Sheep &amp; Kaaba)</option>
+            <option value="lanterns">Lanterns</option>
+            <option value="sparkles">Sparkles</option>
+            <option value="crescent-stars">Crescent &amp; Stars</option>
+            <option value="geometric">Geometric</option>
           </select>
         </div>
 
@@ -818,6 +884,15 @@
             <option value="right">Right (Vertical Side)</option>
             <option value="sides">Sides (Dual Margins)</option>
             <option value="full">Full</option>
+          </select>
+        </div>
+
+        <div class="control-group" id="mobileSideGroup" style="display: none">
+          <label>Mobile Side Behavior</label>
+          <select id="mobileSideBehaviorSelect">
+            <option value="hide" selected>Hide on Mobile (&lt;768px)</option>
+            <option value="show">Show on Mobile</option>
+            <option value="minimal">Minimal (Fewer Motifs)</option>
           </select>
         </div>
 
@@ -991,6 +1066,36 @@
             <option value="normal">Normal</option>
             <option value="high">High</option>
           </select>
+        </div>
+
+        <div class="control-group">
+          <label>Z-Index</label>
+          <input
+            type="number"
+            id="zIndexInput"
+            value="9999"
+            min="0"
+            max="2147483647"
+            style="
+              width: 90px;
+              padding: 6px 10px;
+              border-radius: 6px;
+              border: 1px solid #30363d;
+              background: #0d1117;
+              color: #e6edf3;
+              font-size: 0.88rem;
+            "
+          />
+        </div>
+
+        <div
+          class="control-group"
+          style="justify-content: flex-end; padding-bottom: 6px"
+        >
+          <label class="checkbox-label">
+            <input type="checkbox" id="liveTransitionCheckbox" checked />
+            <span>Live Transition (Midnight Re-check)</span>
+          </label>
         </div>
       </div>
     </div>
@@ -1257,13 +1362,23 @@
       <div class="panel-title">🌙 Iftar Countdown Widget</div>
       <div class="controls-grid">
         <div class="control-group">
-          <label>Countdown Mode</label>
+          <label>Countdown Target</label>
           <select id="countdownSelect">
             <option value="off" selected>Disabled</option>
             <option value="auto">Auto Maghrib (18:15)</option>
-            <option value="1min">⏱️ 1-Minute Countdown Demo (+60s)</option>
+            <option value="custom">Custom Iftar Time</option>
+            <option value="1min">⏱️ 1-Minute Demo (+60s)</option>
             <option value="demo-alert">Demo Celebration Flare (+10s)</option>
           </select>
+        </div>
+
+        <div
+          class="control-group"
+          id="countdownIftarTimeGroup"
+          style="display: none"
+        >
+          <label>Iftar Time (HH:mm)</label>
+          <input type="time" id="countdownIftarTime" value="18:15" />
         </div>
 
         <div class="control-group" id="countdownPosGroup">
@@ -1283,19 +1398,110 @@
             <option value="unmuted">Unmuted (Play Alert Sound)</option>
           </select>
         </div>
-      </div>
-      <div class="actions" style="margin-top: 14px">
-        <button
-          class="btn"
-          id="btnCountdown1Min"
-          style="
-            background: rgba(201, 168, 76, 0.15);
-            border-color: #c9a84c;
-            color: #f5d061;
-          "
+
+        <div class="control-group" id="countdownAlertWindowGroup">
+          <label>Alert Window (mins)</label>
+          <input
+            type="number"
+            id="countdownAlertWindowMinutes"
+            value="30"
+            min="1"
+            max="120"
+            style="width: 80px"
+          />
+        </div>
+
+        <div class="control-group" id="countdownAutoDismissGroup">
+          <label>Auto-Dismiss (mins)</label>
+          <input
+            type="number"
+            id="countdownAutoDismissMinutes"
+            value="10"
+            min="0"
+            max="60"
+            style="width: 80px"
+          />
+        </div>
+
+        <div
+          class="control-group"
+          style="justify-content: flex-end; padding-bottom: 6px"
         >
-          ⏱️ Show 1-Minute Countdown
-        </button>
+          <label class="checkbox-label">
+            <input type="checkbox" id="countdownMinimizable" checked />
+            <span>Minimizable (Dock to pill)</span>
+          </label>
+        </div>
+
+        <div
+          class="control-group"
+          style="justify-content: flex-end; padding-bottom: 6px"
+        >
+          <label class="checkbox-label">
+            <input type="checkbox" id="countdownInitiallyMinimized" />
+            <span>Initially Docked</span>
+          </label>
+        </div>
+      </div>
+
+      <div
+        style="
+          margin-top: 16px;
+          border-top: 1px solid #30363d;
+          padding-top: 12px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          align-items: center;
+          justify-content: space-between;
+        "
+      >
+        <div class="actions">
+          <button
+            class="btn"
+            id="btnCountdown1Min"
+            style="
+              background: rgba(201, 168, 76, 0.15);
+              border-color: #c9a84c;
+              color: #f5d061;
+            "
+          >
+            ⏱️ Quick 1-Min Demo
+          </button>
+        </div>
+        <div
+          style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"
+        >
+          <span
+            style="
+              font-size: 0.72rem;
+              color: #8b8f98;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            "
+            >Controller Seam:</span
+          >
+          <button
+            class="btn-sm"
+            id="btnCtrlMinimize"
+            title="controller.minimize()"
+          >
+            🔽 Minimize
+          </button>
+          <button class="btn-sm" id="btnCtrlExpand" title="controller.expand()">
+            🔼 Expand
+          </button>
+          <button
+            class="btn-sm"
+            id="btnCtrlDismiss"
+            title="controller.dismiss()"
+          >
+            ✕ Dismiss
+          </button>
+          <button class="btn-sm" id="btnCtrlShow" title="controller.show()">
+            👁️ Show
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1514,6 +1720,148 @@
           "#1a3a1a",
         ];
 
+        const THEME_PALETTES = {
+          classic: {
+            colors: [
+              "#c9a84c",
+              "#e5c158",
+              "#8b4513",
+              "#2d5a27",
+              "#fff7cc",
+              "#1a3a1a",
+            ],
+            glowColor: "#c9a84c",
+            ceilingColor: "#8b4513",
+            ropeColor: "#c9a84c",
+            bannerBg: "#181308",
+            bannerTextColor: "#fae17d",
+            bannerIconColor: "#e5c158",
+          },
+          midnight: {
+            colors: [
+              "#fbbf24",
+              "#e2e8f0",
+              "#38bdf8",
+              "#6366f1",
+              "#f8fafc",
+              "#1e293b",
+            ],
+            glowColor: "#38bdf8",
+            ceilingColor: "#1e293b",
+            ropeColor: "#64748b",
+            bannerBg: "#0f172a",
+            bannerTextColor: "#f8fafc",
+            bannerIconColor: "#fbbf24",
+          },
+          emerald: {
+            colors: [
+              "#f59e0b",
+              "#10b981",
+              "#059669",
+              "#064e3b",
+              "#fde68a",
+              "#022c22",
+            ],
+            glowColor: "#10b981",
+            ceilingColor: "#064e3b",
+            ropeColor: "#059669",
+            bannerBg: "#022c22",
+            bannerTextColor: "#fef3c7",
+            bannerIconColor: "#f59e0b",
+          },
+          royal: {
+            colors: [
+              "#fcd34d",
+              "#a78bfa",
+              "#7c3aed",
+              "#4c1d95",
+              "#fef08a",
+              "#2e1065",
+            ],
+            glowColor: "#a78bfa",
+            ceilingColor: "#4c1d95",
+            ropeColor: "#8b5cf6",
+            bannerBg: "#1e0b40",
+            bannerTextColor: "#fef08a",
+            bannerIconColor: "#fcd34d",
+          },
+          "desert-dusk": {
+            colors: [
+              "#f97316",
+              "#fde047",
+              "#ea580c",
+              "#c2410c",
+              "#fed7aa",
+              "#7c2d12",
+            ],
+            glowColor: "#f97316",
+            ceilingColor: "#7c2d12",
+            ropeColor: "#c2410c",
+            bannerBg: "#2b0e05",
+            bannerTextColor: "#fef3c7",
+            bannerIconColor: "#f97316",
+          },
+          "platinum-minimal": {
+            colors: [
+              "#e2e8f0",
+              "#94a3b8",
+              "#cbd5e1",
+              "#64748b",
+              "#f8fafc",
+              "#334155",
+            ],
+            glowColor: "#e2e8f0",
+            ceilingColor: "#475569",
+            ropeColor: "#94a3b8",
+            bannerBg: "#0f172a",
+            bannerTextColor: "#f8fafc",
+            bannerIconColor: "#e2e8f0",
+          },
+          "rose-sahara": {
+            colors: [
+              "#fb7185",
+              "#f43f5e",
+              "#fda4af",
+              "#e11d48",
+              "#fff1f2",
+              "#be123c",
+            ],
+            glowColor: "#fb7185",
+            ceilingColor: "#881337",
+            ropeColor: "#e11d48",
+            bannerBg: "#280a14",
+            bannerTextColor: "#fff1f2",
+            bannerIconColor: "#fb7185",
+          },
+        };
+
+        function applyThemeToSwatches(themeKey) {
+          const t = THEME_PALETTES[themeKey];
+          if (!t) return;
+          for (let i = 1; i <= 12; i++) {
+            const el = document.getElementById("lc" + i);
+            if (el) el.value = t.colors[(i - 1) % t.colors.length];
+          }
+          for (let i = 1; i <= 5; i++) {
+            const el = document.getElementById("gc" + i);
+            if (el) el.value = t.colors[(i - 1) % t.colors.length];
+          }
+          const cEl = document.getElementById("ceilingColor");
+          if (cEl) cEl.value = t.ceilingColor;
+          const rEl = document.getElementById("ropeColor");
+          if (rEl) rEl.value = t.ropeColor;
+          const glEl = document.getElementById("glowColorLantern");
+          if (glEl) glEl.value = t.glowColor;
+          const ggEl = document.getElementById("glowColorGeneric");
+          if (ggEl) ggEl.value = t.glowColor;
+          const bBg = document.getElementById("bannerBgColor");
+          if (bBg) bBg.value = t.bannerBg;
+          const bTxt = document.getElementById("bannerTextColorInput");
+          if (bTxt) bTxt.value = t.bannerTextColor;
+          const bIco = document.getElementById("bannerIconColorInput");
+          if (bIco) bIco.value = t.bannerIconColor;
+        }
+
         function getGlowColor() {
           const isLanterns =
             document.getElementById("variantSelect").value === "lanterns";
@@ -1558,12 +1906,43 @@
             isLanterns ? "" : "none";
           const ropeStyleEl = document.getElementById("ropeStyleGroup");
           if (ropeStyleEl) ropeStyleEl.style.display = isLanterns ? "" : "none";
+
+          // Only show rope sag when variant is lanterns AND rope style is not straight
           const ropeSagEl = document.getElementById("ropeSagGroup");
-          if (ropeSagEl) ropeSagEl.style.display = isLanterns ? "" : "none";
+          const rStyleVal = document.getElementById("ropeStyleSelect")?.value;
+          if (ropeSagEl) {
+            ropeSagEl.style.display =
+              isLanterns && rStyleVal !== "straight" ? "" : "none";
+          }
 
           const clearanceGroup = document.getElementById("clearanceGroup");
           if (clearanceGroup)
             clearanceGroup.style.display = isMotif ? "" : "none";
+
+          // Mobile side behavior group is only relevant for left/right/sides positions
+          const posVal = document.getElementById("positionSelect")?.value;
+          const mobSideEl = document.getElementById("mobileSideGroup");
+          if (mobSideEl) {
+            mobSideEl.style.display = ["left", "right", "sides"].includes(
+              posVal
+            )
+              ? ""
+              : "none";
+          }
+
+          // Calendar mode: show simulated date picker & presets only when simulate mode is chosen
+          const calMode = document.getElementById("calendarModeSelect")?.value;
+          const isSim = calMode === "simulate";
+          const simDateEl = document.getElementById("simDateGroup");
+          if (simDateEl) simDateEl.style.display = isSim ? "" : "none";
+          const simPresetEl = document.getElementById("simPresetGroup");
+          if (simPresetEl) simPresetEl.style.display = isSim ? "" : "none";
+
+          // Countdown custom iftar time group
+          const cdVal = document.getElementById("countdownSelect")?.value;
+          const cdIftarEl = document.getElementById("countdownIftarTimeGroup");
+          if (cdIftarEl)
+            cdIftarEl.style.display = cdVal === "custom" ? "" : "none";
         }
 
         function syncHijriAdjGroup() {
@@ -1582,9 +1961,14 @@
 
         function getConfig() {
           const variant = document.getElementById("variantSelect").value;
+          const calMode =
+            document.getElementById("calendarModeSelect")?.value || "preview";
+          const isPreview = calMode === "preview";
+          const posVal = document.getElementById("positionSelect").value;
+
           const cfg = {
             variant,
-            position: document.getElementById("positionSelect").value,
+            position: posVal,
             opacity: parseFloat(document.getElementById("opacityRange").value),
             confetti: document.getElementById("confettiSelect").value,
             locale: document.getElementById("localeSelect").value,
@@ -1593,7 +1977,7 @@
               document.getElementById("clearanceSelect")?.value || "edges",
             layer:
               document.getElementById("layerSelect")?.value || "foreground",
-            previewMode: true,
+            previewMode: isPreview,
             debug: isDebugMode,
             onError: (err) => {
               if (typeof logSafety === "function") {
@@ -1608,6 +1992,41 @@
             onOccasionChange: (occ, state) =>
               console.log("Occasion changed:", occ, state),
           };
+
+          // Mobile side behavior
+          if (["left", "right", "sides"].includes(posVal)) {
+            const mobSide = document.getElementById(
+              "mobileSideBehaviorSelect"
+            )?.value;
+            if (mobSide) cfg.mobileSideBehavior = mobSide;
+          }
+
+          // Z-index
+          const zVal = parseInt(
+            document.getElementById("zIndexInput")?.value,
+            10
+          );
+          if (!isNaN(zVal)) cfg.zIndex = zVal;
+
+          // Live transition
+          const liveTrans = document.getElementById(
+            "liveTransitionCheckbox"
+          )?.checked;
+          if (liveTrans !== undefined) cfg.liveTransition = liveTrans;
+
+          // Eid variant
+          const eidVar = document.getElementById("eidVariantSelect")?.value;
+          if (eidVar) cfg.eidVariant = eidVar;
+
+          // Simulated date
+          if (calMode === "simulate") {
+            const simDateVal = document.getElementById(
+              "simulatedDatePicker"
+            )?.value;
+            if (simDateVal) cfg.date = simDateVal;
+          }
+
+          // Theme & colors
           const themeVal = document.getElementById("themeSelect")?.value;
           if (themeVal && themeVal !== "custom") {
             cfg.theme = themeVal;
@@ -1617,6 +2036,7 @@
             cfg.ceilingColor = document.getElementById("ceilingColor").value;
             cfg.ropeColor = document.getElementById("ropeColor").value;
           }
+
           if (variant === "lanterns") {
             const rStyle = document.getElementById("ropeStyleSelect")?.value;
             if (rStyle) cfg.ropeStyle = rStyle;
@@ -1626,6 +2046,8 @@
             );
             if (!isNaN(rSag)) cfg.ropeSag = rSag;
           }
+
+          // Countdown
           const cdVal = document.getElementById("countdownSelect")?.value;
           if (cdVal && cdVal !== "off") {
             const is10sDemo = cdVal === "demo-alert";
@@ -1643,6 +2065,9 @@
               const mm = String(d.getMinutes()).padStart(2, "0");
               const ss = String(d.getSeconds()).padStart(2, "0");
               maghribTime = `${hh}:${mm}:${ss}`;
+            } else if (cdVal === "custom") {
+              maghribTime =
+                document.getElementById("countdownIftarTime")?.value || "18:15";
             }
             cfg.countdown = {
               maghribTime,
@@ -1653,20 +2078,30 @@
               defaultMuted:
                 document.getElementById("countdownAudioSelect")?.value ===
                 "muted",
+              minimizable:
+                document.getElementById("countdownMinimizable")?.checked !==
+                false,
+              initiallyMinimized: Boolean(
+                document.getElementById("countdownInitiallyMinimized")?.checked
+              ),
+              alertWindowMinutes:
+                parseInt(
+                  document.getElementById("countdownAlertWindowMinutes")?.value,
+                  10
+                ) || 30,
+              autoDismissAfterMinutes:
+                parseInt(
+                  document.getElementById("countdownAutoDismissMinutes")?.value,
+                  10
+                ) || 10,
             };
           }
+
           const occVal = document.getElementById("occasionsSelect")?.value;
           if (occVal === "ramadan") cfg.occasions = ["ramadan"];
           else if (occVal === "eid") cfg.occasions = ["eid-fitr", "eid-adha"];
           else if (occVal === "eid-fitr") cfg.occasions = ["eid-fitr"];
           else if (occVal === "eid-adha") cfg.occasions = ["eid-adha"];
-
-          const previewOcc = document.getElementById(
-            "occasionPreviewSelect"
-          )?.value;
-          if (previewOcc === "ramadan") cfg.date = "2025-03-05";
-          else if (previewOcc === "eid-fitr") cfg.date = "2025-03-31";
-          else if (previewOcc === "eid-adha") cfg.date = "2025-06-06";
 
           if (variant === "banner") {
             cfg.bannerBg = document.getElementById("bannerBgColor").value;
@@ -1756,6 +2191,11 @@
               lines.push(
                 `  ${k}: [${v.map((x) => JSON.stringify(x)).join(", ")}]`
               );
+            } else if (typeof v === "object" && v !== null) {
+              const nested = Object.entries(v)
+                .map(([nk, nv]) => `    ${nk}: ${JSON.stringify(nv)}`)
+                .join(",\n");
+              lines.push(`  ${k}: {\n${nested}\n  }`);
             } else {
               lines.push(`  ${k}: ${JSON.stringify(v)}`);
             }
@@ -1792,9 +2232,15 @@
                 if (typeof v === "boolean") return v ? k : `${k}={false}`;
                 if (typeof v === "number") return `${k}={${v}}`;
                 if (Array.isArray(v)) return `${k}={${JSON.stringify(v)}}`;
+                if (typeof v === "object" && v !== null) {
+                  const nestedProps = Object.entries(v)
+                    .map(([nk, nv]) => `          ${nk}: ${JSON.stringify(nv)}`)
+                    .join(",\n");
+                  return `${k}={{\n${nestedProps}\n        }}`;
+                }
                 return `${k}=${JSON.stringify(v)}`;
               })
-              .join("\n  ");
+              .join("\n        ");
             return `import { RamadanOverlay } from 'ramadan-overlay/react';\n\nfunction App() {\n  return (\n    <>\n      <RamadanOverlay\n        ${props}\n      />\n      {/* your app */}\n    </>\n  );\n}`;
           }
           if (activeTab === "vue") {
@@ -1866,24 +2312,64 @@ Instructions for the Agent:
           }
         }
 
-        // ── URL hash state ───────────────────────────────────────────────────
+        // ── URL hash state (UTF-8 safe base64) ──────────────────────────────
         function saveHash(cfg) {
           const d = getDisplayCfg(cfg);
           try {
-            location.replace("#" + btoa(JSON.stringify(d)));
-          } catch (_) {}
+            const json = JSON.stringify(d);
+            const encoded = btoa(
+              encodeURIComponent(json).replace(
+                /%([0-9A-F]{2})/g,
+                function (_, p1) {
+                  return String.fromCharCode("0x" + p1);
+                }
+              )
+            );
+            location.replace("#" + encoded);
+          } catch (e) {
+            console.warn("Could not save config to URL hash:", e);
+          }
         }
 
         function loadHash() {
           try {
             const hash = location.hash.slice(1);
             if (!hash) return;
-            const cfg = JSON.parse(atob(hash));
-            // Restore controls
+            let json;
+            try {
+              json = decodeURIComponent(
+                Array.prototype.map
+                  .call(atob(hash), function (c) {
+                    return (
+                      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+                    );
+                  })
+                  .join("")
+              );
+            } catch (_) {
+              json = atob(hash);
+            }
+            const cfg = JSON.parse(json);
             if (cfg.variant)
               document.getElementById("variantSelect").value = cfg.variant;
             if (cfg.position)
               document.getElementById("positionSelect").value = cfg.position;
+            if (cfg.mobileSideBehavior) {
+              const el = document.getElementById("mobileSideBehaviorSelect");
+              if (el) el.value = cfg.mobileSideBehavior;
+            }
+            if (cfg.zIndex != null) {
+              const el = document.getElementById("zIndexInput");
+              if (el) el.value = cfg.zIndex;
+            }
+            if (cfg.liveTransition != null) {
+              const el = document.getElementById("liveTransitionCheckbox");
+              if (el) el.checked = Boolean(cfg.liveTransition);
+            }
+            if (cfg.eidVariant) {
+              const el = document.getElementById("eidVariantSelect");
+              if (el) el.value = cfg.eidVariant;
+            }
             if (cfg.opacity != null) {
               document.getElementById("opacityRange").value = cfg.opacity;
               document.getElementById("opacityVal").textContent = cfg.opacity;
@@ -1898,8 +2384,10 @@ Instructions for the Agent:
               document.getElementById("regionSelect").value = cfg.region;
             if (cfg.density)
               document.getElementById("densitySelect").value = cfg.density;
-            if (cfg.theme)
+            if (cfg.theme) {
               document.getElementById("themeSelect").value = cfg.theme;
+              if (cfg.theme !== "custom") applyThemeToSwatches(cfg.theme);
+            }
             if (cfg.ropeStyle)
               document.getElementById("ropeStyleSelect").value = cfg.ropeStyle;
             if (cfg.ropeSag != null) {
@@ -1972,7 +2460,53 @@ Instructions for the Agent:
               else if (occStr === "eid-adha")
                 document.getElementById("occasionsSelect").value = "eid-adha";
             }
-          } catch (_) {}
+            if (cfg.countdown) {
+              const cdSel = document.getElementById("countdownSelect");
+              if (cdSel)
+                cdSel.value = cfg.countdown.iftarTime ? "custom" : "auto";
+              if (cfg.countdown.iftarTime) {
+                const iftarEl = document.getElementById("countdownIftarTime");
+                if (iftarEl) iftarEl.value = cfg.countdown.iftarTime;
+              }
+              if (cfg.countdown.position) {
+                const posEl = document.getElementById("countdownPosSelect");
+                if (posEl) posEl.value = cfg.countdown.position;
+              }
+              if (cfg.countdown.defaultMuted != null) {
+                const audEl = document.getElementById("countdownAudioSelect");
+                if (audEl)
+                  audEl.value = cfg.countdown.defaultMuted
+                    ? "muted"
+                    : "unmuted";
+              }
+              if (cfg.countdown.minimizable != null) {
+                const minEl = document.getElementById("countdownMinimizable");
+                if (minEl) minEl.checked = Boolean(cfg.countdown.minimizable);
+              }
+              if (cfg.countdown.initiallyMinimized != null) {
+                const initMinEl = document.getElementById(
+                  "countdownInitiallyMinimized"
+                );
+                if (initMinEl)
+                  initMinEl.checked = Boolean(cfg.countdown.initiallyMinimized);
+              }
+              if (cfg.countdown.alertWindowMinutes != null) {
+                const alertEl = document.getElementById(
+                  "countdownAlertWindowMinutes"
+                );
+                if (alertEl) alertEl.value = cfg.countdown.alertWindowMinutes;
+              }
+              if (cfg.countdown.autoDismissAfterMinutes != null) {
+                const autoDisEl = document.getElementById(
+                  "countdownAutoDismissMinutes"
+                );
+                if (autoDisEl)
+                  autoDisEl.value = cfg.countdown.autoDismissAfterMinutes;
+              }
+            }
+          } catch (e) {
+            console.warn("Could not parse config from URL hash:", e);
+          }
         }
 
         // ── Init ──
@@ -1990,6 +2524,7 @@ Instructions for the Agent:
           ?.addEventListener("click", () => {
             const cdSel = document.getElementById("countdownSelect");
             if (cdSel) cdSel.value = "1min";
+            syncColorPanels();
             if (!overlayOn) {
               overlayOn = true;
               const toggleBtn = document.getElementById("toggleBtn");
@@ -2056,7 +2591,7 @@ Instructions for the Agent:
             mount();
           });
 
-        // ── Reset colors ──
+        // ── Reset colors (Instantly remounts overlay with defaults) ──
         document
           .getElementById("resetColorsBtn")
           .addEventListener("click", () => {
@@ -2068,7 +2603,10 @@ Instructions for the Agent:
             document.getElementById("ropeColor").value = DEFAULT_ROPE_COLOR;
             document.getElementById("glowColorLantern").value =
               DEFAULT_GLOW_COLOR;
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
           });
+
         document
           .getElementById("resetColorsGenericBtn")
           .addEventListener("click", () => {
@@ -2077,12 +2615,14 @@ Instructions for the Agent:
             });
             document.getElementById("glowColorGeneric").value =
               DEFAULT_GLOW_COLOR;
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
           });
 
         // ── Auto-apply on any control change ──
         document
           .querySelectorAll(
-            'select:not(#confettiSelect), input[type="range"], input[type="number"]'
+            'select:not(#confettiSelect), input[type="range"], input[type="number"], input[type="date"], input[type="time"], input[type="checkbox"]'
           )
           .forEach((el) => {
             el.addEventListener("change", () => {
@@ -2091,6 +2631,115 @@ Instructions for the Agent:
               if (overlayOn) mount();
             });
           });
+
+        // Theme select populates custom color swatches
+        document
+          .getElementById("themeSelect")
+          ?.addEventListener("change", function () {
+            if (this.value !== "custom") {
+              applyThemeToSwatches(this.value);
+            }
+            if (overlayOn) mount();
+          });
+
+        // Quick simulation presets set the date input and remount
+        document
+          .getElementById("occasionPreviewSelect")
+          ?.addEventListener("change", function () {
+            const dateMap = {
+              ramadan: "2026-02-25",
+              "eid-fitr": "2026-03-21",
+              "eid-adha": "2026-05-28",
+              none: "2026-08-15",
+            };
+            if (dateMap[this.value]) {
+              const picker = document.getElementById("simulatedDatePicker");
+              if (picker) picker.value = dateMap[this.value];
+              if (overlayOn) mount();
+            }
+          });
+
+        // Programmatic Countdown Controller Test Buttons
+        function getActiveController() {
+          return (
+            currentInstance?.getCountdownController?.() ||
+            currentInstance?.countdown ||
+            null
+          );
+        }
+
+        document
+          .getElementById("btnCtrlMinimize")
+          ?.addEventListener("click", () => {
+            const ctrl = getActiveController();
+            if (ctrl) {
+              ctrl.minimize();
+              logSafety(
+                "🔽 Triggered controller.minimize() -> Docked into sleek pill",
+                "#58a6ff"
+              );
+            } else {
+              logSafety(
+                "⚠️ Countdown is not active on overlay instance. Enable Countdown above first.",
+                "#e3b341"
+              );
+            }
+          });
+
+        document
+          .getElementById("btnCtrlExpand")
+          ?.addEventListener("click", () => {
+            const ctrl = getActiveController();
+            if (ctrl) {
+              ctrl.expand();
+              logSafety(
+                "🔼 Triggered controller.expand() -> Restored to full card",
+                "#58a6ff"
+              );
+            } else {
+              logSafety(
+                "⚠️ Countdown is not active on overlay instance. Enable Countdown above first.",
+                "#e3b341"
+              );
+            }
+          });
+
+        document
+          .getElementById("btnCtrlDismiss")
+          ?.addEventListener("click", () => {
+            const ctrl = getActiveController();
+            if (ctrl) {
+              ctrl.dismiss();
+              logSafety(
+                "✕ Triggered controller.dismiss() -> Widget dismissed",
+                "#e3b341"
+              );
+            } else {
+              logSafety(
+                "⚠️ Countdown is not active on overlay instance.",
+                "#e3b341"
+              );
+            }
+          });
+
+        document
+          .getElementById("btnCtrlShow")
+          ?.addEventListener("click", () => {
+            const ctrl = getActiveController();
+            if (ctrl) {
+              ctrl.show();
+              logSafety(
+                "👁️ Triggered controller.show() -> Widget re-shown",
+                "#7ee787"
+              );
+            } else {
+              logSafety(
+                "⚠️ Countdown is not active on overlay instance.",
+                "#e3b341"
+              );
+            }
+          });
+
         // Confetti select controls both code output AND live demo behaviour
         document
           .getElementById("confettiSelect")
@@ -2116,6 +2765,18 @@ Instructions for the Agent:
         // Keep variant/region selectors syncing panels immediately
         document
           .getElementById("variantSelect")
+          .addEventListener("change", syncColorPanels);
+        document
+          .getElementById("positionSelect")
+          .addEventListener("change", syncColorPanels);
+        document
+          .getElementById("ropeStyleSelect")
+          .addEventListener("change", syncColorPanels);
+        document
+          .getElementById("calendarModeSelect")
+          .addEventListener("change", syncColorPanels);
+        document
+          .getElementById("countdownSelect")
           .addEventListener("change", syncColorPanels);
         document
           .getElementById("regionSelect")
@@ -2330,24 +2991,17 @@ Instructions for the Agent:
       } // end initApp
     </script>
 
-    <!-- Load library: local dist for dev (localhost/127/file:), CDN for hosted -->
+    <!-- Load library: local dist first, fallback to modern CDN if dist missing -->
     <script>
       (function () {
         var s = document.createElement("script");
-        var isLocal =
-          location.hostname === "localhost" ||
-          location.hostname === "127.0.0.1" ||
-          location.hostname === "" ||
-          location.protocol === "file:";
-        s.src = isLocal
-          ? "dist/ramadan-overlay.min.js"
-          : "https://cdn.jsdelivr.net/npm/ramadan-overlay@0.1.3/dist/ramadan-overlay.min.js";
+        s.src = "dist/ramadan-overlay.min.js";
         s.onload = initApp;
         s.onerror = function () {
           // local build missing — fall back to CDN
           var fallback = document.createElement("script");
           fallback.src =
-            "https://cdn.jsdelivr.net/npm/ramadan-overlay@0.1.3/dist/ramadan-overlay.min.js";
+            "https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js";
           fallback.onload = initApp;
           document.head.appendChild(fallback);
         };
