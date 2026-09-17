@@ -1121,6 +1121,22 @@
               <span class="field-hint">Primary decorative theme</span>
             </div>
 
+            <div
+              class="control-field"
+              id="bannerOccasionGroup"
+              style="display: none"
+            >
+              <label for="bannerOccasionSelect">Banner Occasion Greeting</label>
+              <select id="bannerOccasionSelect">
+                <option value="ramadan" selected>Ramadan Mubarak</option>
+                <option value="eid-fitr">Eid Al-Fitr Mubarak</option>
+                <option value="eid-adha">Eid Al-Adha Mubarak</option>
+              </select>
+              <span class="field-hint"
+                >Greeting header &amp; icon by occasion</span
+              >
+            </div>
+
             <div class="control-field">
               <label for="occasionsSelect">Occasion Triggers</label>
               <select id="occasionsSelect">
@@ -1239,6 +1255,28 @@
                 <option value="normal">Normal</option>
                 <option value="high">High (Festive Rich)</option>
               </select>
+            </div>
+
+            <div
+              class="control-field"
+              id="intensityGroup"
+              style="display: none"
+            >
+              <label for="intensityRange">
+                Shape Intensity:
+                <span id="intensityVal" style="color: var(--gold-300)">5</span>
+              </label>
+              <input
+                type="range"
+                id="intensityRange"
+                min="1"
+                max="10"
+                step="1"
+                value="5"
+              />
+              <span class="field-hint"
+                >Ascent speed &amp; shape count (1–10)</span
+              >
             </div>
 
             <div class="control-field">
@@ -2148,6 +2186,20 @@
           document.getElementById("bannerColorPanel").style.display = isBanner
             ? ""
             : "none";
+          const bannerOccEl = document.getElementById("bannerOccasionGroup");
+          if (bannerOccEl) bannerOccEl.style.display = isBanner ? "" : "none";
+
+          const isFlyingShapes = [
+            "crescent-stars",
+            "sparkles",
+            "eid",
+            "eid-fitr",
+            "eid-adha",
+          ].includes(variant);
+          const intensityGroup = document.getElementById("intensityGroup");
+          if (intensityGroup)
+            intensityGroup.style.display = isFlyingShapes ? "" : "none";
+
           document.getElementById("lanternStyleGroup").style.display =
             isLanterns ? "" : "none";
           const ropeStyleEl = document.getElementById("ropeStyleGroup");
@@ -2267,6 +2319,17 @@
               "simulatedDatePicker"
             )?.value;
             if (simDateVal) cfg.date = simDateVal;
+          } else if (calMode === "preview") {
+            const bannerOcc =
+              variant === "banner"
+                ? document.getElementById("bannerOccasionSelect")?.value
+                : null;
+            const occPreview =
+              bannerOcc ||
+              document.getElementById("occasionPreviewSelect")?.value;
+            if (occPreview === "eid-fitr") cfg.date = "2026-03-21";
+            else if (occPreview === "eid-adha") cfg.date = "2026-05-28";
+            else if (occPreview === "ramadan") cfg.date = "2026-02-25";
           }
 
           const themeVal = document.getElementById("themeSelect")?.value;
@@ -2395,6 +2458,11 @@
           const densityVal = document.getElementById("densitySelect").value;
           if (densityVal !== "auto") {
             cfg.density = densityVal;
+          }
+          const intensityEl = document.getElementById("intensityRange");
+          if (intensityEl) {
+            const intVal = parseInt(intensityEl.value, 10);
+            if (!isNaN(intVal)) cfg.intensity = intVal;
           }
           return cfg;
         }
@@ -2636,6 +2704,12 @@ Instructions for the Agent:
               document.getElementById("regionSelect").value = cfg.region;
             if (cfg.density)
               document.getElementById("densitySelect").value = cfg.density;
+            if (cfg.intensity != null) {
+              const el = document.getElementById("intensityRange");
+              if (el) el.value = cfg.intensity;
+              const valEl = document.getElementById("intensityVal");
+              if (valEl) valEl.textContent = cfg.intensity;
+            }
             if (cfg.theme) {
               document.getElementById("themeSelect").value = cfg.theme;
               if (cfg.theme !== "custom") applyThemeToSwatches(cfg.theme);
@@ -2823,6 +2897,10 @@ Instructions for the Agent:
               applyThemeToSwatches("classic");
               document.getElementById("confettiSelect").value = "on";
               document.getElementById("countdownSelect").value = "1min";
+              const bOcc = document.getElementById("bannerOccasionSelect");
+              if (bOcc) bOcc.value = "eid-fitr";
+              const occPrev = document.getElementById("occasionPreviewSelect");
+              if (occPrev) occPrev.value = "eid-fitr";
             }
 
             syncColorPanels();
@@ -2990,6 +3068,29 @@ Instructions for the Agent:
         document
           .getElementById("densitySelect")
           .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("bannerOccasionSelect")
+          ?.addEventListener("change", (e) => {
+            const occ = e.target.value;
+            const occPreview = document.getElementById("occasionPreviewSelect");
+            if (occPreview) occPreview.value = occ;
+            const picker = document.getElementById("simulatedDatePicker");
+            if (picker) {
+              if (occ === "ramadan") picker.value = "2026-02-25";
+              else if (occ === "eid-fitr") picker.value = "2026-03-21";
+              else if (occ === "eid-adha") picker.value = "2026-05-28";
+            }
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("intensityRange")
+          ?.addEventListener("input", (e) => {
+            const valEl = document.getElementById("intensityVal");
+            if (valEl) valEl.textContent = e.target.value;
             if (overlayOn) mount();
           });
 
