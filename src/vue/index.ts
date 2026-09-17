@@ -120,6 +120,14 @@ export const RamadanOverlay = defineComponent({
       type: [String, Object] as PropType<string | HTMLElement>,
       default: undefined,
     },
+    attachTo: {
+      type: [String, Object] as PropType<string | HTMLElement>,
+      default: undefined,
+    },
+    attachEdge: {
+      type: String as PropType<"bottom" | "top">,
+      default: undefined,
+    },
     autoTrigger: { type: Boolean as PropType<boolean>, default: undefined },
     previewMode: { type: Boolean as PropType<boolean>, default: undefined },
     confetti: {

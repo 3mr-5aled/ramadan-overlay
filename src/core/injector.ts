@@ -450,18 +450,20 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     debug
   );
 
-  let mountTarget: string | HTMLElement | undefined;
-  if (
-    typeof userConfig.mountTarget === "string" &&
-    userConfig.mountTarget.trim().length > 0
-  ) {
-    mountTarget = userConfig.mountTarget.trim();
+  const rawAttach = userConfig.attachTo ?? userConfig.mountTarget;
+  let attachTo: string | HTMLElement | undefined;
+  if (typeof rawAttach === "string" && rawAttach.trim().length > 0) {
+    attachTo = rawAttach.trim();
   } else if (
     typeof HTMLElement !== "undefined" &&
-    userConfig.mountTarget instanceof HTMLElement
+    rawAttach instanceof HTMLElement
   ) {
-    mountTarget = userConfig.mountTarget;
+    attachTo = rawAttach;
   }
+  const mountTarget = attachTo;
+
+  const attachEdge: "bottom" | "top" =
+    userConfig.attachEdge === "top" ? "top" : "bottom";
 
   let occasions: Occasion[] = ["ramadan", "eid-fitr", "eid-adha"];
   if (Array.isArray(userConfig.occasions)) {
@@ -512,6 +514,8 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     clearance,
     layer,
     mountTarget,
+    attachTo,
+    attachEdge,
     mobileSideBehavior,
     opacity,
     shadows,
@@ -865,6 +869,9 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
               newConfig.ropeStyle !== currentConfig.ropeStyle ||
               newConfig.ropeSag !== currentConfig.ropeSag ||
               newConfig.clearance !== currentConfig.clearance ||
+              newConfig.lanternCount !== currentConfig.lanternCount ||
+              newConfig.attachTo !== currentConfig.attachTo ||
+              newConfig.attachEdge !== currentConfig.attachEdge ||
               newConfig.mountTarget !== currentConfig.mountTarget ||
               bannerChanged;
 

@@ -593,7 +593,13 @@ export const mountLanterns: VariantMountFn = (
   let lanternWraps: HTMLElement[] = [];
 
   const renderHorizontal = () => {
+    const parentWidth =
+      (container.clientWidth > 0 ? container.clientWidth : 0) ||
+      (container.parentElement?.clientWidth
+        ? container.parentElement.clientWidth
+        : 0);
     const W =
+      parentWidth ||
       (typeof window !== "undefined" && window.innerWidth) ||
       (typeof document !== "undefined" &&
         document.documentElement?.clientWidth) ||
@@ -686,9 +692,20 @@ export const mountLanterns: VariantMountFn = (
   const onResize = () => {
     renderHorizontal();
   };
-  window.addEventListener("resize", onResize, { passive: true });
+  let resizeObs: ResizeObserver | null = null;
+  if (typeof ResizeObserver !== "undefined" && container.parentElement) {
+    try {
+      resizeObs = new ResizeObserver(() => {
+        renderHorizontal();
+      });
+      resizeObs.observe(container.parentElement);
+    } catch {
+      // Ignore
+    }
+  }
 
   return () => {
+    resizeObs?.disconnect();
     svg.remove();
     row.remove();
     window.removeEventListener("resize", onResize);

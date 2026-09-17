@@ -51,6 +51,8 @@ export interface Translations {
       shadowOptions: Record<string, string>;
       confetti: string;
       confettiOptions: Record<string, string>;
+      attachTo: string;
+      attachToOptions: Record<string, string>;
       autoTrigger: string;
       autoTriggerHelp: string;
       countdown: string;

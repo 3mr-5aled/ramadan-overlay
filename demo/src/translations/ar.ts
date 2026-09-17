@@ -111,6 +111,11 @@ export const arTranslations: Translations = {
         on: "مفعّل (عند وقت الإفطار)",
         off: "معطل",
       },
+      attachTo: "مكان وتثبيت الزينة",
+      attachToOptions: {
+        overlay: "طبقة فوق كامل الصفحة (الافتراضي)",
+        header: "إرفاق بالهيدر (.celestial-nav)",
+      },
       autoTrigger: "الكشف التلقائي بالتقويم الهجري",
       autoTriggerHelp:
         "يظهر تلقائياً في شهر رمضان وأيام العيد ويختفي في باقي شهور السنة.",

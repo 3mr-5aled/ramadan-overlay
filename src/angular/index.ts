@@ -58,6 +58,8 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
   @Input() clearance?: ClearanceMode;
   @Input() layer?: LayerStacking;
   @Input() mountTarget?: string | HTMLElement;
+  @Input() attachTo?: string | HTMLElement;
+  @Input() attachEdge?: "bottom" | "top";
   @Input() autoTrigger?: boolean;
   @Input() previewMode?: boolean;
   @Input() confetti?: "on" | "off";
@@ -122,6 +124,8 @@ export class RamadanOverlayDirective implements OnInit, OnChanges, OnDestroy {
       "clearance",
       "layer",
       "mountTarget",
+      "attachTo",
+      "attachEdge",
       "autoTrigger",
       "previewMode",
       "confetti",

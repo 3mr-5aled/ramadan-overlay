@@ -237,8 +237,26 @@ export interface RamadanOverlayConfig {
   layer?: LayerStacking;
 
   /**
+   * CSS selector string (e.g. '.site-header', '#navbar') or HTMLElement to attach the overlay decorations to.
+   * When specified, the overlay is anchored to that element rather than the full viewport.
+   * Default is undefined ("overlay above all" full-screen overlay).
+   * @default undefined ("overlay above all")
+   * @example attachTo: ".site-header"
+   * @example attachTo: "#main-navbar"
+   */
+  attachTo?: string | HTMLElement;
+
+  /**
+   * Which edge of the attached element to hang decorations from (e.g. lanterns).
+   * - 'bottom': Hangs along the bottom edge of the attached element, dangling downwards (default).
+   * - 'top': Hangs along the top ceiling of the attached element.
+   * @default 'bottom'
+   */
+  attachEdge?: "bottom" | "top";
+
+  /**
    * Optional custom container element or CSS selector string to mount the overlay into.
-   * Constrains the overlay to the scoped boundaries of the target element.
+   * Alias for `attachTo`.
    */
   mountTarget?: string | HTMLElement;
 
@@ -704,10 +722,14 @@ export interface ResolvedConfig extends Required<
     | "countdown"
     | "date"
     | "mountTarget"
+    | "attachTo"
+    | "attachEdge"
     | "lanternCount"
   >
 > {
   mountTarget?: string | HTMLElement;
+  attachTo?: string | HTMLElement;
+  attachEdge?: "bottom" | "top";
   lanternCount?: number;
   clearance: ClearanceMode;
   layer: LayerStacking;

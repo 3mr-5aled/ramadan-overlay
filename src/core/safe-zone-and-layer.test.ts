@@ -108,6 +108,80 @@ describe("Content Safe Zone and Layer Stacking", () => {
         overlayElement.container?.classList.contains("ro-scoped-host")
       ).toBe(true);
       overlayElement.destroy();
+
+      hostDiv.remove();
+    });
+
+    it("defaults to full-screen overlay above all when attachTo is omitted", () => {
+      const overlay = init({
+        previewMode: true,
+      });
+      expect(overlay.container?.parentElement).toBe(document.body);
+      expect(overlay.container?.classList.contains("ro-scoped-host")).toBe(
+        false
+      );
+      expect(overlay.container?.classList.contains("ro-attached")).toBe(false);
+      overlay.destroy();
+    });
+
+    it("attaches to target element via attachTo selector or class name with attachEdge", () => {
+      const header = document.createElement("header");
+      header.className = "site-header";
+      document.body.appendChild(header);
+
+      // Selector with leading dot
+      const overlaySelector = init({
+        previewMode: true,
+        attachTo: ".site-header",
+        attachEdge: "bottom",
+      });
+      expect(overlaySelector.container?.parentElement).toBe(header);
+      expect(
+        overlaySelector.container?.classList.contains("ro-scoped-host")
+      ).toBe(true);
+      expect(overlaySelector.container?.classList.contains("ro-attached")).toBe(
+        true
+      );
+      expect(
+        overlaySelector.container?.classList.contains("ro-attached--bottom")
+      ).toBe(true);
+      overlaySelector.destroy();
+
+      // Plain class name without dot
+      const overlayClass = init({
+        previewMode: true,
+        attachTo: "site-header",
+        attachEdge: "top",
+      });
+      expect(overlayClass.container?.parentElement).toBe(header);
+      expect(
+        overlayClass.container?.classList.contains("ro-attached--top")
+      ).toBe(true);
+      overlayClass.destroy();
+
+      header.remove();
+    });
+
+    it("reactively updates attachment target when attachTo is updated dynamically", () => {
+      const headerA = document.createElement("header");
+      headerA.id = "header-a";
+      const headerB = document.createElement("header");
+      headerB.id = "header-b";
+      document.body.appendChild(headerA);
+      document.body.appendChild(headerB);
+
+      const overlay = init({
+        previewMode: true,
+        attachTo: "#header-a",
+      });
+      expect(overlay.container?.parentElement).toBe(headerA);
+
+      overlay.update({ attachTo: "#header-b" });
+      expect(overlay.container?.parentElement).toBe(headerB);
+
+      overlay.destroy();
+      headerA.remove();
+      headerB.remove();
     });
   });
 

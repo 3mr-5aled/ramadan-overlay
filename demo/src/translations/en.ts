@@ -111,6 +111,11 @@ export const enTranslations: Translations = {
         on: "Enabled (Flare at T-0)",
         off: "Disabled",
       },
+      attachTo: "Attachment Mode / Target",
+      attachToOptions: {
+        overlay: "Overlay Above All (Default)",
+        header: "Attach to Header (.celestial-nav)",
+      },
       autoTrigger: "Automatic Hijri Calendar Trigger",
       autoTriggerHelp:
         "Automatically displays during Ramadan and Eid periods and sleeps the rest of the year.",

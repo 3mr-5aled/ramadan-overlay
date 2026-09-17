@@ -32,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleDrawer,
 }) => {
   return (
-    <header className="celestial-nav">
+    <header className="celestial-nav ro-attach-target">
       <div
         className="nav-brand"
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

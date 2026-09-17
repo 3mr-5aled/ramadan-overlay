@@ -41,6 +41,8 @@ interface UniversalControlsProps {
   onToggleAutoTrigger: () => void;
   countdownEnabled: boolean;
   onToggleCountdown: () => void;
+  attachTo?: string | HTMLElement;
+  onChangeAttachTo?: (val: string | undefined) => void;
 }
 
 export const UniversalControls: React.FC<UniversalControlsProps> = ({
@@ -62,6 +64,8 @@ export const UniversalControls: React.FC<UniversalControlsProps> = ({
   onToggleAutoTrigger,
   countdownEnabled,
   onToggleCountdown,
+  attachTo,
+  onChangeAttachTo,
 }) => {
   const showShadows = isOptionVisible("shadows", variant);
 
@@ -140,6 +144,31 @@ export const UniversalControls: React.FC<UniversalControlsProps> = ({
             </option>
             <option value="off">
               {t.workbench.universal.confettiOptions.off}
+            </option>
+          </select>
+        </div>
+
+        {/* Attachment Target (Overlay Above All vs Attached to Header) */}
+        <div className="form-group">
+          <label className="form-label">{t.workbench.universal.attachTo}</label>
+          <select
+            className="form-select"
+            value={
+              typeof attachTo === "string" && attachTo ? "header" : "overlay"
+            }
+            onChange={(e) => {
+              if (onChangeAttachTo) {
+                onChangeAttachTo(
+                  e.target.value === "header" ? ".celestial-nav" : undefined
+                );
+              }
+            }}
+          >
+            <option value="overlay">
+              {t.workbench.universal.attachToOptions.overlay}
+            </option>
+            <option value="header">
+              {t.workbench.universal.attachToOptions.header}
             </option>
           </select>
         </div>

@@ -150,8 +150,12 @@ export function injectStyles(): void {
 #ramadan-overlay-root .ro-geo-band--top{top:0}
 #ramadan-overlay-root .ro-geo-band--bottom{bottom:0}
 #ramadan-overlay-root .ro-geo-band svg{width:100%;height:100%}
-#ramadan-overlay-root.ro-layer--background{z-index:-1!important}
 #ramadan-overlay-root.ro-scoped-host{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+#ramadan-overlay-root.ro-attached{position:absolute!important;left:0!important;right:0!important;width:100%!important;pointer-events:none!important;overflow:visible!important;contain:none!important}
+#ramadan-overlay-root.ro-attached--bottom{top:100%!important;height:0!important}
+#ramadan-overlay-root.ro-attached--top{top:0!important;height:100%!important}
+#ramadan-overlay-root.ro-attached .ro-lantern-ropes{height:160px!important;overflow:visible!important}
+#ramadan-overlay-root.ro-attached .ro-lantern-row{overflow:visible!important}
 @keyframes ro-swing{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
 @keyframes ro-swing-side{0%{transform:translateX(-50%) rotate(-3.5deg)}100%{transform:translateX(-50%) rotate(3.5deg)}}
 @keyframes ro-float{from{transform:translateY(0) rotate(0deg);opacity:.7}to{transform:translateY(-12px) rotate(10deg);opacity:1}}
@@ -250,27 +254,51 @@ function mountOverlayHost(
   let targetParent: HTMLElement = document.body;
   let isScoped = false;
 
-  if (config.mountTarget) {
-    if (typeof config.mountTarget === "string") {
-      const found = document.querySelector<HTMLElement>(config.mountTarget);
+  const rawAttach = config.attachTo ?? config.mountTarget;
+  if (rawAttach) {
+    if (typeof rawAttach === "string" && rawAttach.trim().length > 0) {
+      const trimmed = rawAttach.trim();
+      let found: HTMLElement | null = null;
+      try {
+        found = document.querySelector<HTMLElement>(trimmed);
+      } catch {
+        // Not a standard selector
+      }
+      if (!found && !trimmed.startsWith(".") && !trimmed.startsWith("#")) {
+        try {
+          found = document.querySelector<HTMLElement>(`.${trimmed}`);
+        } catch {
+          // Ignore
+        }
+      }
       if (found) {
         targetParent = found;
         isScoped = true;
       }
     } else if (
       typeof HTMLElement !== "undefined" &&
-      config.mountTarget instanceof HTMLElement
+      rawAttach instanceof HTMLElement
     ) {
-      targetParent = config.mountTarget;
+      targetParent = rawAttach;
       isScoped = true;
     }
   }
 
   if (isScoped) {
     root.classList.add("ro-scoped-host");
+    root.classList.add("ro-attached");
+    if (config.attachEdge === "top") {
+      root.classList.add("ro-attached--top");
+    } else {
+      root.classList.add("ro-attached--bottom");
+    }
     const targetPos = window.getComputedStyle?.(targetParent)?.position;
     if (targetPos === "static" || !targetPos) {
       targetParent.style.position = "relative";
+    }
+    const targetOverflow = window.getComputedStyle?.(targetParent)?.overflow;
+    if (targetOverflow === "hidden" || targetOverflow === "clip") {
+      targetParent.style.overflow = "visible";
     }
   }
 

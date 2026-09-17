@@ -93,6 +93,8 @@ export const Workbench: React.FC<WorkbenchProps> = ({
             onToggleAutoTrigger={onToggleAutoTrigger}
             countdownEnabled={countdownEnabled}
             onToggleCountdown={onToggleCountdown}
+            attachTo={config.attachTo}
+            onChangeAttachTo={(val) => onUpdateConfig({ attachTo: val })}
           />
 
           {themeName === "custom" && (
