@@ -3,6 +3,8 @@
  * and reduced-motion constraints.
  */
 
+import type { IntensityMode, IntensityOption } from "../types";
+
 export type TickFn = (dt: number) => void;
 
 export interface MotionEngineOptions {
@@ -130,4 +132,54 @@ const defaultEngine = createMotionEngine();
  */
 export function scheduleRender(fn: TickFn): () => void {
   return defaultEngine.scheduleRender(fn);
+}
+
+/**
+ * Resolves an intensity option (preset or 1..10 numeric) and falls back to density or 'normal'.
+ */
+export function resolveIntensityValue(
+  intensity?: IntensityOption,
+  density?: "low" | "normal" | "high"
+): number {
+  if (typeof intensity === "number") {
+    return Math.min(10, Math.max(1, Math.round(intensity)));
+  }
+  const mode =
+    intensity && intensity !== "normal"
+      ? intensity
+      : (density ?? intensity ?? "normal");
+
+  if (mode === "low") return 3;
+  if (mode === "high") return 8;
+  return 5;
+}
+
+/**
+ * Calculates item density for ascending flying shapes.
+ */
+export function calculateAscendingItemCount(
+  intensityValue: number,
+  isMobile = false
+): number {
+  const base = Math.round(5 + intensityValue * 3.1);
+  if (isMobile) {
+    return Math.max(4, Math.round(base * 0.6));
+  }
+  return base;
+}
+
+/**
+ * Calculates duration range (in seconds) for ascending flying shapes.
+ * Higher intensity yields faster ascent velocities.
+ */
+export function calculateAscendingDurationRange(intensityValue: number): {
+  minDuration: number;
+  maxDuration: number;
+} {
+  const minDuration = Math.max(4, 18.5 - intensityValue * 1.35);
+  const spread = Math.max(3, 9 - intensityValue * 0.5);
+  return {
+    minDuration: Number(minDuration.toFixed(1)),
+    maxDuration: Number((minDuration + spread).toFixed(1)),
+  };
 }

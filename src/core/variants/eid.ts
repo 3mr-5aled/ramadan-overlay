@@ -1,5 +1,10 @@
 import type { Occasion, ResolvedConfig, VariantMountFn } from "../../types";
 import { calculateMotifCoords } from "../host";
+import {
+  calculateAscendingDurationRange,
+  calculateAscendingItemCount,
+  resolveIntensityValue,
+} from "../motion";
 
 function buildBalloonSVG(
   color: string,
@@ -87,9 +92,11 @@ export const mountEid: VariantMountFn = (
   const colors = config.colors;
   const elements: HTMLElement[] = [];
 
-  const DENSITY_MAP = { low: 6, normal: 14, high: 24 };
-  const totalItems = DENSITY_MAP[config.density] ?? 14;
+  const intensityVal = resolveIntensityValue(config.intensity, config.density);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const totalItems = calculateAscendingItemCount(intensityVal, isMobile);
+  const { minDuration, maxDuration } =
+    calculateAscendingDurationRange(intensityVal);
   const sizeScale = isMobile ? 0.7 : 1.0;
 
   for (let i = 0; i < totalItems; i++) {
@@ -145,19 +152,34 @@ export const mountEid: VariantMountFn = (
       }
     }
 
-    const { x, y } = calculateMotifCoords(
+    const { x } = calculateMotifCoords(
       config.position,
       config.clearance,
       isMobile
     );
 
-    const duration = (4 + Math.random() * 4).toFixed(1);
-    const delay = (Math.random() * 3).toFixed(1);
+    const durationNum =
+      minDuration + Math.random() * (maxDuration - minDuration);
+    const duration = durationNum.toFixed(1);
+    const delay = (-Math.random() * durationNum).toFixed(1);
+
+    const sway1 = (10 + Math.random() * 16) * (Math.random() < 0.5 ? 1 : -1);
+    const sway2 = (10 + Math.random() * 16) * (Math.random() < 0.5 ? 1 : -1);
+    const swayEnd = (8 + Math.random() * 14) * (Math.random() < 0.5 ? 1 : -1);
+    const rot1 = (5 + Math.random() * 12) * (Math.random() < 0.5 ? 1 : -1);
+    const rot2 = (5 + Math.random() * 12) * (Math.random() < 0.5 ? 1 : -1);
+    const rot3 = (5 + Math.random() * 12) * (Math.random() < 0.5 ? 1 : -1);
 
     el.style.cssText = `
       left:${x}%;
-      top:${y}%;
+      top:102%;
       --ro-float-duration:${duration}s;
+      --ro-sway-1:${sway1.toFixed(1)}px;
+      --ro-sway-2:${sway2.toFixed(1)}px;
+      --ro-sway-end:${swayEnd.toFixed(1)}px;
+      --ro-rot-1:${rot1.toFixed(1)}deg;
+      --ro-rot-2:${rot2.toFixed(1)}deg;
+      --ro-rot-3:${rot3.toFixed(1)}deg;
       animation-delay:${delay}s;
     `;
 

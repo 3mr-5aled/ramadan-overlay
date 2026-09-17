@@ -1,5 +1,9 @@
 import type { VariantMountFn } from "../../types";
-import { isMotionAllowed, scheduleRender } from "../motion";
+import {
+  isMotionAllowed,
+  resolveIntensityValue,
+  scheduleRender,
+} from "../motion";
 import { resolveSidePositions } from "../host";
 
 interface SparkleParticle {
@@ -51,8 +55,9 @@ export const mountSparkles: VariantMountFn = (
   const colors = config.colors.length
     ? config.colors
     : ["#c9a84c", "#e8c96b", "#fff7cc", "#4a8a3a"];
-  const DENSITY_MAP = { low: 18, normal: 40, high: 70 };
-  const MAX_PARTICLES = DENSITY_MAP[config.density] ?? 40;
+  const intensityVal = resolveIntensityValue(config.intensity, config.density);
+  const MAX_PARTICLES = Math.round(12 + intensityVal * 6.5);
+  const speedScale = 0.5 + (intensityVal / 10) * 0.8;
   const particles: SparkleParticle[] = [];
 
   function spawnParticle(): SparkleParticle {
@@ -127,8 +132,8 @@ export const mountSparkles: VariantMountFn = (
       el,
       x,
       y,
-      vx: (Math.random() - 0.5) * 0.06,
-      vy: -0.04 - Math.random() * 0.06,
+      vx: (Math.random() - 0.5) * 0.06 * speedScale,
+      vy: (-0.035 - Math.random() * 0.055) * speedScale,
       size: particleSize,
       opacity: 0,
       life: 0,
