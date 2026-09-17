@@ -80,7 +80,7 @@ describe("mountEid", () => {
     expect(container.children.length).toBe(0);
   });
 
-  it("mounts Eid Al-Adha motifs (sheep, kaaba, crescents) when occasion is eid-adha", () => {
+  it("mounts Eid Al-Adha motifs (sheep, crescents) when occasion is eid-adha and never floats Kaaba", () => {
     const config = createConfig();
     const cleanup = mountEid(container, config, "eid-adha");
 
@@ -88,10 +88,17 @@ describe("mountEid", () => {
     const hasAdhaMotifs = Array.from(container.children).some(
       (el) =>
         el.classList.contains("ro-sheep") ||
-        el.classList.contains("ro-kaaba") ||
         el.classList.contains("ro-crescent")
     );
     expect(hasAdhaMotifs).toBe(true);
+
+    // Kaaba is strictly removed from floating visual variants
+    const hasFloatingKaaba = Array.from(container.children).some(
+      (el) =>
+        el.classList.contains("ro-kaaba") ||
+        el.innerHTML.toLowerCase().includes("kaaba")
+    );
+    expect(hasFloatingKaaba).toBe(false);
 
     cleanup();
     expect(container.children.length).toBe(0);
@@ -254,5 +261,37 @@ describe("mountBannerElements with Eid occasion", () => {
     );
     expect(elAdha[0].textContent).toContain("Bespoke Adha Message");
     cAdha();
+  });
+
+  it("verifies Eid Al-Adha banner icon contains Kaaba, excludes crescent, and remains black regardless of theme", () => {
+    const configTheme = createConfig({
+      theme: "emerald",
+      bannerIconColor: "#00ff88", // theme-colored green
+    });
+
+    const { elements, cleanup } = mountBannerElements(configTheme, "eid-adha");
+    expect(elements.length).toBeGreaterThan(0);
+
+    const bannerEl = elements[0];
+    const svgEl = bannerEl.querySelector("svg");
+    expect(svgEl).not.toBeNull();
+    const svgContent = svgEl!.outerHTML;
+
+    // 1. Must contain Kaaba body with strictly black fill (#121212)
+    expect(svgContent).toContain('fill="#121212"');
+
+    // 2. Must contain gold Kiswah belt and door
+    expect(svgContent).toContain('stroke="#d4af37"');
+    expect(svgContent).toContain('fill="#d4af37"');
+
+    // 3. Must NOT contain crescent path
+    expect(svgContent).not.toContain("M14 4 C7 4");
+    expect(svgContent).not.toContain("M18 3 C9 3");
+
+    // 4. Must NOT color the Kaaba cube with theme/banner icon color
+    expect(svgContent).not.toContain('fill="var(--ro-banner-icon');
+    expect(svgContent).not.toContain('fill="#00ff88"');
+
+    cleanup();
   });
 });

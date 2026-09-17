@@ -122,7 +122,7 @@ Building with Cursor, Claude Code, GitHub Copilot, Windsurf, or Google Antigravi
 | `geometric`      | Decorative Islamic geometric patterns                                               |
 | `eid`            | Auto-adapting Eid variant: mounts `eid-fitr` or `eid-adha` based on current holiday |
 | `eid-fitr`       | Eid Al-Fitr celebration with floating festive balloons, gift boxes, and stars       |
-| `eid-adha`       | Eid Al-Adha celebration with geometric sheep, the Kaaba motif, and crescents        |
+| `eid-adha`       | Eid Al-Adha celebration with geometric sheep and crescents                          |
 | `banner`         | Fixed greeting bar prepended to the page (contextually adapts for Ramadan and Eids) |
 
 ---
@@ -254,7 +254,7 @@ import { init } from "ramadan-overlay";
 
 init({
   variant: "lanterns",
-  eidVariant: "eid", // automatically displays festive balloons or sheep/Kaaba during Eid!
+  eidVariant: "eid", // automatically displays festive balloons or sheep/crescents during Eid!
   onOccasionChange: (occasion, state) => {
     console.log(`Active occasion: ${occasion} (Hijri ${state.hijriYear})`);
   },

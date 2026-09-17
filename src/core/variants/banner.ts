@@ -87,12 +87,20 @@ function buildEidFitrIcon(color: string): string {
   </svg>`;
 }
 
-function buildEidAdhaIcon(color: string): string {
+function buildEidAdhaIcon(_color?: string): string {
   return `<svg viewBox="0 0 36 36" height="34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;display:block">
-    <path d="M14 4 C7 4 3 10 3 17 C3 24 7 30 14 30 C9 26 8 22 8 17 C8 12 9 8 14 4 Z" fill="var(--ro-banner-icon, ${color})"/>
-    <rect x="18" y="10" width="15" height="15" rx="1.5" fill="var(--ro-banner-icon, ${color})"/>
-    <line x1="18" y1="14" x2="33" y2="14" stroke="#ffffff" stroke-width="1.5" opacity="0.85"/>
-    <rect x="25" y="16" width="3.5" height="7" rx="0.5" fill="#ffffff" opacity="0.75"/>
+    <!-- Sacred Kaaba: strictly black cube with gold Kiswah belt and door, never themed -->
+    <rect x="6" y="7" width="24" height="22" rx="1.5" fill="#121212"/>
+    <!-- Marble Base (Shadherwan) -->
+    <rect x="5.5" y="28.5" width="25" height="1.5" rx="0.5" fill="#e5e7eb" opacity="0.85"/>
+    <!-- Kiswah Gold Belt -->
+    <line x1="6" y1="13" x2="30" y2="13" stroke="#d4af37" stroke-width="2.5"/>
+    <line x1="6" y1="16.5" x2="30" y2="16.5" stroke="#d4af37" stroke-width="0.8" stroke-dasharray="2 1" opacity="0.9"/>
+    <!-- Golden Door (Bab al-Kaaba) -->
+    <rect x="19" y="15" width="5" height="11" rx="0.5" fill="#d4af37"/>
+    <line x1="21.5" y1="15" x2="21.5" y2="26" stroke="#997b1a" stroke-width="0.6"/>
+    <!-- Golden Spout (Mizab al-Rahmah) -->
+    <rect x="10" y="6" width="2.2" height="1.8" rx="0.3" fill="#d4af37"/>
   </svg>`;
 }
 

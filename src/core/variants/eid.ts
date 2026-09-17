@@ -57,22 +57,6 @@ function buildSheepSVG(
   </svg>`;
 }
 
-function buildKaabaSVG(
-  wallColor: string,
-  goldColor: string,
-  size: number
-): string {
-  return `<svg width="${size}" height="${size}" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <!-- Kaaba Cube -->
-    <rect x="4" y="6" width="24" height="23" rx="1.5" fill="${wallColor}"/>
-    <!-- Kiswa Gold Band -->
-    <line x1="4" y1="12" x2="28" y2="12" stroke="${goldColor}" stroke-width="2.5"/>
-    <line x1="4" y1="16" x2="28" y2="16" stroke="${goldColor}" stroke-width="0.8" stroke-dasharray="2 1"/>
-    <!-- Kaaba Door -->
-    <rect x="18" y="15" width="4.5" height="11" rx="0.5" fill="${goldColor}"/>
-  </svg>`;
-}
-
 function buildCrescentSVG(color: string, size: number): string {
   return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <path d="M20 3 C8 3 2 11 2 20 C2 29 8 37 20 37 C14 32 11 26 11 20 C11 14 14 8 20 3Z" fill="${color}"/>
@@ -109,21 +93,14 @@ export const mountEid: VariantMountFn = (
       colors[Math.floor(Math.random() * colors.length)] ?? color1;
 
     if (isAdha) {
-      // Adha motifs: Sheep, Kaaba, Crescent
+      // Adha motifs: Sheep and Crescent (Kaaba is reserved exclusively for the banner variant and never floats)
       const motifRand = Math.random();
-      if (motifRand < 0.4) {
+      if (motifRand < 0.5) {
         el.className = "ro-sheep";
         el.innerHTML = buildSheepSVG(
           "#f8f9fa",
           color3,
           Math.round(36 * sizeScale)
-        );
-      } else if (motifRand < 0.7) {
-        el.className = "ro-kaaba";
-        el.innerHTML = buildKaabaSVG(
-          "#1a1a1a",
-          color1,
-          Math.round(28 * sizeScale)
         );
       } else {
         el.className = "ro-crescent";

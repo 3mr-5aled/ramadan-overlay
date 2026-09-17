@@ -97,7 +97,7 @@ The internal, prefix-standardized developer notice mechanism that activates in d
 _Avoid_: Console wrapper, debug printer, log util
 
 **Floating Motifs**:
-Festive SVG visual items (crescents, stars, sheep, Kaaba, balloons, and gifts) that float and drift across the viewport in celebratory animation variants.
+Festive SVG visual items (crescents, stars, sheep, balloons, and gifts) that float and drift across the viewport in celebratory animation variants.
 _Avoid_: Floating icons, particles, decoration elements, floating shapes
 
 **Content Safe Zone**:

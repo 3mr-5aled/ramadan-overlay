@@ -183,14 +183,9 @@ describe("Content Safe Zone and Layer Stacking", () => {
 
       const container = overlay.container!;
       const motifs = Array.from(container.children).filter((el) =>
-        [
-          "ro-balloon",
-          "ro-gift",
-          "ro-star",
-          "ro-sheep",
-          "ro-kaaba",
-          "ro-crescent",
-        ].some((cls) => el.classList.contains(cls))
+        ["ro-balloon", "ro-gift", "ro-star", "ro-sheep", "ro-crescent"].some(
+          (cls) => el.classList.contains(cls)
+        )
       ) as HTMLElement[];
 
       expect(motifs.length).toBeGreaterThan(0);
