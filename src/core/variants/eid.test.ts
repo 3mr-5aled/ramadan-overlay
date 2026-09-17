@@ -185,20 +185,74 @@ describe("mountBannerElements with Eid occasion", () => {
     const config = createConfig();
     const { elements, cleanup } = mountBannerElements(config, "ramadan");
     expect(elements[0].textContent).toContain("Ramadan Mubarak");
+    expect(elements[0].innerHTML).toContain("ro-banner-icon");
     cleanup();
   });
 
-  it("uses contextual Eid greeting in English when occasion is eid-fitr", () => {
-    const config = createConfig({ locale: "en" });
-    const { elements, cleanup } = mountBannerElements(config, "eid-fitr");
-    expect(elements[0].textContent).toContain("Eid Mubarak");
-    cleanup();
+  it("uses specific Eid Al-Fitr greeting in English and Arabic when occasion is eid-fitr", () => {
+    const configEn = createConfig({ locale: "en" });
+    const { elements: elEn, cleanup: cleanupEn } = mountBannerElements(
+      configEn,
+      "eid-fitr"
+    );
+    expect(elEn[0].textContent).toContain("Eid Al-Fitr");
+    cleanupEn();
+
+    const configAr = createConfig({ locale: "ar" });
+    const { elements: elAr, cleanup: cleanupAr } = mountBannerElements(
+      configAr,
+      "eid-fitr"
+    );
+    expect(elAr[0].textContent).toContain("عيد فطر مبارك");
+    cleanupAr();
   });
 
-  it("uses contextual Eid greeting in Arabic when locale is ar and occasion is eid-adha", () => {
-    const config = createConfig({ locale: "ar" });
-    const { elements, cleanup } = mountBannerElements(config, "eid-adha");
-    expect(elements[0].textContent).toContain("عيد مبارك");
-    cleanup();
+  it("uses specific Eid Al-Adha greeting in English and Arabic when occasion is eid-adha", () => {
+    const configEn = createConfig({ locale: "en" });
+    const { elements: elEn, cleanup: cleanupEn } = mountBannerElements(
+      configEn,
+      "eid-adha"
+    );
+    expect(elEn[0].textContent).toContain("Eid Al-Adha");
+    cleanupEn();
+
+    const configAr = createConfig({ locale: "ar" });
+    const { elements: elAr, cleanup: cleanupAr } = mountBannerElements(
+      configAr,
+      "eid-adha"
+    );
+    expect(elAr[0].textContent).toContain("عيد أضحى مبارك");
+    cleanupAr();
+  });
+
+  it("resolves occasion-specific text from dictionary config", () => {
+    const configDict = createConfig({
+      bannerTextEn: {
+        ramadan: "Bespoke Ramadan Message",
+        "eid-fitr": "Bespoke Fitr Message",
+        "eid-adha": "Bespoke Adha Message",
+      },
+    });
+
+    const { elements: elRamadan, cleanup: cRamadan } = mountBannerElements(
+      configDict,
+      "ramadan"
+    );
+    expect(elRamadan[0].textContent).toContain("Bespoke Ramadan Message");
+    cRamadan();
+
+    const { elements: elFitr, cleanup: cFitr } = mountBannerElements(
+      configDict,
+      "eid-fitr"
+    );
+    expect(elFitr[0].textContent).toContain("Bespoke Fitr Message");
+    cFitr();
+
+    const { elements: elAdha, cleanup: cAdha } = mountBannerElements(
+      configDict,
+      "eid-adha"
+    );
+    expect(elAdha[0].textContent).toContain("Bespoke Adha Message");
+    cAdha();
   });
 });

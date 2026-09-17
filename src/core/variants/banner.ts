@@ -32,15 +32,30 @@ function extractBannerText(
  *  - `position`        — 'top' | 'bottom' (both/full shows top only for banner)
  */
 
-const RAMADAN_GREETINGS: Record<string, string> = {
-  en: "Ramadan Mubarak - May allah bless you with peace, health, and happiness",
-  ar: "رمضان مبارك - أعاده الله عليكم بالخير واليمن والبركات",
+export const OCCASION_GREETINGS: Record<
+  Occasion,
+  Record<"en" | "ar", string>
+> = {
+  ramadan: {
+    en: "Ramadan Mubarak — May Allah bless you with peace, health, and happiness",
+    ar: "رمضان مبارك — أعاده الله عليكم بالخير واليمن والبركات",
+  },
+  "eid-fitr": {
+    en: "Eid Al-Fitr Mubarak — Wishing you and your loved ones joy, peace, and prosperity",
+    ar: "عيد فطر مبارك — تقبل الله منا ومنكم صالح الأعمال وكل عام وأنتم بخير",
+  },
+  "eid-adha": {
+    en: "Eid Al-Adha Mubarak — Blessed Eid and warmest wishes to you and your family",
+    ar: "عيد أضحى مبارك — تقبل الله منا ومنكم صالح الأعمال وحجاً مبروراً",
+  },
+  none: {
+    en: "Ramadan Mubarak — May Allah bless you with peace, health, and happiness",
+    ar: "رمضان مبارك — أعاده الله عليكم بالخير واليمن والبركات",
+  },
 };
 
-const EID_GREETINGS: Record<string, string> = {
-  en: "Eid Mubarak - May this blessed day bring joy, peace, and prosperity",
-  ar: "عيد مبارك - تقبل الله منا ومنكم صالح الأعمال وكل عام وأنتم بخير",
-};
+export const RAMADAN_GREETINGS = OCCASION_GREETINGS.ramadan;
+export const EID_GREETINGS = OCCASION_GREETINGS["eid-fitr"];
 
 // Lantern-3 SVG paths (viewBox="0 0 54.700001 119.00001"), fill driven by color param
 function buildLanternIcon(color: string): string {
@@ -60,6 +75,24 @@ function buildEidIcon(color: string): string {
   return `<svg viewBox="0 0 36 36" height="32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;display:block">
     <path d="M18 3 C9 3 4 10 4 18 C4 26 9 33 18 33 C12 29 10 24 10 18 C10 12 12 7 18 3 Z" fill="var(--ro-banner-icon, ${color})"/>
     <polygon points="25,12 26.5,16.5 31,16.5 27.5,19 29,23 25,20.5 21,23 22.5,19 19,16.5 23.5,16.5" fill="var(--ro-banner-icon, ${color})"/>
+  </svg>`;
+}
+
+function buildEidFitrIcon(color: string): string {
+  return `<svg viewBox="0 0 36 36" height="34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;display:block">
+    <path d="M18 3 C9 3 4 10 4 18 C4 26 9 33 18 33 C12 29 10 24 10 18 C10 12 12 7 18 3 Z" fill="var(--ro-banner-icon, ${color})"/>
+    <polygon points="26,10 27.2,13.5 31,13.5 28,15.5 29.2,19 26,17 22.8,19 24,15.5 21,13.5 24.8,13.5" fill="var(--ro-banner-icon, ${color})"/>
+    <circle cx="15" cy="11" r="1.4" fill="var(--ro-banner-icon, ${color})" opacity="0.85"/>
+    <circle cx="28" cy="25" r="1.6" fill="var(--ro-banner-icon, ${color})" opacity="0.9"/>
+  </svg>`;
+}
+
+function buildEidAdhaIcon(color: string): string {
+  return `<svg viewBox="0 0 36 36" height="34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;display:block">
+    <path d="M14 4 C7 4 3 10 3 17 C3 24 7 30 14 30 C9 26 8 22 8 17 C8 12 9 8 14 4 Z" fill="var(--ro-banner-icon, ${color})"/>
+    <rect x="18" y="10" width="15" height="15" rx="1.5" fill="var(--ro-banner-icon, ${color})"/>
+    <line x1="18" y1="14" x2="33" y2="14" stroke="#ffffff" stroke-width="1.5" opacity="0.85"/>
+    <rect x="25" y="16" width="3.5" height="7" rx="0.5" fill="#ffffff" opacity="0.75"/>
   </svg>`;
 }
 
@@ -134,12 +167,14 @@ export function mountBannerElements(
   const iconColor = config.bannerIconColor;
   const zIndex = config.zIndex;
   const locale = config.locale ?? "en";
-  const effectiveOccasion: Occasion = occasion ?? "ramadan";
+  const effectiveOccasion: Occasion =
+    occasion === "eid-fitr" || occasion === "eid-adha" || occasion === "ramadan"
+      ? occasion
+      : "ramadan";
   const enText = extractBannerText(config.bannerTextEn, effectiveOccasion);
   const arText = extractBannerText(config.bannerTextAr, effectiveOccasion);
 
-  const isEid = occasion === "eid-fitr" || occasion === "eid-adha";
-  const defaultGreetings = isEid ? EID_GREETINGS : RAMADAN_GREETINGS;
+  const defaultGreetings = OCCASION_GREETINGS[effectiveOccasion];
 
   // Pick locale-matching text first, fall back to the other lang, then built-in default
   const greeting =
@@ -160,7 +195,14 @@ export function mountBannerElements(
     config.position === "both" ||
     config.position === "full";
 
-  const iconSvg = isEid ? buildEidIcon(iconColor) : buildLanternIcon(iconColor);
+  let iconSvg: string;
+  if (effectiveOccasion === "eid-fitr") {
+    iconSvg = buildEidFitrIcon(iconColor);
+  } else if (effectiveOccasion === "eid-adha") {
+    iconSvg = buildEidAdhaIcon(iconColor);
+  } else {
+    iconSvg = buildLanternIcon(iconColor);
+  }
 
   if (showTop) {
     const el = buildBar(
