@@ -250,4 +250,22 @@ describe("HostMount and Overlay Lifecycle", () => {
 
     overlay.destroy();
   });
+
+  it("uses symmetric ease-in-out timing for ro-swing and ro-swing-side to ensure smooth pendulum motion without stoppage", () => {
+    const overlay = init({ variant: "lanterns", previewMode: true });
+    const styles = Array.from(document.querySelectorAll("style"))
+      .map((s) => s.textContent || "")
+      .join("\n");
+
+    // Must use ease-in-out to prevent pause/stoppage at swing extremes
+    expect(styles).toMatch(
+      /\.ro-lantern\{[^}]*animation:ro-swing[^}]*ease-in-out[^}]*infinite alternate/
+    );
+    expect(styles).toMatch(
+      /\.ro-lantern-unit\{[^}]*animation:ro-swing-side[^}]*ease-in-out[^}]*infinite alternate/
+    );
+    expect(styles).not.toContain("cubic-bezier(0.25,1,0.5,1)");
+
+    overlay.destroy();
+  });
 });
