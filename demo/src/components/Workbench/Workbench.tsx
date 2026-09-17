@@ -20,7 +20,6 @@ import { TabStyling } from "./TabStyling";
 import { TabCalendar } from "./TabCalendar";
 import { TabCountdownBanner } from "./TabCountdownBanner";
 import { TabCodeExport } from "./TabCodeExport";
-import { CodeViewer } from "./CodeViewer";
 
 export interface WorkbenchProps {
   t: Translations;
@@ -208,16 +207,6 @@ export const Workbench: React.FC<WorkbenchProps> = ({
               onNextTab={handleNextTab}
             />
           </div>
-        </div>
-
-        {/* Right Column: Code Viewer & Agent Prompt Seam */}
-        <div className="code-column">
-          <CodeViewer
-            t={t}
-            locale={locale}
-            config={config}
-            themeName={themeName}
-          />
         </div>
       </div>
     </section>

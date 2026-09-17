@@ -323,7 +323,12 @@ export const arTranslations: Translations = {
       resetBtn: "استعادة ألوان السمة الافتراضية",
     },
     code: {
-      heading: "4. كود التضمين الفوري",
+      heading: "طريقة التضمين وكود الإنتاج",
+      chooseSetup: "اختر طريقة التضمين والتشغيل",
+      chooseSetupHelp:
+        "حدد إطار العمل أو بيئة التشغيل الخاصة بمشروعك للحصول على كود إنتاج مخصص وجاهز للنسخ:",
+      installCmd: "أمر تثبيت الحزمة عبر npm",
+      installCmdCopied: "✓ تم النسخ!",
       copyBtn: "📋 نسخ الكود",
       copiedBtn: "✓ تم النسخ إلى الحافظة!",
       copyPromptSeamBtn:
@@ -331,6 +336,7 @@ export const arTranslations: Translations = {
       promptSeamCopiedBtn: "✓ تم نسخ مسار الوكيل للحافظة!",
       tabs: {
         react: "React",
+        cdn: "وسم CDN مباشر",
         vanilla: "Vanilla JS",
         vue: "Vue 3",
         svelte: "Svelte",

@@ -360,4 +360,75 @@ describe("Workbench 6-Tab Progress Configurator Seam", () => {
     });
     container.remove();
   });
+
+  it("ensures production integration code is in Tab 6 and not a standalone side column", async () => {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <Workbench
+          t={enTranslations}
+          locale="en"
+          config={initialConfig}
+          themeName="classic"
+          customTheme={defaultThemeDef}
+          onSelectVariant={vi.fn()}
+          onChangePosition={vi.fn()}
+          onChangeTheme={vi.fn()}
+          onUpdateConfig={vi.fn()}
+          onUpdateCustomColor={vi.fn()}
+          onResetCustomColors={vi.fn()}
+          onToggleAutoTrigger={vi.fn()}
+          onToggleCountdown={vi.fn()}
+        />
+      );
+    });
+
+    // 1. Confirm code is NOT rendered in a standalone side column alongside steps
+    expect(container.querySelector(".code-column")).toBeNull();
+
+    // 2. Navigate to Tab 6 (Final Step)
+    const tabButtons = container.querySelectorAll(".ro-config-tab-btn");
+    const codeTab = tabButtons[5] as HTMLButtonElement;
+
+    await act(async () => {
+      codeTab.click();
+    });
+
+    const progressLabel = container.querySelector(".ro-progress-label");
+    expect(progressLabel?.textContent).toContain("Step 6 of 6");
+
+    // 3. Confirm setup target options exist
+    expect(container.textContent).toContain("Choose Your Setup Method");
+    const setupCards = container.querySelectorAll(".setup-target-card");
+    expect(setupCards.length).toBe(7); // React, CDN, Vanilla, Vue, Svelte, Angular, AI
+
+    // 4. Default is React snippet
+    const codeBlock = container.querySelector("pre.code-pre code");
+    expect(codeBlock).toBeTruthy();
+    expect(codeBlock?.textContent).toContain(
+      "import { RamadanOverlay } from 'ramadan-overlay/react'"
+    );
+
+    // 5. Switch to CDN setup
+    const cdnCard = Array.from(setupCards).find((el) =>
+      el.textContent?.includes("CDN")
+    ) as HTMLButtonElement;
+    expect(cdnCard).toBeTruthy();
+
+    await act(async () => {
+      cdnCard.click();
+    });
+
+    expect(codeBlock?.textContent).toContain(
+      "https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/index.global.js"
+    );
+
+    act(() => {
+      root.unmount();
+    });
+    container.remove();
+  });
 });

@@ -322,13 +322,19 @@ export const enTranslations: Translations = {
       resetBtn: "Reset to Classic Palette",
     },
     code: {
-      heading: "4. Production Integration Code",
+      heading: "Production Integration & Setup",
+      chooseSetup: "Choose Your Setup Method",
+      chooseSetupHelp:
+        "Select how you want to integrate the overlay into your application to generate customized production code:",
+      installCmd: "Package Install Command",
+      installCmdCopied: "✓ Copied!",
       copyBtn: "📋 Copy Code",
       copiedBtn: "✓ Copied to clipboard!",
       copyPromptSeamBtn: "📋 Copy Agent Prompt Seam",
       promptSeamCopiedBtn: "✓ Agent Prompt Seam copied!",
       tabs: {
         react: "React",
+        cdn: "HTML / CDN Script",
         vanilla: "Vanilla JS",
         vue: "Vue 3",
         svelte: "Svelte",

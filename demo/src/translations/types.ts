@@ -198,12 +198,17 @@ export interface Translations {
     };
     code: {
       heading: string;
+      chooseSetup: string;
+      chooseSetupHelp: string;
+      installCmd: string;
+      installCmdCopied: string;
       copyBtn: string;
       copiedBtn: string;
       copyPromptSeamBtn: string;
       promptSeamCopiedBtn: string;
       tabs: {
         react: string;
+        cdn: string;
         vanilla: string;
         vue: string;
         svelte: string;

@@ -519,23 +519,25 @@ body {
   color: var(--text-secondary);
 }
 .workbench-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 @media (min-width: 1024px) {
   .workbench-grid {
-    grid-template-columns: 1.2fr 0.8fr;
     height: calc(100vh - 200px);
     height: calc(100dvh - 200px);
-    max-height: 860px;
+    max-height: 880px;
   }
 }
 .ro-controls-column-studio {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   overflow: hidden;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -564,27 +566,17 @@ body {
   gap: 16px;
   min-height: 0;
 }
-.code-column {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+.setup-target-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.code-column .code-viewer-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 0;
+.setup-target-card:hover {
+  border-color: var(--border-gold-glow) !important;
+  background: #c9a84c14 !important;
+  transform: translateY(-1px);
 }
-.code-column .code-box-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-.code-column .code-pre {
-  flex: 1;
-  overflow-y: auto;
-  max-height: none;
+.setup-target-card.active {
+  box-shadow: 0 0 16px #c9a84c2e;
 }
 .ro-config-tabs-container {
   margin-bottom: 14px;
