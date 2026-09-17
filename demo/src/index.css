@@ -283,11 +283,13 @@ body {
 }
 
 .canopy-hero-logo {
-  width: clamp(100px, 14vh, 150px);
-  height: clamp(100px, 14vh, 150px);
+  width: clamp(300px, 42vh, 450px);
+  height: clamp(300px, 42vh, 450px);
+  max-width: min(450px, 85vw);
+  max-height: min(450px, 42vh);
   object-fit: contain;
-  filter: drop-shadow(0 0 28px var(--gold-glow))
-    drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 0 36px var(--gold-glow))
+    drop-shadow(0 12px 28px rgba(0, 0, 0, 0.5));
   transition:
     transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
     filter 0.35s ease;
@@ -299,9 +301,9 @@ body {
 }
 
 .canopy-hero-logo:hover {
-  transform: scale(1.06) translateY(-3px);
-  filter: drop-shadow(0 0 45px var(--gold-glow-strong))
-    drop-shadow(0 12px 28px rgba(0, 0, 0, 0.6));
+  transform: scale(1.04) translateY(-4px);
+  filter: drop-shadow(0 0 65px var(--gold-glow-strong))
+    drop-shadow(0 16px 36px rgba(0, 0, 0, 0.65));
 }
 
 .canopy-hero-logo.clickable:active {
@@ -527,8 +529,8 @@ body {
     padding: 14px clamp(12px, 3vw, 28px);
   }
   .canopy-hero-logo {
-    width: clamp(80px, 12vh, 105px);
-    height: clamp(80px, 12vh, 105px);
+    width: clamp(220px, 32vh, 315px);
+    height: clamp(220px, 32vh, 315px);
   }
   .canopy-title {
     font-size: clamp(1.4rem, 3.2vw, 2rem);
