@@ -1,0 +1,3558 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      ramadan-overlay — Festive Visuals &amp; Iftar Countdown for Modern Web
+    </title>
+    <meta
+      name="description"
+      content="A lightweight, zero-dependency Ramadan &amp; Eid festive overlay library with auto Hijri detection, 8 visual variants, live Iftar countdown widget, and first-class framework support."
+    />
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+
+    <!-- Google Fonts: Cinzel (Monumental Roman/Astronomical), Plus Jakarta Sans (Modern UI), Amiri (Sacred Arabic Calligraphy), JetBrains Mono (Code) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg-void: #05070d;
+        --bg-base: #080c14;
+        --bg-surface: #0f1624;
+        --bg-surface-elevated: #151f33;
+        --bg-surface-translucent: rgba(15, 22, 36, 0.75);
+        --bg-card: rgba(18, 26, 42, 0.65);
+
+        --border-subtle: rgba(201, 168, 76, 0.16);
+        --border-mid: rgba(201, 168, 76, 0.32);
+        --border-active: #c9a84c;
+        --border-dark: rgba(255, 255, 255, 0.08);
+
+        --gold-100: #fef7da;
+        --gold-200: #fceea6;
+        --gold-300: #f7dd6d;
+        --gold-400: #e8c95d;
+        --gold-500: #c9a84c;
+        --gold-600: #9e7f2b;
+        --gold-700: #735a18;
+        --gold-glow: rgba(201, 168, 76, 0.22);
+        --gold-glow-strong: rgba(201, 168, 76, 0.45);
+
+        --emerald-400: #34d399;
+        --emerald-500: #10b981;
+        --lapis-400: #60a5fa;
+        --lapis-500: #3b82f6;
+
+        --text-pure: #ffffff;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #5e6f88;
+
+        --font-display: "Cinzel", Georgia, serif;
+        --font-arabic: "Amiri", "Traditional Arabic", serif;
+        --font-ui: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 18px;
+        --radius-xl: 26px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        background-color: var(--bg-void);
+        color: var(--text-primary);
+        font-family: var(--font-ui);
+      }
+
+      body {
+        min-height: 100vh;
+        background-color: var(--bg-void);
+        background-image:
+          radial-gradient(
+            ellipse 90% 50% at 50% -10%,
+            rgba(201, 168, 76, 0.14) 0%,
+            transparent 65%
+          ),
+          radial-gradient(
+            circle at 10% 30%,
+            rgba(59, 130, 246, 0.05) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 90% 60%,
+            rgba(16, 185, 129, 0.05) 0%,
+            transparent 40%
+          ),
+          url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c9a84c' fill-opacity='0.025' fill-rule='evenodd'%3E%3Cpath d='M0 0h80v80H0V0zm40 40L20 20v40h40V20L40 40zm0-20l14.14 14.14L40 48.28 25.86 34.14 40 20z'/%3E%3C/g%3E%3C/svg%3E");
+        background-attachment: fixed;
+        color: var(--text-primary);
+        overflow-x: hidden;
+      }
+
+      /* ── Navigation ── */
+      .celestial-nav {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 66px;
+        padding: 0 clamp(16px, 4vw, 40px);
+        background: rgba(8, 12, 20, 0.82);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border-subtle);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+      }
+      .nav-crescent-icon {
+        font-size: 1.45rem;
+        filter: drop-shadow(0 0 10px var(--gold-glow));
+        animation: subtleFloat 4s ease-in-out infinite;
+      }
+      .nav-title {
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        background: linear-gradient(135deg, var(--gold-200), var(--gold-500));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .nav-version-badge {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        padding: 2px 7px;
+        border-radius: 20px;
+        border: 1px solid var(--border-subtle);
+        background: rgba(201, 168, 76, 0.08);
+        color: var(--gold-300);
+      }
+
+      .nav-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .nav-btn-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+      }
+      .nav-btn-pill:hover {
+        border-color: var(--gold-400);
+        background: var(--bg-surface-elevated);
+        box-shadow: 0 0 16px var(--gold-glow);
+      }
+      .nav-btn-pill.active {
+        background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+        color: #060911;
+        border-color: var(--gold-300);
+        box-shadow: 0 0 20px var(--gold-glow-strong);
+      }
+      .nav-btn-pill.chime-btn:hover {
+        border-color: var(--emerald-400);
+        box-shadow: 0 0 16px var(--emerald-glow);
+      }
+
+      .audio-wave {
+        display: inline-flex;
+        gap: 2px;
+        align-items: flex-end;
+        height: 12px;
+      }
+      .audio-bar {
+        width: 2.5px;
+        background: var(--gold-400);
+        border-radius: 2px;
+        animation: soundWave 1s ease-in-out infinite alternate;
+      }
+      .audio-bar:nth-child(1) {
+        height: 4px;
+        animation-delay: 0.1s;
+      }
+      .audio-bar:nth-child(2) {
+        height: 10px;
+        animation-delay: 0.25s;
+      }
+      .audio-bar:nth-child(3) {
+        height: 6px;
+        animation-delay: 0.4s;
+      }
+
+      @keyframes soundWave {
+        0% {
+          height: 3px;
+        }
+        100% {
+          height: 12px;
+        }
+      }
+      @keyframes subtleFloat {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-3px) rotate(4deg);
+        }
+      }
+
+      /* ── Canopy Stage (Hero) ── */
+      .canopy-stage {
+        position: relative;
+        text-align: center;
+        padding: 130px clamp(20px, 6vw, 80px) 70px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .canopy-badge-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 30px;
+        background: rgba(201, 168, 76, 0.08);
+        border: 1px solid var(--border-mid);
+        margin-bottom: 24px;
+        font-size: 0.82rem;
+        color: var(--gold-300);
+        letter-spacing: 0.4px;
+        box-shadow: 0 0 20px rgba(201, 168, 76, 0.08);
+      }
+      .canopy-badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--emerald-400);
+        box-shadow: 0 0 8px var(--emerald-400);
+        animation: pulseDot 2s ease-in-out infinite;
+      }
+      @keyframes pulseDot {
+        0%,
+        100% {
+          opacity: 0.4;
+          transform: scale(0.9);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.15);
+        }
+      }
+
+      .canopy-arabic-blessing {
+        font-family: var(--font-arabic);
+        font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+        color: var(--gold-300);
+        opacity: 0.92;
+        margin-bottom: 8px;
+        text-shadow: 0 0 25px rgba(201, 168, 76, 0.4);
+        direction: rtl;
+      }
+
+      .canopy-title {
+        font-family: var(--font-display);
+        font-size: clamp(2.6rem, 6.5vw, 5.2rem);
+        font-weight: 800;
+        line-height: 1.08;
+        letter-spacing: -0.5px;
+        margin-bottom: 18px;
+        background: linear-gradient(
+          135deg,
+          #ffffff 0%,
+          #fef1b8 40%,
+          #c9a84c 85%,
+          #88651c 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 45px rgba(201, 168, 76, 0.25);
+      }
+
+      .canopy-sub {
+        max-width: 680px;
+        margin: 0 auto 36px;
+        font-size: clamp(1rem, 1.3vw, 1.15rem);
+        line-height: 1.7;
+        color: var(--text-secondary);
+        font-weight: 400;
+      }
+
+      /* Quick Package Install Box */
+      .quick-install-box {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(10, 15, 26, 0.88);
+        border: 1px solid var(--border-mid);
+        border-radius: var(--radius-md);
+        padding: 6px 6px 6px 16px;
+        box-shadow:
+          0 10px 30px -10px rgba(0, 0, 0, 0.6),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        gap: 12px;
+        max-width: 90%;
+        margin-bottom: 28px;
+      }
+      .quick-install-code {
+        font-family: var(--font-mono);
+        font-size: 0.88rem;
+        color: var(--gold-300);
+      }
+      .quick-install-copy-btn {
+        padding: 7px 16px;
+        border-radius: 8px;
+        background: rgba(201, 168, 76, 0.15);
+        border: 1px solid var(--border-mid);
+        color: var(--gold-200);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .quick-install-copy-btn:hover {
+        background: var(--gold-500);
+        color: #060911;
+        box-shadow: 0 0 16px var(--gold-glow);
+      }
+
+      .canopy-framework-tags {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 48px;
+      }
+      .framework-chip {
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--border-dark);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-secondary);
+        font-size: 0.76rem;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+      }
+
+      /* ── Signature Element: Curated Atmospheric Presets Deck ── */
+      .presets-deck-wrapper {
+        max-width: 1100px;
+        margin: 0 auto 50px;
+        text-align: left;
+      }
+      .presets-deck-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        padding: 0 4px;
+      }
+      .presets-deck-title {
+        font-family: var(--font-display);
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--gold-300);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .presets-deck-hint {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      .presets-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 12px;
+      }
+      .preset-card {
+        padding: 16px 14px;
+        border-radius: var(--radius-md);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      .preset-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at 50% 0%,
+          var(--gold-glow),
+          transparent 70%
+        );
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .preset-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--gold-400);
+        box-shadow:
+          0 12px 28px -6px rgba(0, 0, 0, 0.7),
+          0 0 20px var(--gold-glow);
+      }
+      .preset-card:hover::before {
+        opacity: 1;
+      }
+      .preset-card.active {
+        border-color: var(--gold-300);
+        background: linear-gradient(
+          180deg,
+          rgba(201, 168, 76, 0.12) 0%,
+          var(--bg-surface) 100%
+        );
+        box-shadow: 0 0 25px var(--gold-glow);
+      }
+      .preset-card-icon {
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+        display: inline-block;
+      }
+      .preset-card-name {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--text-pure);
+        margin-bottom: 4px;
+        letter-spacing: 0.2px;
+      }
+      .preset-card-desc {
+        font-size: 0.72rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
+      }
+
+      /* ── Unified Studio Workbench ── */
+      .workbench-container {
+        max-width: 1100px;
+        margin: 0 auto 60px;
+        padding: 0 clamp(16px, 3vw, 24px);
+      }
+
+      .workbench-shell {
+        background: var(--bg-surface-translucent);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-xl);
+        box-shadow:
+          0 20px 60px -15px rgba(0, 0, 0, 0.8),
+          inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+      }
+
+      /* Workbench Header / Status Bar */
+      .workbench-status-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 16px 24px;
+        background: rgba(8, 12, 20, 0.6);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .state-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.76rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-dark);
+        color: var(--text-secondary);
+      }
+      .state-pill strong {
+        color: var(--gold-300);
+        font-weight: 600;
+      }
+
+      .status-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      /* Workbench Navigation Tabs */
+      .workbench-tabs-nav {
+        display: flex;
+        overflow-x: auto;
+        background: rgba(12, 17, 28, 0.95);
+        border-bottom: 1px solid var(--border-subtle);
+        scrollbar-width: none;
+      }
+      .workbench-tabs-nav::-webkit-scrollbar {
+        display: none;
+      }
+      .workbench-tab-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 22px;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--text-muted);
+        font-family: var(--font-ui);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s;
+      }
+      .workbench-tab-btn:hover {
+        color: var(--text-primary);
+        background: rgba(201, 168, 76, 0.03);
+      }
+      .workbench-tab-btn.active {
+        color: var(--gold-300);
+        border-bottom-color: var(--gold-400);
+        background: rgba(201, 168, 76, 0.06);
+      }
+
+      /* Workbench Tab Pane Content */
+      .workbench-pane {
+        display: none;
+        padding: 28px clamp(18px, 3vw, 36px);
+      }
+      .workbench-pane.active {
+        display: block;
+        animation: fadeInPane 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes fadeInPane {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Grid for Controls */
+      .studio-controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        align-items: flex-start;
+      }
+
+      .control-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .control-field label {
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+      }
+      .control-field .field-hint {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+      }
+
+      /* Custom Modern Form Inputs */
+      select,
+      input[type="text"],
+      input[type="date"],
+      input[type="time"],
+      input[type="number"] {
+        width: 100%;
+        padding: 9px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-dark);
+        background: var(--bg-void);
+        color: var(--text-primary);
+        font-family: var(--font-ui);
+        font-size: 0.88rem;
+        transition: all 0.18s;
+        outline: none;
+      }
+      select:hover,
+      input[type="text"]:hover,
+      input[type="date"]:hover,
+      input[type="time"]:hover,
+      input[type="number"]:hover {
+        border-color: var(--border-subtle);
+      }
+      select:focus,
+      input[type="text"]:focus,
+      input[type="date"]:focus,
+      input[type="time"]:focus,
+      input[type="number"]:focus {
+        border-color: var(--gold-400);
+        box-shadow: 0 0 12px var(--gold-glow);
+      }
+
+      /* Sliders */
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--gold-400);
+        cursor: pointer;
+        padding: 4px 0;
+      }
+
+      /* Checkboxes */
+      .custom-checkbox-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+        user-select: none;
+        padding-top: 8px;
+      }
+      .custom-checkbox-wrap input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--gold-500);
+        cursor: pointer;
+      }
+
+      /* Swatch Grid */
+      .swatches-block {
+        background: rgba(8, 12, 20, 0.45);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 16px 20px;
+        margin-top: 16px;
+      }
+      .swatches-flex {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: flex-end;
+      }
+      .swatch-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+      }
+      .swatch-item span {
+        font-size: 0.68rem;
+        color: var(--text-muted);
+      }
+      input[type="color"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 38px;
+        height: 38px;
+        border: 2px solid var(--border-dark);
+        border-radius: var(--radius-sm);
+        padding: 2px;
+        background: var(--bg-void);
+        cursor: pointer;
+        transition: border-color 0.15s;
+      }
+      input[type="color"]:hover {
+        border-color: var(--gold-400);
+      }
+      input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+      input[type="color"]::-webkit-color-swatch {
+        border: none;
+        border-radius: 4px;
+      }
+
+      /* Reset Button */
+      .btn-secondary-action {
+        padding: 7px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle);
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .btn-secondary-action:hover {
+        border-color: var(--gold-400);
+        color: var(--gold-300);
+      }
+
+      /* Code Panel Section */
+      .code-export-shell {
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--bg-void);
+      }
+      .code-tabs {
+        display: flex;
+        background: rgba(12, 17, 28, 0.95);
+        border-bottom: 1px solid var(--border-subtle);
+        overflow-x: auto;
+      }
+      .code-tab {
+        padding: 10px 18px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        letter-spacing: 0.3px;
+        transition: all 0.15s;
+      }
+      .code-tab:hover {
+        color: var(--text-primary);
+      }
+      .code-tab.active {
+        color: var(--gold-300);
+        border-bottom: 2px solid var(--gold-400);
+        background: rgba(201, 168, 76, 0.05);
+      }
+      .code-box {
+        padding: 20px;
+        font-family: var(--font-mono);
+        font-size: 0.84rem;
+        line-height: 1.7;
+        color: var(--text-primary);
+        white-space: pre;
+        overflow-x: auto;
+        tab-size: 2;
+        background: var(--bg-void);
+        border: none;
+        margin: 0;
+        min-height: 140px;
+      }
+      .code-footer-bar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 10px 16px;
+        background: rgba(15, 22, 36, 0.8);
+        border-top: 1px solid var(--border-subtle);
+      }
+
+      /* Syntax tokens */
+      .tok-key {
+        color: #79c0ff;
+      }
+      .tok-str {
+        color: #a5d6ff;
+      }
+      .tok-num {
+        color: #f2cc60;
+      }
+      .tok-bool {
+        color: #ff7b72;
+      }
+      .tok-cmt {
+        color: #6e7681;
+        font-style: italic;
+      }
+
+      /* Diagnostic Terminal */
+      .diagnostic-terminal {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        background: #04060a;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        color: #7ee787;
+        max-height: 160px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        line-height: 1.6;
+      }
+
+      /* Contact and Footer */
+      .celestial-footer {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+        text-align: center;
+        border-top: 1px solid var(--border-subtle);
+      }
+      .footer-title {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--gold-300);
+        margin-bottom: 6px;
+      }
+      .footer-sub {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+      }
+      .footer-contact-links {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 30px;
+      }
+      .contact-card {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.82rem;
+        transition: all 0.2s;
+      }
+      .contact-card:hover {
+        border-color: var(--gold-400);
+        color: var(--gold-300);
+        transform: translateY(-2px);
+      }
+      .footer-credits {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+      }
+      .footer-credits a {
+        color: var(--gold-400);
+        text-decoration: none;
+      }
+      .footer-credits a:hover {
+        text-decoration: underline;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .canopy-stage {
+          padding-top: 90px;
+        }
+        .canopy-title {
+          font-size: 2.4rem;
+        }
+        .workbench-pane {
+          padding: 20px 14px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ── Celestial App Header ── -->
+    <header class="celestial-nav">
+      <a href="#" class="nav-brand">
+        <span class="nav-crescent-icon">🌙</span>
+        <span class="nav-title">ramadan-overlay</span>
+        <span class="nav-version-badge">v0.1.3</span>
+      </a>
+
+      <div class="nav-controls">
+        <!-- Master Overlay Toggle Switch -->
+        <button
+          class="nav-btn-pill active"
+          id="toggleBtn"
+          title="Toggle overlay visibility"
+        >
+          <span style="font-size: 0.9rem">✨</span>
+          <span>Overlay ON</span>
+        </button>
+
+        <!-- Confetti Trigger -->
+        <button
+          class="nav-btn-pill"
+          id="confettiBtn"
+          title="Trigger celebratory confetti burst"
+        >
+          <span>🎊</span>
+          <span>Confetti</span>
+        </button>
+
+        <!-- Melodic Chime Preview -->
+        <button
+          class="nav-btn-pill chime-btn"
+          id="btnTestChime"
+          title="Listen to built-in Web Audio harmonic alert chime"
+        >
+          <span class="audio-wave">
+            <span class="audio-bar"></span>
+            <span class="audio-bar"></span>
+            <span class="audio-bar"></span>
+          </span>
+          <span>Test Chime</span>
+        </button>
+
+        <!-- GitHub link -->
+        <a
+          href="https://github.com/3mr-5aled/ramadan-overlay"
+          target="_blank"
+          rel="noopener"
+          class="nav-btn-pill"
+          style="border-color: var(--border-dark)"
+        >
+          <span>GitHub ↗</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- ── Canopy Stage (The Architectural Showcase) ── -->
+    <section class="canopy-stage">
+      <div class="canopy-badge-wrap">
+        <span class="canopy-badge-dot"></span>
+        <span>Ramadan 1447 AH &amp; Eid Celebrations</span>
+      </div>
+
+      <div class="canopy-arabic-blessing">
+        شَهْرُ رَمَضَانَ الَّذِي أُنزِلَ فِيهِ الْقُرْآنُ
+      </div>
+      <h1 class="canopy-title">ramadan-overlay</h1>
+      <p class="canopy-sub">
+        A lightweight, framework-agnostic TypeScript library that injects
+        beautiful, culturally authentic Ramadan &amp; Eid decorations into any
+        website. Auto-detects Hijri dates with zero external dependencies.
+      </p>
+
+      <!-- Quick Install Box with Interactive Toast -->
+      <div class="quick-install-box">
+        <span style="color: var(--text-muted)">$</span>
+        <code class="quick-install-code" id="quickInstallCmd"
+          >npm install ramadan-overlay</code
+        >
+        <button class="quick-install-copy-btn" id="quickInstallCopyBtn">
+          Copy
+        </button>
+      </div>
+
+      <!-- Framework Pills -->
+      <div class="canopy-framework-tags">
+        <span class="framework-chip">⚛️ React</span>
+        <span class="framework-chip">💚 Vue 3</span>
+        <span class="framework-chip">🔺 Angular</span>
+        <span class="framework-chip">🧡 Svelte</span>
+        <span class="framework-chip">⚡ Vanilla JS</span>
+        <span class="framework-chip">🌐 Script CDN</span>
+      </div>
+
+      <!-- ── Signature Element: Curated Atmospheric Presets Deck ── -->
+      <div class="presets-deck-wrapper">
+        <div class="presets-deck-header">
+          <div class="presets-deck-title">
+            <span>✨</span>
+            <span>Curated Atmosphere Presets</span>
+          </div>
+          <span class="presets-deck-hint"
+            >Click any preset to instantly morph the overlay</span
+          >
+        </div>
+
+        <div class="presets-grid">
+          <!-- Preset 1: Fanoos Nights -->
+          <div class="preset-card active" data-preset="fanoos">
+            <span class="preset-card-icon">🏮</span>
+            <div class="preset-card-name">Fanoos Nights</div>
+            <div class="preset-card-desc">
+              Handcrafted hanging lanterns with warm golden flame and scalloped
+              rope
+            </div>
+          </div>
+
+          <!-- Preset 2: Laylat Al-Qadr -->
+          <div class="preset-card" data-preset="laylat">
+            <span class="preset-card-icon">🌌</span>
+            <div class="preset-card-name">Laylat Al-Qadr</div>
+            <div class="preset-card-desc">
+              Sublime shimmering sparkles on deep midnight sapphire sky
+            </div>
+          </div>
+
+          <!-- Preset 3: Desert Crescent -->
+          <div class="preset-card" data-preset="crescent">
+            <span class="preset-card-icon">🌙</span>
+            <div class="preset-card-name">Desert Crescent</div>
+            <div class="preset-card-desc">
+              Crescent moons and floating stars with amber desert twilight
+              shadows
+            </div>
+          </div>
+
+          <!-- Preset 4: Arabesque Geometry -->
+          <div class="preset-card" data-preset="geometric">
+            <span class="preset-card-icon">🕌</span>
+            <div class="preset-card-name">Arabesque Stars</div>
+            <div class="preset-card-desc">
+              Sacred Islamic octagonal geometry in lush emerald and gold
+            </div>
+          </div>
+
+          <!-- Preset 5: Eid Celebration -->
+          <div class="preset-card" data-preset="eid">
+            <span class="preset-card-icon">🎊</span>
+            <div class="preset-card-name">Eid Festivities</div>
+            <div class="preset-card-desc">
+              Joyful Eid Al-Fitr balloons, celebratory confetti, and Iftar flare
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Unified Studio Workbench ── -->
+    <main class="workbench-container" id="config">
+      <div class="workbench-shell">
+        <!-- Workbench Top Status Bar -->
+        <div class="workbench-status-bar">
+          <div class="status-left">
+            <div class="state-pill">
+              <span>Calendar Occasion:</span>
+              <strong id="s-occasion">—</strong>
+            </div>
+            <div class="state-pill">
+              <span>Hijri Year:</span>
+              <strong id="s-hijriYear">—</strong>
+            </div>
+            <div class="state-pill">
+              <span>Day:</span>
+              <strong id="s-dayNumber">—</strong>
+            </div>
+            <span id="s-isRamadan" style="display: none">false</span>
+            <span id="s-isEid" style="display: none">false</span>
+          </div>
+
+          <div class="status-actions">
+            <button class="btn-secondary-action" id="shareBtn">
+              🔗 Share Link
+            </button>
+            <button class="btn-secondary-action" id="copyBtn">
+              📋 Copy Code
+            </button>
+          </div>
+        </div>
+
+        <!-- Workbench Tab Navigation -->
+        <nav class="workbench-tabs-nav" aria-label="Studio Configuration Tabs">
+          <button class="workbench-tab-btn active" data-workbench-tab="motif">
+            <span>🎨</span>
+            <span>Motif &amp; Dynamics</span>
+          </button>
+          <button class="workbench-tab-btn" data-workbench-tab="palette">
+            <span>✨</span>
+            <span>Palette &amp; Glow</span>
+          </button>
+          <button class="workbench-tab-btn" data-workbench-tab="countdown">
+            <span>🌙</span>
+            <span>Iftar Countdown</span>
+          </button>
+          <button class="workbench-tab-btn" data-workbench-tab="safety">
+            <span>🛡️</span>
+            <span>Safety &amp; Dates</span>
+          </button>
+          <button class="workbench-tab-btn" data-workbench-tab="export">
+            <span>⚡</span>
+            <span>Code &amp; AI Export</span>
+          </button>
+        </nav>
+
+        <!-- ── TAB 1: Motif & Dynamics ── -->
+        <div class="workbench-pane active" id="pane-motif">
+          <div class="studio-controls-grid">
+            <div class="control-field">
+              <label for="variantSelect">Visual Variant</label>
+              <select id="variantSelect">
+                <option value="lanterns" selected>Lanterns (Fanoos)</option>
+                <option value="sparkles">Sparkles</option>
+                <option value="crescent-stars">Crescent &amp; Stars</option>
+                <option value="geometric">Geometric (Arabesque)</option>
+                <option value="eid">Eid (Auto: Fitr / Adha)</option>
+                <option value="eid-fitr">
+                  Eid Al-Fitr (Balloons &amp; Gifts)
+                </option>
+                <option value="eid-adha">
+                  Eid Al-Adha (Sheep &amp; Crescents)
+                </option>
+                <option value="banner">Banner (Greeting Header)</option>
+              </select>
+              <span class="field-hint">Primary decorative theme</span>
+            </div>
+
+            <div
+              class="control-field"
+              id="bannerOccasionGroup"
+              style="display: none"
+            >
+              <label for="bannerOccasionSelect">Banner Occasion Greeting</label>
+              <select id="bannerOccasionSelect">
+                <option value="ramadan" selected>Ramadan Mubarak</option>
+                <option value="eid-fitr">Eid Al-Fitr Mubarak</option>
+                <option value="eid-adha">Eid Al-Adha Mubarak</option>
+              </select>
+              <span class="field-hint"
+                >Greeting header &amp; icon by occasion</span
+              >
+            </div>
+
+            <div class="control-field">
+              <label for="occasionsSelect">Occasion Triggers</label>
+              <select id="occasionsSelect">
+                <option value="all" selected>All (Ramadan + Eids)</option>
+                <option value="ramadan">Ramadan Only</option>
+                <option value="eid">Eids Only</option>
+                <option value="eid-fitr">Eid Al-Fitr Only</option>
+                <option value="eid-adha">Eid Al-Adha Only</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="positionSelect">Viewport Placement</label>
+              <select id="positionSelect">
+                <option value="both" selected>Both (Top &amp; Bottom)</option>
+                <option value="top">Top Ceiling</option>
+                <option value="bottom">Bottom Margin</option>
+                <option value="left">Left Margin</option>
+                <option value="right">Right Margin</option>
+                <option value="sides">Both Sides (Margins)</option>
+                <option value="full">Full Screen Dispersion</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="ropeStyleGroup">
+              <label for="ropeStyleSelect">Ceiling Suspension Style</label>
+              <select id="ropeStyleSelect">
+                <option value="straight" selected>Straight Ceiling Wire</option>
+                <option value="u-shaped">Scalloped Catenary Curves</option>
+                <option value="dual">Dual Suspended Ropes</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="ropeSagGroup">
+              <label for="ropeSagRange">
+                Rope Sag:
+                <span id="ropeSagVal" style="color: var(--gold-300)">20px</span>
+              </label>
+              <input
+                type="range"
+                id="ropeSagRange"
+                min="6"
+                max="60"
+                step="2"
+                value="20"
+              />
+            </div>
+
+            <div class="control-field" id="lanternStyleGroup">
+              <label for="lanternStyleSelect">Lantern Motif Style</label>
+              <select id="lanternStyleSelect">
+                <option value="0" selected>Cycle All 12 Styles</option>
+                <option value="1">Style 1 (Traditional)</option>
+                <option value="2">Style 2 (Octagonal)</option>
+                <option value="3">Style 3 (Minaret)</option>
+                <option value="4">Style 4 (Jeweled)</option>
+                <option value="5">Style 5 (Filigree)</option>
+                <option value="6">Style 6 (Hexagonal)</option>
+                <option value="7">Style 7 (Moroccan)</option>
+                <option value="8">Style 8 (Crescent Top)</option>
+                <option value="9">Style 9 (Palace)</option>
+                <option value="10">Style 10 (Ottoman)</option>
+                <option value="11">Style 11 (Khyameya)</option>
+                <option value="12">Style 12 (Modern Slim)</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="eidVariantGroup">
+              <label for="eidVariantSelect">Eid Variant Style</label>
+              <select id="eidVariantSelect">
+                <option value="eid" selected>Auto (Fitr / Adha)</option>
+                <option value="eid-fitr">
+                  Eid Al-Fitr (Balloons &amp; Gifts)
+                </option>
+                <option value="eid-adha">
+                  Eid Al-Adha (Sheep &amp; Crescents)
+                </option>
+                <option value="lanterns">Lanterns</option>
+                <option value="sparkles">Sparkles</option>
+                <option value="crescent-stars">Crescent &amp; Stars</option>
+                <option value="geometric">Geometric</option>
+              </select>
+            </div>
+
+            <div
+              class="control-field"
+              id="clearanceGroup"
+              style="display: none"
+            >
+              <label for="clearanceSelect">Motif Safe Clearance</label>
+              <select id="clearanceSelect">
+                <option value="edges" selected>
+                  Edges (Protected Safe Zone)
+                </option>
+                <option value="full">Full Viewport Scatter</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="layerGroup">
+              <label for="layerSelect">Layer Stacking Depth</label>
+              <select id="layerSelect">
+                <option value="foreground" selected>
+                  Foreground (Overlay on top)
+                </option>
+                <option value="background">Background (Behind content)</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="densitySelect">Motif Quantity</label>
+              <select id="densitySelect">
+                <option value="auto" selected>
+                  Auto (Responsive to screen)
+                </option>
+                <option value="low">Low (Minimal &amp; Quiet)</option>
+                <option value="normal">Normal</option>
+                <option value="high">High (Festive Rich)</option>
+              </select>
+            </div>
+
+            <div
+              class="control-field"
+              id="intensityGroup"
+              style="display: none"
+            >
+              <label for="intensityRange">
+                Shape Intensity:
+                <span id="intensityVal" style="color: var(--gold-300)">5</span>
+              </label>
+              <input
+                type="range"
+                id="intensityRange"
+                min="1"
+                max="10"
+                step="1"
+                value="5"
+              />
+              <span class="field-hint"
+                >Ascent speed &amp; shape count (1–10)</span
+              >
+            </div>
+
+            <div class="control-field">
+              <label for="zIndexInput">Layer Z-Index</label>
+              <input
+                type="number"
+                id="zIndexInput"
+                value="9999"
+                min="0"
+                max="2147483647"
+              />
+            </div>
+
+            <div class="control-field" style="justify-content: flex-end">
+              <label class="custom-checkbox-wrap">
+                <input type="checkbox" id="liveTransitionCheckbox" checked />
+                <span>Midnight Auto-Transition</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── TAB 2: Palette & Glow ── -->
+        <div class="workbench-pane" id="pane-palette">
+          <div class="studio-controls-grid">
+            <div class="control-field">
+              <label for="themeSelect">Harmonious Theme Preset</label>
+              <select id="themeSelect">
+                <option value="classic" selected>Classic Imperial Gold</option>
+                <option value="midnight">Midnight Sapphire</option>
+                <option value="emerald">Emerald Oasis &amp; Gold</option>
+                <option value="royal">Royal Amethyst &amp; Amber</option>
+                <option value="desert-dusk">Desert Dusk Twilight</option>
+                <option value="platinum-minimal">Platinum Minimal Slate</option>
+                <option value="rose-sahara">Rose Sahara Sand</option>
+                <option value="custom">Custom Artisanal Palette</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="shadowsSelect">Elevation Shadows</label>
+              <select id="shadowsSelect">
+                <option value="soft" selected>Soft Atmospheric Drop</option>
+                <option value="deep">Deep Dramatic Shadow</option>
+                <option value="none">Flat (No Drop Shadows)</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="opacityRange">
+                Overlay Opacity:
+                <span id="opacityVal" style="color: var(--gold-300)">0.85</span>
+              </label>
+              <input
+                type="range"
+                id="opacityRange"
+                min="0.1"
+                max="1"
+                step="0.05"
+                value="0.85"
+              />
+            </div>
+
+            <div class="control-field">
+              <label for="confettiSelect">Festive Confetti</label>
+              <select id="confettiSelect">
+                <option value="on" selected>🎊 Enabled on Occasion</option>
+                <option value="off">Disabled</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="localeSelect">Greeting Language</label>
+              <select id="localeSelect">
+                <option value="en" selected>English (en)</option>
+                <option value="ar">Arabic (العربية)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Color Swatches: Lanterns -->
+          <div class="swatches-block" id="lanternColorPanel">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+              "
+            >
+              <span
+                style="
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  color: var(--gold-300);
+                  text-transform: uppercase;
+                "
+                >Lantern Swatches (1–12)</span
+              >
+              <button class="btn-secondary-action" id="resetColorsBtn">
+                Reset Defaults
+              </button>
+            </div>
+
+            <div class="swatches-flex">
+              <div class="swatch-item">
+                <input type="color" id="lc1" value="#c9a84c" /><span>L1</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc2" value="#e8c96b" /><span>L2</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc3" value="#8b4513" /><span>L3</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc4" value="#2d5a27" /><span>L4</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc5" value="#4a8a3a" /><span>L5</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc6" value="#8b1a1a" /><span>L6</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc7" value="#cc4444" /><span>L7</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc8" value="#1a3a6b" /><span>L8</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc9" value="#3a6ab8" /><span>L9</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc10" value="#6b2fa0" /><span>L10</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc11" value="#c44d8a" /><span>L11</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc12" value="#1a7a6b" /><span>L12</span>
+              </div>
+
+              <div
+                style="
+                  width: 1px;
+                  height: 38px;
+                  background: var(--border-subtle);
+                  margin: 0 4px;
+                "
+              ></div>
+
+              <div class="swatch-item">
+                <input type="color" id="ceilingColor" value="#c9a84c" /><span
+                  >Ceiling</span
+                >
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="ropeColor" value="#c9a84c" /><span
+                  >Rope</span
+                >
+              </div>
+              <div class="swatch-item">
+                <input
+                  type="color"
+                  id="glowColorLantern"
+                  value="#c9a84c"
+                /><span>Flame</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Color Swatches: Generic (Sparkles, Crescent, Geometric) -->
+          <div
+            class="swatches-block"
+            id="genericColorPanel"
+            style="display: none"
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+              "
+            >
+              <span
+                style="
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  color: var(--gold-300);
+                  text-transform: uppercase;
+                "
+                >Motif Color Palette</span
+              >
+              <button class="btn-secondary-action" id="resetColorsGenericBtn">
+                Reset Defaults
+              </button>
+            </div>
+            <div class="swatches-flex">
+              <div class="swatch-item">
+                <input type="color" id="gc1" value="#c9a84c" /><span>C1</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="gc2" value="#e8c96b" /><span>C2</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="gc3" value="#8b4513" /><span>C3</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="gc4" value="#2d5a27" /><span>C4</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="gc5" value="#1a3a1a" /><span>C5</span>
+              </div>
+              <div
+                style="
+                  width: 1px;
+                  height: 38px;
+                  background: var(--border-subtle);
+                  margin: 0 4px;
+                "
+              ></div>
+              <div class="swatch-item">
+                <input
+                  type="color"
+                  id="glowColorGeneric"
+                  value="#c9a84c"
+                /><span>Ambient Glow</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Color Swatches: Banner Variant -->
+          <div
+            class="swatches-block"
+            id="bannerColorPanel"
+            style="display: none"
+          >
+            <div style="margin-bottom: 12px">
+              <span
+                style="
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  color: var(--gold-300);
+                  text-transform: uppercase;
+                "
+                >Banner Appearance &amp; Copy</span
+              >
+            </div>
+            <div class="swatches-flex" style="margin-bottom: 16px">
+              <div class="swatch-item">
+                <input type="color" id="bannerBgColor" value="#0f0f14" /><span
+                  >Background</span
+                >
+              </div>
+              <div class="swatch-item">
+                <input
+                  type="color"
+                  id="bannerTextColorInput"
+                  value="#c9a84c"
+                /><span>Text Color</span>
+              </div>
+              <div class="swatch-item">
+                <input
+                  type="color"
+                  id="bannerIconColorInput"
+                  value="#c9a84c"
+                /><span>Icon Accent</span>
+              </div>
+            </div>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px"
+            >
+              <div class="control-field">
+                <label for="bannerTextEn">English Custom Greeting</label>
+                <input
+                  type="text"
+                  id="bannerTextEn"
+                  placeholder="Ramadan Mubarak! May peace and blessings..."
+                />
+              </div>
+              <div class="control-field">
+                <label for="bannerTextAr">Arabic Custom Greeting</label>
+                <input
+                  type="text"
+                  id="bannerTextAr"
+                  dir="rtl"
+                  placeholder="رمضان مبارك وكل عام وأنتم بخير"
+                />
+              </div>
+            </div>
+            <div
+              style="display: flex; justify-content: flex-end; margin-top: 12px"
+            >
+              <button class="nav-btn-pill active" id="bannerApplyBtn">
+                Apply Banner Copy
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── TAB 3: Iftar Countdown ── -->
+        <div class="workbench-pane" id="pane-countdown">
+          <div class="studio-controls-grid">
+            <div class="control-field">
+              <label for="countdownSelect">Countdown Target Mode</label>
+              <select id="countdownSelect">
+                <option value="off" selected>Disabled</option>
+                <option value="auto">Auto Maghrib (18:15)</option>
+                <option value="custom">Custom Iftar Time</option>
+                <option value="1min">⏱️ Quick 1-Min Demo (+60s)</option>
+                <option value="demo-alert">Celebration Flare (+10s)</option>
+              </select>
+            </div>
+
+            <div
+              class="control-field"
+              id="countdownIftarTimeGroup"
+              style="display: none"
+            >
+              <label for="countdownIftarTime">Iftar Maghrib Time (HH:mm)</label>
+              <input type="time" id="countdownIftarTime" value="18:15" />
+            </div>
+
+            <div class="control-field" id="countdownPosGroup">
+              <label for="countdownPosSelect">Floating Card Placement</label>
+              <select id="countdownPosSelect">
+                <option value="bottom-right" selected>Bottom Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="top-left">Top Left</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="countdownAudioGroup">
+              <label for="countdownAudioSelect">Initial Audio State</label>
+              <select id="countdownAudioSelect">
+                <option value="muted" selected>
+                  Muted by Default (Browser Compliant)
+                </option>
+                <option value="unmuted">Unmuted (Audible)</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="countdownSoundSelect">Chime Alert Audio</label>
+              <select id="countdownSoundSelect">
+                <option value="default" selected>
+                  Web Audio Harmonic Chime (Offline)
+                </option>
+                <option value="custom">Custom Audio URL...</option>
+                <option value="none">Disabled (No Audio Alert)</option>
+              </select>
+            </div>
+
+            <div
+              class="control-field"
+              id="countdownSoundUrlGroup"
+              style="display: none"
+            >
+              <label for="countdownSoundUrlInput">Custom MP3 Audio URL</label>
+              <input
+                type="text"
+                id="countdownSoundUrlInput"
+                placeholder="https://example.com/audio/iftar.mp3"
+              />
+            </div>
+
+            <div class="control-field">
+              <label for="countdownAlertWindowMinutes">Alert Window</label>
+              <select id="countdownAlertWindowMinutes">
+                <option value="30" selected>30 Minutes Prior</option>
+                <option value="15">15 Minutes Prior</option>
+                <option value="60">60 Minutes Prior</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="countdownAutoDismissMinutes"
+                >Celebration Auto-Dismiss</label
+              >
+              <select id="countdownAutoDismissMinutes">
+                <option value="10" selected>10 Minutes After</option>
+                <option value="5">5 Minutes After</option>
+                <option value="30">30 Minutes After</option>
+              </select>
+            </div>
+
+            <div class="control-field" style="justify-content: flex-end">
+              <label class="custom-checkbox-wrap">
+                <input type="checkbox" id="countdownMinimizable" checked />
+                <span>Allow Card Minimization</span>
+              </label>
+            </div>
+
+            <div class="control-field" style="justify-content: flex-end">
+              <label class="custom-checkbox-wrap">
+                <input type="checkbox" id="countdownInitiallyMinimized" />
+                <span>Mount Initially Minimized</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Controller Seams Testing Row -->
+          <div
+            style="
+              margin-top: 24px;
+              padding-top: 16px;
+              border-top: 1px solid var(--border-subtle);
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              flex-wrap: wrap;
+              gap: 12px;
+            "
+          >
+            <div style="display: flex; gap: 8px; align-items: center">
+              <button
+                class="nav-btn-pill"
+                id="btnCountdown1Min"
+                style="border-color: var(--gold-400); color: var(--gold-300)"
+              >
+                ⏱️ Quick 1-Min Test
+              </button>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                flex-wrap: wrap;
+              "
+            >
+              <span
+                style="
+                  font-size: 0.72rem;
+                  color: var(--text-muted);
+                  text-transform: uppercase;
+                "
+                >Controller API:</span
+              >
+              <button class="btn-secondary-action" id="btnCtrlMinimize">
+                🔽 Minimize
+              </button>
+              <button class="btn-secondary-action" id="btnCtrlExpand">
+                🔼 Expand
+              </button>
+              <button class="btn-secondary-action" id="btnCtrlDismiss">
+                ✕ Dismiss
+              </button>
+              <button class="btn-secondary-action" id="btnCtrlShow">
+                👁️ Show
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── TAB 4: Safety & Dates ── -->
+        <div class="workbench-pane" id="pane-safety">
+          <div class="studio-controls-grid">
+            <div class="control-field">
+              <label for="calendarModeSelect">Calendar Detection Mode</label>
+              <select id="calendarModeSelect">
+                <option value="auto">Auto-detect (Current Date)</option>
+                <option value="preview" selected>
+                  Preview Mode (Force Display)
+                </option>
+                <option value="simulate">Simulate Calendar Date</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="simDateGroup" style="display: none">
+              <label for="simulatedDatePicker">Simulated Calendar Date</label>
+              <input type="date" id="simulatedDatePicker" value="2026-02-25" />
+            </div>
+
+            <div
+              class="control-field"
+              id="simPresetGroup"
+              style="display: none"
+            >
+              <label for="occasionPreviewSelect">Hijri 1447 AH Presets</label>
+              <select id="occasionPreviewSelect">
+                <option value="ramadan" selected>
+                  Ramadan 1447 (Feb 25, 2026)
+                </option>
+                <option value="eid-fitr">
+                  Eid Al-Fitr 1447 (Mar 21, 2026)
+                </option>
+                <option value="eid-adha">
+                  Eid Al-Adha 1447 (May 28, 2026)
+                </option>
+                <option value="none">Normal Non-Festive Day</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="regionSelect">Regional Sighting Authority</label>
+              <select id="regionSelect">
+                <option value="standard" selected>
+                  Standard (Umm al-Qura)
+                </option>
+                <option value="saudi">Saudi Arabia</option>
+                <option value="uae">United Arab Emirates</option>
+                <option value="malaysia">Malaysia</option>
+                <option value="egypt">Egypt (+1 day)</option>
+                <option value="turkey">Turkey (+1 day)</option>
+                <option value="pakistan">Pakistan (+1 day)</option>
+                <option value="indonesia">Indonesia (+1 day)</option>
+                <option value="morocco">Morocco (+1 day)</option>
+                <option value="us">USA / ISNA (+1 day)</option>
+                <option value="uk">United Kingdom (+1 day)</option>
+                <option value="custom">Custom Offset…</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="hijriAdjGroup" style="display: none">
+              <label for="hijriAdjustment">Hijri Day Offset (-3 to +3)</label>
+              <input
+                type="number"
+                id="hijriAdjustment"
+                value="0"
+                min="-3"
+                max="3"
+                step="1"
+              />
+            </div>
+
+            <div
+              class="control-field"
+              id="mobileSideGroup"
+              style="display: none"
+            >
+              <label for="mobileSideBehaviorSelect"
+                >Mobile Viewport Sides</label
+              >
+              <select id="mobileSideBehaviorSelect">
+                <option value="hide" selected>
+                  Hide on Mobile (&lt;768px)
+                </option>
+                <option value="show">Show on Mobile</option>
+                <option value="minimal">Minimal (Fewer Motifs)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Error Containment Sandbox -->
+          <div
+            style="
+              margin-top: 24px;
+              padding-top: 16px;
+              border-top: 1px solid var(--border-subtle);
+            "
+          >
+            <div
+              style="
+                font-size: 0.8rem;
+                font-weight: 700;
+                color: var(--gold-300);
+                text-transform: uppercase;
+                margin-bottom: 8px;
+              "
+            >
+              🛡️ Zero-Crash Error Containment Boundary
+            </div>
+            <p
+              style="
+                font-size: 0.78rem;
+                color: var(--text-muted);
+                margin-bottom: 14px;
+              "
+            >
+              Test how the library gracefully contains errors, safely clamps
+              out-of-bounds configurations, isolates customer telemetry
+              callbacks, and logs diagnostics without crashing the host
+              application.
+            </p>
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-bottom: 14px;
+              "
+            >
+              <button class="btn-secondary-action" id="btnTestClamping">
+                Clamp Extreme Config
+              </button>
+              <button class="btn-secondary-action" id="btnTestInvalidDate">
+                Test Invalid Date (NaN)
+              </button>
+              <button class="btn-secondary-action" id="btnTestCrash">
+                Trigger Mount Crash &amp; Rollback
+              </button>
+              <button class="btn-secondary-action" id="btnTestOnError">
+                Test Telemetry onError
+              </button>
+              <button class="btn-secondary-action" id="btnToggleDebug">
+                Toggle Debug (ON)
+              </button>
+            </div>
+            <div class="diagnostic-terminal" id="safetyConsole">
+              [ramadan-overlay] Ready. Diagnostic logs and safety verification
+              results stream here...
+            </div>
+          </div>
+        </div>
+
+        <!-- ── TAB 5: Code & AI Export ── -->
+        <div class="workbench-pane" id="pane-export">
+          <div class="code-export-shell">
+            <div class="code-tabs">
+              <button class="code-tab active" data-tab="esm">ESM Module</button>
+              <button class="code-tab" data-tab="react">React Component</button>
+              <button class="code-tab" data-tab="vue">Vue 3 Adapter</button>
+              <button class="code-tab" data-tab="angular">
+                Angular Directive
+              </button>
+              <button class="code-tab" data-tab="svelte">Svelte Action</button>
+              <button class="code-tab" data-tab="cdn">Script Tag (CDN)</button>
+              <button class="code-tab" data-tab="ai">🤖 AI Agent Prompt</button>
+            </div>
+
+            <pre class="code-box" id="codeBox"></pre>
+
+            <div class="code-footer-bar">
+              <span
+                style="
+                  font-size: 0.72rem;
+                  color: var(--text-muted);
+                  margin-right: auto;
+                "
+              >
+                Synchronized live with all workbench controls
+              </span>
+              <button class="nav-btn-pill active" id="codeCopyFooterBtn">
+                📋 Copy Code Snippet
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ── Developer Credits & Social Footer ── -->
+    <footer class="celestial-footer">
+      <div class="footer-title">ramadan-overlay</div>
+      <p class="footer-sub">
+        Handcrafted with care for the global Muslim community and web developers
+        everywhere.
+      </p>
+
+      <div class="footer-contact-links">
+        <a
+          href="https://github.com/3mr-5aled/"
+          class="contact-card"
+          target="_blank"
+          rel="noopener"
+        >
+          <span>GitHub: @3mr-5aled</span>
+        </a>
+        <a
+          href="https://www.linkedin.com/in/3mr5aled/"
+          class="contact-card"
+          target="_blank"
+          rel="noopener"
+        >
+          <span>LinkedIn: Amr Khaled</span>
+        </a>
+        <a href="mailto:3mr5aled.contact@gmail.com" class="contact-card">
+          <span>Email: 3mr5aled.contact@gmail.com</span>
+        </a>
+        <a
+          href="https://www.npmjs.com/package/ramadan-overlay"
+          class="contact-card"
+          target="_blank"
+          rel="noopener"
+        >
+          <span>npm: ramadan-overlay</span>
+        </a>
+      </div>
+
+      <div class="footer-credits">
+        Released under the
+        <a
+          href="https://github.com/3mr-5aled/ramadan-overlay/blob/main/LICENSE"
+          target="_blank"
+          rel="noopener"
+          >MIT License</a
+        >. Zero dependencies · Accessible · Responsive
+      </div>
+    </footer>
+
+    <!-- ── Application Script ── -->
+    <script>
+      function initApp() {
+        const { init, getRamadanState, getOccasionState } = RamadanOverlay;
+
+        let currentInstance = null;
+        let overlayOn = true;
+
+        const DEFAULT_LANTERN_COLORS = [
+          "#c9a84c",
+          "#e8c96b",
+          "#8b4513",
+          "#2d5a27",
+          "#4a8a3a",
+          "#8b1a1a",
+          "#cc4444",
+          "#1a3a6b",
+          "#3a6ab8",
+          "#6b2fa0",
+          "#c44d8a",
+          "#1a7a6b",
+        ];
+        const DEFAULT_GLOW_COLOR = "#c9a84c";
+        const DEFAULT_CEILING_COLOR = "#c9a84c";
+        const DEFAULT_ROPE_COLOR = "#c9a84c";
+        const DEFAULT_GENERIC_COLORS = [
+          "#c9a84c",
+          "#e8c96b",
+          "#8b4513",
+          "#2d5a27",
+          "#1a3a1a",
+        ];
+
+        const THEME_PALETTES = {
+          classic: {
+            colors: [
+              "#c9a84c",
+              "#e5c158",
+              "#8b4513",
+              "#2d5a27",
+              "#fff7cc",
+              "#1a3a1a",
+            ],
+            glowColor: "#c9a84c",
+            ceilingColor: "#8b4513",
+            ropeColor: "#c9a84c",
+            bannerBg: "#181308",
+            bannerTextColor: "#fae17d",
+            bannerIconColor: "#e5c158",
+          },
+          midnight: {
+            colors: [
+              "#fbbf24",
+              "#e2e8f0",
+              "#38bdf8",
+              "#6366f1",
+              "#f8fafc",
+              "#1e293b",
+            ],
+            glowColor: "#38bdf8",
+            ceilingColor: "#1e293b",
+            ropeColor: "#64748b",
+            bannerBg: "#0f172a",
+            bannerTextColor: "#f8fafc",
+            bannerIconColor: "#fbbf24",
+          },
+          emerald: {
+            colors: [
+              "#f59e0b",
+              "#10b981",
+              "#059669",
+              "#064e3b",
+              "#fde68a",
+              "#022c22",
+            ],
+            glowColor: "#10b981",
+            ceilingColor: "#064e3b",
+            ropeColor: "#059669",
+            bannerBg: "#022c22",
+            bannerTextColor: "#fef3c7",
+            bannerIconColor: "#f59e0b",
+          },
+          royal: {
+            colors: [
+              "#fcd34d",
+              "#a78bfa",
+              "#7c3aed",
+              "#4c1d95",
+              "#fef08a",
+              "#2e1065",
+            ],
+            glowColor: "#a78bfa",
+            ceilingColor: "#4c1d95",
+            ropeColor: "#8b5cf6",
+            bannerBg: "#1e0b40",
+            bannerTextColor: "#fef08a",
+            bannerIconColor: "#fcd34d",
+          },
+          "desert-dusk": {
+            colors: [
+              "#f97316",
+              "#fde047",
+              "#ea580c",
+              "#c2410c",
+              "#fed7aa",
+              "#7c2d12",
+            ],
+            glowColor: "#f97316",
+            ceilingColor: "#7c2d12",
+            ropeColor: "#c2410c",
+            bannerBg: "#2b0e05",
+            bannerTextColor: "#fef3c7",
+            bannerIconColor: "#f97316",
+          },
+          "platinum-minimal": {
+            colors: [
+              "#e2e8f0",
+              "#94a3b8",
+              "#cbd5e1",
+              "#64748b",
+              "#f8fafc",
+              "#334155",
+            ],
+            glowColor: "#e2e8f0",
+            ceilingColor: "#475569",
+            ropeColor: "#94a3b8",
+            bannerBg: "#0f172a",
+            bannerTextColor: "#f8fafc",
+            bannerIconColor: "#e2e8f0",
+          },
+          "rose-sahara": {
+            colors: [
+              "#fb7185",
+              "#f43f5e",
+              "#fda4af",
+              "#e11d48",
+              "#fff1f2",
+              "#be123c",
+            ],
+            glowColor: "#fb7185",
+            ceilingColor: "#881337",
+            ropeColor: "#e11d48",
+            bannerBg: "#280a14",
+            bannerTextColor: "#fff1f2",
+            bannerIconColor: "#fb7185",
+          },
+        };
+
+        function applyThemeToSwatches(themeKey) {
+          const t = THEME_PALETTES[themeKey];
+          if (!t) return;
+          for (let i = 1; i <= 12; i++) {
+            const el = document.getElementById("lc" + i);
+            if (el) el.value = t.colors[(i - 1) % t.colors.length];
+          }
+          for (let i = 1; i <= 5; i++) {
+            const el = document.getElementById("gc" + i);
+            if (el) el.value = t.colors[(i - 1) % t.colors.length];
+          }
+          const cEl = document.getElementById("ceilingColor");
+          if (cEl) cEl.value = t.ceilingColor;
+          const rEl = document.getElementById("ropeColor");
+          if (rEl) rEl.value = t.ropeColor;
+          const glEl = document.getElementById("glowColorLantern");
+          if (glEl) glEl.value = t.glowColor;
+          const ggEl = document.getElementById("glowColorGeneric");
+          if (ggEl) ggEl.value = t.glowColor;
+          const bBg = document.getElementById("bannerBgColor");
+          if (bBg) bBg.value = t.bannerBg;
+          const bTxt = document.getElementById("bannerTextColorInput");
+          if (bTxt) bTxt.value = t.bannerTextColor;
+          const bIco = document.getElementById("bannerIconColorInput");
+          if (bIco) bIco.value = t.bannerIconColor;
+        }
+
+        function getGlowColor() {
+          const isLanterns =
+            document.getElementById("variantSelect").value === "lanterns";
+          return isLanterns
+            ? document.getElementById("glowColorLantern").value
+            : document.getElementById("glowColorGeneric").value;
+        }
+
+        function getColors() {
+          const isLanterns =
+            document.getElementById("variantSelect").value === "lanterns";
+          if (isLanterns) {
+            return Array.from(
+              { length: 12 },
+              (_, i) => document.getElementById("lc" + (i + 1)).value
+            );
+          }
+          return [1, 2, 3, 4, 5].map(
+            (i) => document.getElementById("gc" + i).value
+          );
+        }
+
+        function syncColorPanels() {
+          const variant = document.getElementById("variantSelect").value;
+          const isLanterns = variant === "lanterns";
+          const isBanner = variant === "banner";
+          const isMotif = [
+            "crescent-stars",
+            "eid",
+            "eid-fitr",
+            "eid-adha",
+          ].includes(variant);
+
+          document.getElementById("lanternColorPanel").style.display =
+            isLanterns ? "" : "none";
+          document.getElementById("genericColorPanel").style.display =
+            !isLanterns && !isBanner ? "" : "none";
+          document.getElementById("bannerColorPanel").style.display = isBanner
+            ? ""
+            : "none";
+          const bannerOccEl = document.getElementById("bannerOccasionGroup");
+          if (bannerOccEl) bannerOccEl.style.display = isBanner ? "" : "none";
+
+          const isFlyingShapes = [
+            "crescent-stars",
+            "sparkles",
+            "eid",
+            "eid-fitr",
+            "eid-adha",
+          ].includes(variant);
+          const intensityGroup = document.getElementById("intensityGroup");
+          if (intensityGroup)
+            intensityGroup.style.display = isFlyingShapes ? "" : "none";
+
+          document.getElementById("lanternStyleGroup").style.display =
+            isLanterns ? "" : "none";
+          const ropeStyleEl = document.getElementById("ropeStyleGroup");
+          if (ropeStyleEl) ropeStyleEl.style.display = isLanterns ? "" : "none";
+
+          const ropeSagEl = document.getElementById("ropeSagGroup");
+          const rStyleVal = document.getElementById("ropeStyleSelect")?.value;
+          if (ropeSagEl) {
+            ropeSagEl.style.display =
+              isLanterns && rStyleVal !== "straight" ? "" : "none";
+          }
+
+          const clearanceGroup = document.getElementById("clearanceGroup");
+          if (clearanceGroup)
+            clearanceGroup.style.display = isMotif ? "" : "none";
+
+          const posVal = document.getElementById("positionSelect")?.value;
+          const mobSideEl = document.getElementById("mobileSideGroup");
+          if (mobSideEl) {
+            mobSideEl.style.display = ["left", "right", "sides"].includes(
+              posVal
+            )
+              ? ""
+              : "none";
+          }
+
+          const calMode = document.getElementById("calendarModeSelect")?.value;
+          const isSim = calMode === "simulate";
+          const simDateEl = document.getElementById("simDateGroup");
+          if (simDateEl) simDateEl.style.display = isSim ? "" : "none";
+          const simPresetEl = document.getElementById("simPresetGroup");
+          if (simPresetEl) simPresetEl.style.display = isSim ? "" : "none";
+
+          const cdVal = document.getElementById("countdownSelect")?.value;
+          const cdIftarEl = document.getElementById("countdownIftarTimeGroup");
+          if (cdIftarEl)
+            cdIftarEl.style.display = cdVal === "custom" ? "" : "none";
+
+          const soundMode = document.getElementById(
+            "countdownSoundSelect"
+          )?.value;
+          const soundUrlGroup = document.getElementById(
+            "countdownSoundUrlGroup"
+          );
+          if (soundUrlGroup) {
+            soundUrlGroup.style.display = soundMode === "custom" ? "" : "none";
+          }
+        }
+
+        function syncHijriAdjGroup() {
+          const isCustom =
+            document.getElementById("regionSelect").value === "custom";
+          document.getElementById("hijriAdjGroup").style.display = isCustom
+            ? ""
+            : "none";
+        }
+
+        let isDebugMode = true;
+
+        function getConfig() {
+          const variant = document.getElementById("variantSelect").value;
+          const calMode =
+            document.getElementById("calendarModeSelect")?.value || "preview";
+          const isPreview = calMode === "preview";
+          const posVal = document.getElementById("positionSelect").value;
+
+          const cfg = {
+            variant,
+            position: posVal,
+            opacity: parseFloat(document.getElementById("opacityRange").value),
+            confetti: document.getElementById("confettiSelect").value,
+            locale: document.getElementById("localeSelect").value,
+            shadows: document.getElementById("shadowsSelect")?.value || "soft",
+            clearance:
+              document.getElementById("clearanceSelect")?.value || "edges",
+            layer:
+              document.getElementById("layerSelect")?.value || "foreground",
+            previewMode: isPreview,
+            debug: isDebugMode,
+            onError: (err) => {
+              if (typeof logSafety === "function") {
+                logSafety(
+                  `[Telemetry Hook] onError caught: ${err && err.message ? err.message : String(err)}`,
+                  "#f85149"
+                );
+              }
+            },
+            onRamadanStart: (state) => console.log("Ramadan started!", state),
+            onEidStart: (state) => console.log("Eid started!", state),
+            onOccasionChange: (occ, state) =>
+              console.log("Occasion changed:", occ, state),
+          };
+
+          if (["left", "right", "sides"].includes(posVal)) {
+            const mobSide = document.getElementById(
+              "mobileSideBehaviorSelect"
+            )?.value;
+            if (mobSide) cfg.mobileSideBehavior = mobSide;
+          }
+
+          const zVal = parseInt(
+            document.getElementById("zIndexInput")?.value,
+            10
+          );
+          if (!isNaN(zVal)) cfg.zIndex = zVal;
+
+          const liveTrans = document.getElementById(
+            "liveTransitionCheckbox"
+          )?.checked;
+          if (liveTrans !== undefined) cfg.liveTransition = liveTrans;
+
+          const eidVar = document.getElementById("eidVariantSelect")?.value;
+          if (eidVar) cfg.eidVariant = eidVar;
+
+          if (calMode === "simulate") {
+            const simDateVal = document.getElementById(
+              "simulatedDatePicker"
+            )?.value;
+            if (simDateVal) cfg.date = simDateVal;
+          } else if (calMode === "preview") {
+            const bannerOcc =
+              variant === "banner"
+                ? document.getElementById("bannerOccasionSelect")?.value
+                : null;
+            const occPreview =
+              bannerOcc ||
+              document.getElementById("occasionPreviewSelect")?.value;
+            if (occPreview === "eid-fitr") cfg.date = "2026-03-21";
+            else if (occPreview === "eid-adha") cfg.date = "2026-05-28";
+            else if (occPreview === "ramadan") cfg.date = "2026-02-25";
+          }
+
+          const themeVal = document.getElementById("themeSelect")?.value;
+          if (themeVal && themeVal !== "custom") {
+            cfg.theme = themeVal;
+          } else {
+            cfg.colors = getColors();
+            cfg.glowColor = getGlowColor();
+            cfg.ceilingColor = document.getElementById("ceilingColor").value;
+            cfg.ropeColor = document.getElementById("ropeColor").value;
+          }
+
+          if (variant === "lanterns") {
+            const rStyle = document.getElementById("ropeStyleSelect")?.value;
+            if (rStyle) cfg.ropeStyle = rStyle;
+            const rSag = parseInt(
+              document.getElementById("ropeSagRange")?.value,
+              10
+            );
+            if (!isNaN(rSag)) cfg.ropeSag = rSag;
+          }
+
+          const cdVal = document.getElementById("countdownSelect")?.value;
+          if (cdVal && cdVal !== "off") {
+            const is10sDemo = cdVal === "demo-alert";
+            const is1minDemo = cdVal === "1min";
+            let maghribTime = "18:15";
+            if (is10sDemo) {
+              const d = new Date(Date.now() + 10_000);
+              const hh = String(d.getHours()).padStart(2, "0");
+              const mm = String(d.getMinutes()).padStart(2, "0");
+              const ss = String(d.getSeconds()).padStart(2, "0");
+              maghribTime = `${hh}:${mm}:${ss}`;
+            } else if (is1minDemo) {
+              const d = new Date(Date.now() + 60_000);
+              const hh = String(d.getHours()).padStart(2, "0");
+              const mm = String(d.getMinutes()).padStart(2, "0");
+              const ss = String(d.getSeconds()).padStart(2, "0");
+              maghribTime = `${hh}:${mm}:${ss}`;
+            } else if (cdVal === "custom") {
+              maghribTime =
+                document.getElementById("countdownIftarTime")?.value || "18:15";
+            }
+            cfg.countdown = {
+              maghribTime,
+              iftarTime: maghribTime,
+              position:
+                document.getElementById("countdownPosSelect")?.value ||
+                "bottom-right",
+              defaultMuted:
+                document.getElementById("countdownAudioSelect")?.value ===
+                "muted",
+              minimizable:
+                document.getElementById("countdownMinimizable")?.checked !==
+                false,
+              initiallyMinimized: Boolean(
+                document.getElementById("countdownInitiallyMinimized")?.checked
+              ),
+              alertWindowMinutes:
+                parseInt(
+                  document.getElementById("countdownAlertWindowMinutes")?.value,
+                  10
+                ) || 30,
+              autoDismissAfterMinutes:
+                parseInt(
+                  document.getElementById("countdownAutoDismissMinutes")?.value,
+                  10
+                ) || 10,
+            };
+
+            const soundMode = document.getElementById(
+              "countdownSoundSelect"
+            )?.value;
+            if (soundMode === "none") {
+              cfg.countdown.sound = false;
+              cfg.countdown.soundUrl = false;
+            } else if (soundMode === "custom") {
+              const customUrl = document
+                .getElementById("countdownSoundUrlInput")
+                ?.value?.trim();
+              if (customUrl) {
+                cfg.countdown.soundUrl = customUrl;
+              }
+            }
+          }
+
+          const occVal = document.getElementById("occasionsSelect")?.value;
+          if (occVal === "ramadan") cfg.occasions = ["ramadan"];
+          else if (occVal === "eid") cfg.occasions = ["eid-fitr", "eid-adha"];
+          else if (occVal === "eid-fitr") cfg.occasions = ["eid-fitr"];
+          else if (occVal === "eid-adha") cfg.occasions = ["eid-adha"];
+
+          if (variant === "banner") {
+            cfg.bannerBg = document.getElementById("bannerBgColor").value;
+            cfg.bannerTextColor = document.getElementById(
+              "bannerTextColorInput"
+            ).value;
+            cfg.bannerIconColor = document.getElementById(
+              "bannerIconColorInput"
+            ).value;
+            const _enText = document
+              .getElementById("bannerTextEn")
+              .value.trim();
+            const _arText = document
+              .getElementById("bannerTextAr")
+              .value.trim();
+            if (_enText) cfg.bannerTextEn = _enText;
+            if (_arText) cfg.bannerTextAr = _arText;
+          }
+
+          const regionVal = document.getElementById("regionSelect").value;
+          if (regionVal === "custom") {
+            cfg.hijriAdjustment =
+              parseInt(document.getElementById("hijriAdjustment").value, 10) ||
+              0;
+          } else {
+            cfg.region = regionVal;
+          }
+
+          if (variant === "lanterns") {
+            cfg.lanternStyle = parseInt(
+              document.getElementById("lanternStyleSelect").value,
+              10
+            );
+          }
+          const densityVal = document.getElementById("densitySelect").value;
+          if (densityVal !== "auto") {
+            cfg.density = densityVal;
+          }
+          const intensityEl = document.getElementById("intensityRange");
+          if (intensityEl) {
+            const intVal = parseInt(intensityEl.value, 10);
+            if (!isNaN(intVal)) cfg.intensity = intVal;
+          }
+          return cfg;
+        }
+
+        function updateStateDisplay(state) {
+          if (!state) return;
+          const occ =
+            state.occasion ||
+            (state.isRamadan ? "ramadan" : state.isEid ? "eid" : "none");
+          const sOcc = document.getElementById("s-occasion");
+          if (sOcc) sOcc.textContent = occ.toUpperCase();
+          const sRamadan = document.getElementById("s-isRamadan");
+          if (sRamadan) sRamadan.textContent = String(Boolean(state.isRamadan));
+          const sEid = document.getElementById("s-isEid");
+          if (sEid) sEid.textContent = String(Boolean(state.isEid));
+          const sYear = document.getElementById("s-hijriYear");
+          if (sYear) sYear.textContent = state.hijriYear || "1447 AH";
+          const sDay = document.getElementById("s-dayNumber");
+          if (sDay)
+            sDay.textContent =
+              state.dayNumber != null ? String(state.dayNumber) : "—";
+        }
+
+        // ── Code generation ────────────────────────────────────────────────
+        let activeTab = "esm";
+
+        function syntaxHighlight(code) {
+          return code
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(
+              /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
+              '<span class="tok-str">$1</span>'
+            )
+            .replace(/\/\/[^\n]*/g, '<span class="tok-cmt">$&</span>')
+            .replace(
+              /(import|from|export|const|return|function|default)(?=[\s({])/g,
+              '<span class="tok-key">$1</span>'
+            )
+            .replace(/\b(true|false)\b/g, '<span class="tok-bool">$1</span>')
+            .replace(/\b(\d+\.?\d*)\b/g, '<span class="tok-num">$1</span>');
+        }
+
+        function cfgToObjLiteral(cfg) {
+          const lines = [];
+          for (const [k, v] of Object.entries(cfg)) {
+            if (Array.isArray(v)) {
+              lines.push(
+                `  ${k}: [${v.map((x) => JSON.stringify(x)).join(", ")}]`
+              );
+            } else if (typeof v === "object" && v !== null) {
+              const nested = Object.entries(v)
+                .map(([nk, nv]) => `    ${nk}: ${JSON.stringify(nv)}`)
+                .join(",\n");
+              lines.push(`  ${k}: {\n${nested}\n  }`);
+            } else {
+              lines.push(`  ${k}: ${JSON.stringify(v)}`);
+            }
+          }
+          return `{\n${lines.join(",\n")}\n}`;
+        }
+
+        function getDisplayCfg(cfg) {
+          return Object.fromEntries(
+            Object.entries(cfg).filter(
+              ([k]) =>
+                ![
+                  "onRamadanStart",
+                  "onRamadanEnd",
+                  "onEidStart",
+                  "onOccasionChange",
+                  "previewMode",
+                  "date",
+                  "onError",
+                ].includes(k)
+            )
+          );
+        }
+
+        function buildCode(cfg) {
+          const d = getDisplayCfg(cfg);
+          const obj = cfgToObjLiteral(d);
+          if (activeTab === "esm") {
+            return `import { init } from 'ramadan-overlay';\n\nconst overlay = init(${obj});\n\n// to remove:\n// overlay.destroy();`;
+          }
+          if (activeTab === "react") {
+            const props = Object.entries(d)
+              .map(([k, v]) => {
+                if (typeof v === "boolean") return v ? k : `${k}={false}`;
+                if (typeof v === "number") return `${k}={${v}}`;
+                if (Array.isArray(v)) return `${k}={${JSON.stringify(v)}}`;
+                if (typeof v === "object" && v !== null) {
+                  const nestedProps = Object.entries(v)
+                    .map(([nk, nv]) => `          ${nk}: ${JSON.stringify(nv)}`)
+                    .join(",\n");
+                  return `${k}={{\n${nestedProps}\n        }}`;
+                }
+                return `${k}=${JSON.stringify(v)}`;
+              })
+              .join("\n        ");
+            return `import { RamadanOverlay } from 'ramadan-overlay/react';\n\nfunction App() {\n  return (\n    <>\n      <RamadanOverlay\n        ${props}\n      />\n      {/* your app */}\n    </>\n  );\n}`;
+          }
+          if (activeTab === "vue") {
+            const objSingleQuote = cfgToObjLiteral(d).replace(/"/g, "'");
+            return `<template>\n  <RamadanOverlay :config="overlayConfig" />\n<\/template>\n\n<script setup>\nimport { RamadanOverlay } from 'ramadan-overlay/vue';\n\nconst overlayConfig = ${objSingleQuote};\n<\/script>`;
+          }
+          if (activeTab === "angular") {
+            return `import { Component } from '@angular/core';\nimport { RamadanOverlayModule } from 'ramadan-overlay/angular';\n\n@Component({\n  selector: 'app-root',\n  imports: [RamadanOverlayModule],\n  template: \`\n    <ng-container ramadanOverlay [ramadanConfig]="overlayConfig"></ng-container>\n  \`\n})\nexport class AppComponent {\n  overlayConfig = ${obj};\n}`;
+          }
+          if (activeTab === "svelte") {
+            return `<script>\n  import { ramadanOverlay } from 'ramadan-overlay/svelte';\n\n  const config = ${obj};\n<\/script>\n\n<div use:ramadanOverlay={config}></div>`;
+          }
+          if (activeTab === "cdn") {
+            return `<script src="https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js"><\/script>\n<script>\n  RamadanOverlay.init(${obj});\n<\/script>`;
+          }
+          if (activeTab === "ai") {
+            return `Install and integrate \`ramadan-overlay\` into this project.
+\nHere is the desired configuration:
+\`\`\`ts
+import { init } from 'ramadan-overlay';
+
+const overlay = init(${obj});
+\`\`\`
+
+Instructions for the Agent:
+1. Inspect this codebase to identify the front-end framework (React, Next.js, Vue, Nuxt, Angular, Svelte, or plain HTML/JS).
+2. Install \`ramadan-overlay\` using the project's package manager (npm, pnpm, yarn, or bun).
+3. Mount the component or call \`init()\` at the root layout or main application entry point.
+4. Review configuration options (such as theme presets, elevation shadows, and the Iftar countdown widget) with the developer.
+5. Run the dev server or test suite to verify visual decorations appear cleanly without layout shift.`;
+          }
+          return "";
+        }
+
+        function updateCodeBox(cfg) {
+          const raw = buildCode(cfg);
+          if (activeTab === "ai") {
+            document.getElementById("codeBox").innerHTML = raw
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;");
+          } else {
+            document.getElementById("codeBox").innerHTML = syntaxHighlight(raw);
+          }
+          document.getElementById("codeBox").dataset.raw = raw;
+          const copyBtn = document.getElementById("copyBtn");
+          if (copyBtn && !copyBtn.classList.contains("copied")) {
+            copyBtn.textContent =
+              activeTab === "ai" ? "📋 Copy prompt" : "📋 Copy code";
+          }
+        }
+
+        function mount(withConfetti = false) {
+          currentInstance?.destroy();
+          const cfg = getConfig();
+          updateCodeBox(cfg);
+          saveHash(cfg);
+          try {
+            currentInstance = init({
+              ...cfg,
+              confetti: withConfetti ? cfg.confetti : "off",
+            });
+            updateStateDisplay(currentInstance.state);
+          } catch (e) {
+            console.warn("[ramadan-overlay] init error:", e);
+          }
+        }
+
+        // ── URL hash state (UTF-8 safe base64) ──────────────────────────────
+        function saveHash(cfg) {
+          const d = getDisplayCfg(cfg);
+          try {
+            const json = JSON.stringify(d);
+            const encoded = btoa(
+              encodeURIComponent(json).replace(
+                /%([0-9A-F]{2})/g,
+                function (_, p1) {
+                  return String.fromCharCode("0x" + p1);
+                }
+              )
+            );
+            location.replace("#" + encoded);
+          } catch (e) {
+            console.warn("Could not save config to URL hash:", e);
+          }
+        }
+
+        function loadHash() {
+          try {
+            const hash = location.hash.slice(1);
+            if (!hash) return;
+            let json;
+            try {
+              json = decodeURIComponent(
+                Array.prototype.map
+                  .call(atob(hash), function (c) {
+                    return (
+                      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+                    );
+                  })
+                  .join("")
+              );
+            } catch (_) {
+              json = atob(hash);
+            }
+            const cfg = JSON.parse(json);
+            if (cfg.variant)
+              document.getElementById("variantSelect").value = cfg.variant;
+            if (cfg.position)
+              document.getElementById("positionSelect").value = cfg.position;
+            if (cfg.mobileSideBehavior) {
+              const el = document.getElementById("mobileSideBehaviorSelect");
+              if (el) el.value = cfg.mobileSideBehavior;
+            }
+            if (cfg.zIndex != null) {
+              const el = document.getElementById("zIndexInput");
+              if (el) el.value = cfg.zIndex;
+            }
+            if (cfg.liveTransition != null) {
+              const el = document.getElementById("liveTransitionCheckbox");
+              if (el) el.checked = Boolean(cfg.liveTransition);
+            }
+            if (cfg.eidVariant) {
+              const el = document.getElementById("eidVariantSelect");
+              if (el) el.value = cfg.eidVariant;
+            }
+            if (cfg.opacity != null) {
+              document.getElementById("opacityRange").value = cfg.opacity;
+              document.getElementById("opacityVal").textContent = cfg.opacity;
+            }
+            if (cfg.confetti != null)
+              document.getElementById("confettiSelect").value = String(
+                cfg.confetti
+              );
+            if (cfg.locale)
+              document.getElementById("localeSelect").value = cfg.locale;
+            if (cfg.region && cfg.region !== "standard")
+              document.getElementById("regionSelect").value = cfg.region;
+            if (cfg.density)
+              document.getElementById("densitySelect").value = cfg.density;
+            if (cfg.intensity != null) {
+              const el = document.getElementById("intensityRange");
+              if (el) el.value = cfg.intensity;
+              const valEl = document.getElementById("intensityVal");
+              if (valEl) valEl.textContent = cfg.intensity;
+            }
+            if (cfg.theme) {
+              document.getElementById("themeSelect").value = cfg.theme;
+              if (cfg.theme !== "custom") applyThemeToSwatches(cfg.theme);
+            }
+            if (cfg.ropeStyle)
+              document.getElementById("ropeStyleSelect").value = cfg.ropeStyle;
+            if (cfg.ropeSag != null) {
+              document.getElementById("ropeSagRange").value = cfg.ropeSag;
+              const sagValEl = document.getElementById("ropeSagVal");
+              if (sagValEl) sagValEl.textContent = cfg.ropeSag + "px";
+            }
+            if (cfg.lanternStyle != null)
+              document.getElementById("lanternStyleSelect").value =
+                cfg.lanternStyle;
+            if (cfg.glowColor) {
+              const isLanterns = cfg.variant === "lanterns" || !cfg.variant;
+              if (isLanterns)
+                document.getElementById("glowColorLantern").value =
+                  cfg.glowColor;
+              else
+                document.getElementById("glowColorGeneric").value =
+                  cfg.glowColor;
+            }
+            if (Array.isArray(cfg.colors)) {
+              const isLanterns = cfg.variant === "lanterns" || !cfg.variant;
+              if (isLanterns) {
+                cfg.colors.slice(0, 12).forEach((c, i) => {
+                  document.getElementById("lc" + (i + 1)).value = c;
+                });
+              } else {
+                cfg.colors.slice(0, 5).forEach((c, i) => {
+                  document.getElementById("gc" + (i + 1)).value = c;
+                });
+              }
+            }
+            if (cfg.ceilingColor)
+              document.getElementById("ceilingColor").value = cfg.ceilingColor;
+            if (cfg.ropeColor)
+              document.getElementById("ropeColor").value = cfg.ropeColor;
+            if (cfg.bannerBg)
+              document.getElementById("bannerBgColor").value = cfg.bannerBg;
+            if (cfg.bannerTextColor)
+              document.getElementById("bannerTextColorInput").value =
+                cfg.bannerTextColor;
+            if (cfg.bannerIconColor)
+              document.getElementById("bannerIconColorInput").value =
+                cfg.bannerIconColor;
+            if (cfg.bannerTextEn)
+              document.getElementById("bannerTextEn").value = cfg.bannerTextEn;
+            if (cfg.bannerTextAr)
+              document.getElementById("bannerTextAr").value = cfg.bannerTextAr;
+            if (cfg.occasions) {
+              const arr = cfg.occasions;
+              let occ = "all";
+              if (arr.length === 1 && arr[0] === "ramadan") occ = "ramadan";
+              else if (
+                arr.length === 2 &&
+                arr.includes("eid-fitr") &&
+                arr.includes("eid-adha")
+              )
+                occ = "eid";
+              else if (arr.length === 1 && arr[0] === "eid-fitr")
+                occ = "eid-fitr";
+              else if (arr.length === 1 && arr[0] === "eid-adha")
+                occ = "eid-adha";
+              document.getElementById("occasionsSelect").value = occ;
+            }
+            if (cfg.shadows) {
+              const el = document.getElementById("shadowsSelect");
+              if (el) el.value = cfg.shadows;
+            }
+            if (cfg.clearance) {
+              const el = document.getElementById("clearanceSelect");
+              if (el) el.value = cfg.clearance;
+            }
+            if (cfg.layer) {
+              const el = document.getElementById("layerSelect");
+              if (el) el.value = cfg.layer;
+            }
+            if (cfg.countdown) {
+              const cd = cfg.countdown;
+              const cdSelect = document.getElementById("countdownSelect");
+              if (cd.maghribTime) {
+                cdSelect.value = "auto";
+                const iftarEl = document.getElementById("countdownIftarTime");
+                if (iftarEl) iftarEl.value = cd.maghribTime;
+              }
+              if (cd.position) {
+                const posEl = document.getElementById("countdownPosSelect");
+                if (posEl) posEl.value = cd.position;
+              }
+              if (cd.defaultMuted !== undefined) {
+                const audEl = document.getElementById("countdownAudioSelect");
+                if (audEl) audEl.value = cd.defaultMuted ? "muted" : "unmuted";
+              }
+              if (cd.minimizable !== undefined) {
+                const minEl = document.getElementById("countdownMinimizable");
+                if (minEl) minEl.checked = Boolean(cd.minimizable);
+              }
+              if (cd.initiallyMinimized !== undefined) {
+                const initMinEl = document.getElementById(
+                  "countdownInitiallyMinimized"
+                );
+                if (initMinEl)
+                  initMinEl.checked = Boolean(cd.initiallyMinimized);
+              }
+              if (cd.alertWindowMinutes != null) {
+                const winEl = document.getElementById(
+                  "countdownAlertWindowMinutes"
+                );
+                if (winEl) winEl.value = String(cd.alertWindowMinutes);
+              }
+              if (cd.autoDismissAfterMinutes != null) {
+                const disEl = document.getElementById(
+                  "countdownAutoDismissMinutes"
+                );
+                if (disEl) disEl.value = String(cd.autoDismissAfterMinutes);
+              }
+              if (cd.sound === false || cd.soundUrl === false) {
+                const sndEl = document.getElementById("countdownSoundSelect");
+                if (sndEl) sndEl.value = "none";
+              } else if (typeof cd.soundUrl === "string" && cd.soundUrl) {
+                const sndEl = document.getElementById("countdownSoundSelect");
+                if (sndEl) sndEl.value = "custom";
+                const urlEl = document.getElementById("countdownSoundUrlInput");
+                if (urlEl) urlEl.value = cd.soundUrl;
+              }
+            }
+          } catch (e) {
+            console.warn("Could not load config from URL hash:", e);
+          }
+        }
+
+        // ── Workbench Tabs Logic ──
+        const tabBtns = document.querySelectorAll(".workbench-tab-btn");
+        tabBtns.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            tabBtns.forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            const targetPaneId = "pane-" + btn.dataset.workbenchTab;
+            document.querySelectorAll(".workbench-pane").forEach((pane) => {
+              pane.classList.remove("active");
+            });
+            const targetPane = document.getElementById(targetPaneId);
+            if (targetPane) targetPane.classList.add("active");
+          });
+        });
+
+        // ── Curated Atmospheric Presets Click Handlers ──
+        const presetCards = document.querySelectorAll(".preset-card");
+        presetCards.forEach((card) => {
+          card.addEventListener("click", () => {
+            presetCards.forEach((c) => c.classList.remove("active"));
+            card.classList.add("active");
+            const presetKey = card.dataset.preset;
+
+            if (presetKey === "fanoos") {
+              document.getElementById("variantSelect").value = "lanterns";
+              document.getElementById("themeSelect").value = "classic";
+              applyThemeToSwatches("classic");
+              document.getElementById("ropeStyleSelect").value = "dual";
+              document.getElementById("shadowsSelect").value = "soft";
+              document.getElementById("countdownSelect").value = "off";
+            } else if (presetKey === "laylat") {
+              document.getElementById("variantSelect").value = "sparkles";
+              document.getElementById("themeSelect").value = "midnight";
+              applyThemeToSwatches("midnight");
+              document.getElementById("shadowsSelect").value = "deep";
+              document.getElementById("countdownSelect").value = "off";
+            } else if (presetKey === "crescent") {
+              document.getElementById("variantSelect").value = "crescent-stars";
+              document.getElementById("themeSelect").value = "desert-dusk";
+              applyThemeToSwatches("desert-dusk");
+              document.getElementById("shadowsSelect").value = "deep";
+              document.getElementById("countdownSelect").value = "off";
+            } else if (presetKey === "geometric") {
+              document.getElementById("variantSelect").value = "geometric";
+              document.getElementById("themeSelect").value = "emerald";
+              applyThemeToSwatches("emerald");
+              document.getElementById("shadowsSelect").value = "soft";
+              document.getElementById("countdownSelect").value = "off";
+            } else if (presetKey === "eid") {
+              document.getElementById("variantSelect").value = "eid-fitr";
+              document.getElementById("themeSelect").value = "classic";
+              applyThemeToSwatches("classic");
+              document.getElementById("confettiSelect").value = "on";
+              document.getElementById("countdownSelect").value = "1min";
+              const bOcc = document.getElementById("bannerOccasionSelect");
+              if (bOcc) bOcc.value = "eid-fitr";
+              const occPrev = document.getElementById("occasionPreviewSelect");
+              if (occPrev) occPrev.value = "eid-fitr";
+            }
+
+            syncColorPanels();
+            if (overlayOn) mount(presetKey === "eid");
+          });
+        });
+
+        // ── Quick Install Copy Button ──
+        const quickInstallBtn = document.getElementById("quickInstallCopyBtn");
+        quickInstallBtn?.addEventListener("click", () => {
+          navigator.clipboard
+            .writeText("npm install ramadan-overlay")
+            .then(() => {
+              quickInstallBtn.textContent = "✓ Copied!";
+              setTimeout(() => {
+                quickInstallBtn.textContent = "Copy";
+              }, 2000);
+            });
+        });
+
+        // ── Event listeners ──
+        document
+          .getElementById("variantSelect")
+          .addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("calendarModeSelect")
+          .addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("simulatedDatePicker")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("occasionPreviewSelect")
+          .addEventListener("change", (e) => {
+            const val = e.target.value;
+            const picker = document.getElementById("simulatedDatePicker");
+            if (val === "ramadan") picker.value = "2026-02-25";
+            else if (val === "eid-fitr") picker.value = "2026-03-21";
+            else if (val === "eid-adha") picker.value = "2026-05-28";
+            else if (val === "none") picker.value = "2026-08-15";
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("eidVariantSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("positionSelect")
+          .addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("mobileSideBehaviorSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("clearanceSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("layerSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("zIndexInput")
+          ?.addEventListener("input", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("liveTransitionCheckbox")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("themeSelect")
+          .addEventListener("change", (e) => {
+            if (e.target.value !== "custom") {
+              applyThemeToSwatches(e.target.value);
+            }
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("shadowsSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("localeSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("opacityRange")
+          .addEventListener("input", (e) => {
+            document.getElementById("opacityVal").textContent = e.target.value;
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("confettiSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount(true);
+          });
+
+        document
+          .getElementById("regionSelect")
+          .addEventListener("change", () => {
+            syncHijriAdjGroup();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("hijriAdjustment")
+          .addEventListener("input", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("lanternStyleSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("ropeStyleSelect")
+          .addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("ropeSagRange")
+          ?.addEventListener("input", (e) => {
+            const sagValEl = document.getElementById("ropeSagVal");
+            if (sagValEl) sagValEl.textContent = e.target.value + "px";
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("densitySelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("bannerOccasionSelect")
+          ?.addEventListener("change", (e) => {
+            const occ = e.target.value;
+            const occPreview = document.getElementById("occasionPreviewSelect");
+            if (occPreview) occPreview.value = occ;
+            const picker = document.getElementById("simulatedDatePicker");
+            if (picker) {
+              if (occ === "ramadan") picker.value = "2026-02-25";
+              else if (occ === "eid-fitr") picker.value = "2026-03-21";
+              else if (occ === "eid-adha") picker.value = "2026-05-28";
+            }
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("intensityRange")
+          ?.addEventListener("input", (e) => {
+            const valEl = document.getElementById("intensityVal");
+            if (valEl) valEl.textContent = e.target.value;
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("occasionsSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        // ── Countdown Widget listeners ──
+        document
+          .getElementById("countdownSelect")
+          ?.addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownIftarTime")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownPosSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownAudioSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownSoundSelect")
+          ?.addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownSoundUrlInput")
+          ?.addEventListener("input", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownMinimizable")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownInitiallyMinimized")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownAlertWindowMinutes")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownAutoDismissMinutes")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        // Test Chime alert button with visual soundwave animation
+        document
+          .getElementById("btnTestChime")
+          ?.addEventListener("click", async () => {
+            const wave = document.querySelector(".audio-wave");
+            wave?.classList.add("playing");
+            try {
+              if (currentInstance?.countdown?.playAlert) {
+                await currentInstance.countdown.playAlert();
+              } else if (RamadanOverlay?.playSynthesizedChime) {
+                await RamadanOverlay.playSynthesizedChime();
+              }
+            } catch (err) {
+              console.warn("Chime preview playback error:", err);
+            } finally {
+              setTimeout(() => wave?.classList.remove("playing"), 2000);
+            }
+          });
+
+        document
+          .getElementById("btnCountdown1Min")
+          ?.addEventListener("click", () => {
+            document.getElementById("countdownSelect").value = "1min";
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        // Controller seam tests
+        document
+          .getElementById("btnCtrlMinimize")
+          ?.addEventListener("click", () => {
+            currentInstance?.countdown?.minimize();
+          });
+        document
+          .getElementById("btnCtrlExpand")
+          ?.addEventListener("click", () => {
+            currentInstance?.countdown?.expand();
+          });
+        document
+          .getElementById("btnCtrlDismiss")
+          ?.addEventListener("click", () => {
+            currentInstance?.countdown?.dismiss();
+          });
+        document
+          .getElementById("btnCtrlShow")
+          ?.addEventListener("click", () => {
+            currentInstance?.countdown?.show();
+          });
+
+        // Lantern color pickers
+        for (let i = 1; i <= 12; i++) {
+          document.getElementById("lc" + i).addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+        }
+        document
+          .getElementById("ceilingColor")
+          .addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+        document.getElementById("ropeColor").addEventListener("input", () => {
+          document.getElementById("themeSelect").value = "custom";
+          if (overlayOn) mount();
+        });
+        document
+          .getElementById("glowColorLantern")
+          .addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+
+        // Generic color pickers
+        for (let i = 1; i <= 5; i++) {
+          document.getElementById("gc" + i).addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+        }
+        document
+          .getElementById("glowColorGeneric")
+          .addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+
+        // Reset colors
+        document
+          .getElementById("resetColorsBtn")
+          .addEventListener("click", () => {
+            DEFAULT_LANTERN_COLORS.forEach((c, i) => {
+              document.getElementById("lc" + (i + 1)).value = c;
+            });
+            document.getElementById("glowColorLantern").value =
+              DEFAULT_GLOW_COLOR;
+            document.getElementById("ceilingColor").value =
+              DEFAULT_CEILING_COLOR;
+            document.getElementById("ropeColor").value = DEFAULT_ROPE_COLOR;
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("resetColorsGenericBtn")
+          .addEventListener("click", () => {
+            DEFAULT_GENERIC_COLORS.forEach((c, i) => {
+              document.getElementById("gc" + (i + 1)).value = c;
+            });
+            document.getElementById("glowColorGeneric").value =
+              DEFAULT_GLOW_COLOR;
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+
+        // Banner color & text inputs
+        [
+          "bannerBgColor",
+          "bannerTextColorInput",
+          "bannerIconColorInput",
+        ].forEach((id) => {
+          document.getElementById(id).addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+        });
+        document
+          .getElementById("bannerApplyBtn")
+          .addEventListener("click", () => {
+            if (overlayOn) mount();
+          });
+
+        // Master Toggle button
+        const toggleBtn = document.getElementById("toggleBtn");
+        toggleBtn.addEventListener("click", () => {
+          overlayOn = !overlayOn;
+          if (overlayOn) {
+            toggleBtn.classList.add("active");
+            toggleBtn.innerHTML =
+              '<span style="font-size: 0.9rem">✨</span><span>Overlay ON</span>';
+            mount();
+          } else {
+            toggleBtn.classList.remove("active");
+            toggleBtn.innerHTML =
+              '<span style="font-size: 0.9rem">💤</span><span>Overlay OFF</span>';
+            currentInstance?.destroy();
+            currentInstance = null;
+          }
+        });
+
+        // Confetti button
+        document.getElementById("confettiBtn").addEventListener("click", () => {
+          if (currentInstance?.fireConfetti) {
+            currentInstance.fireConfetti();
+          } else {
+            try {
+              if (
+                typeof confetti === "function" &&
+                RamadanOverlay?.CONFETTI_COLORS
+              ) {
+                confetti({
+                  particleCount: 80,
+                  spread: 70,
+                  origin: { y: 0.2 },
+                  colors: RamadanOverlay.CONFETTI_COLORS,
+                });
+              }
+            } catch (_) {}
+          }
+        });
+
+        // Code tabs
+        document.querySelectorAll(".code-tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
+            document
+              .querySelectorAll(".code-tab")
+              .forEach((t) => t.classList.remove("active"));
+            tab.classList.add("active");
+            activeTab = tab.dataset.tab;
+            updateCodeBox(getConfig());
+          });
+        });
+
+        // Copy button handlers
+        function handleCopy() {
+          const raw = document.getElementById("codeBox").dataset.raw || "";
+          navigator.clipboard.writeText(raw).then(() => {
+            const btns = [
+              document.getElementById("copyBtn"),
+              document.getElementById("codeCopyFooterBtn"),
+            ];
+            btns.forEach((btn) => {
+              if (!btn) return;
+              btn.textContent = "✓ Copied to clipboard!";
+              btn.classList.add("copied");
+            });
+            setTimeout(() => {
+              btns.forEach((btn) => {
+                if (!btn) return;
+                btn.textContent =
+                  activeTab === "ai" ? "📋 Copy prompt" : "📋 Copy code";
+                btn.classList.remove("copied");
+              });
+            }, 2200);
+          });
+        }
+        document
+          .getElementById("copyBtn")
+          .addEventListener("click", handleCopy);
+        document
+          .getElementById("codeCopyFooterBtn")
+          ?.addEventListener("click", handleCopy);
+
+        // Share button
+        document.getElementById("shareBtn").addEventListener("click", () => {
+          saveHash(getConfig());
+          navigator.clipboard.writeText(location.href).then(() => {
+            const btn = document.getElementById("shareBtn");
+            btn.textContent = "✓ Link copied!";
+            setTimeout(() => {
+              btn.textContent = "🔗 Share Link";
+            }, 2000);
+          });
+        });
+
+        // ── Diagnostic Logging & Defensive Safety Testing ──
+        const safetyConsole = document.getElementById("safetyConsole");
+        function logSafety(msg, color = "#7ee787") {
+          if (!safetyConsole) return;
+          const time = new Date().toISOString().slice(11, 19);
+          const line = document.createElement("div");
+          line.style.color = color;
+          line.style.margin = "2px 0";
+          line.textContent = `[${time}] ${msg}`;
+          safetyConsole.appendChild(line);
+          safetyConsole.scrollTop = safetyConsole.scrollHeight;
+        }
+
+        const origWarn = console.warn;
+        const origError = console.error;
+        console.warn = function (...args) {
+          origWarn.apply(console, args);
+          const str = args
+            .map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a)))
+            .join(" ");
+          if (str.includes("[ramadan-overlay]")) logSafety(str, "#e3b341");
+        };
+        console.error = function (...args) {
+          origError.apply(console, args);
+          const str = args
+            .map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a)))
+            .join(" ");
+          if (str.includes("[ramadan-overlay]")) logSafety(str, "#f85149");
+        };
+
+        document
+          .getElementById("btnTestClamping")
+          ?.addEventListener("click", () => {
+            logSafety("Testing defensive config clamping...", "#e3b341");
+            currentInstance?.destroy();
+            currentInstance = init({
+              variant: "lanterns",
+              opacity: 99,
+              zIndex: -9999999999,
+              ropeSag: 999,
+              hijriAdjustment: 50,
+              debug: true,
+              previewMode: true,
+            });
+            logSafety(
+              "✅ Result: Extreme config safely clamped to valid range without throwing!",
+              "#7ee787"
+            );
+          });
+
+        document
+          .getElementById("btnTestInvalidDate")
+          ?.addEventListener("click", () => {
+            logSafety(
+              "Testing invalid Date input resilience in detector...",
+              "#e3b341"
+            );
+            const res1 = getRamadanState(new Date(NaN), 0, true);
+            const res2 = getRamadanState(null, 0, true);
+            logSafety(
+              `✅ Result: getRamadanState(NaN) -> occasion: '${res1.occasion}', isRamadan: ${res1.isRamadan}`,
+              "#7ee787"
+            );
+            logSafety(
+              `✅ Result: getRamadanState(null) -> occasion: '${res2.occasion}', isRamadan: ${res2.isRamadan}`,
+              "#7ee787"
+            );
+          });
+
+        document
+          .getElementById("btnTestCrash")
+          ?.addEventListener("click", () => {
+            logSafety(
+              "Testing Error Containment Boundary & Atomic DOM Rollback...",
+              "#e3b341"
+            );
+            const origCreate = document.createElement;
+            let counter = 0;
+            document.createElement = function (tagName) {
+              if (tagName.toLowerCase() === "style" && ++counter === 1) {
+                throw new Error(
+                  "Simulated catastrophic CSS stylesheet mounting crash"
+                );
+              }
+              return origCreate.call(document, tagName);
+            };
+            try {
+              const safeInstance = init({
+                previewMode: true,
+                debug: true,
+                onError: (err) =>
+                  logSafety(
+                    `onError hook captured crash: ${err && err.message ? err.message : err}`,
+                    "#f85149"
+                  ),
+              });
+              logSafety(
+                `✅ Result: Host application did NOT crash! Safe instance returned (typeof destroy: '${typeof safeInstance.destroy}').`,
+                "#7ee787"
+              );
+              safeInstance.destroy();
+            } finally {
+              document.createElement = origCreate;
+            }
+          });
+
+        document
+          .getElementById("btnTestOnError")
+          ?.addEventListener("click", () => {
+            logSafety(
+              "Testing double-contained onError hook isolation...",
+              "#e3b341"
+            );
+            init({
+              previewMode: true,
+              debug: true,
+              onError: () => {
+                throw new Error(
+                  "Faulty external telemetry service threw an uncaught error"
+                );
+              },
+            });
+            logSafety(
+              "✅ Result: Consumer onError threw, but double-containment seam prevented host crash!",
+              "#7ee787"
+            );
+          });
+
+        document
+          .getElementById("btnToggleDebug")
+          ?.addEventListener("click", function () {
+            isDebugMode = !isDebugMode;
+            this.textContent = isDebugMode
+              ? "Toggle Debug (ON)"
+              : "Toggle Debug (OFF)";
+            logSafety(
+              `Debug mode set to: ${isDebugMode}`,
+              isDebugMode ? "#7ee787" : "#8b8f98"
+            );
+            if (overlayOn) mount();
+          });
+
+        // Initial setup
+        loadHash();
+        syncColorPanels();
+        syncHijriAdjGroup();
+        mount();
+      } // end initApp
+    </script>
+
+    <!-- Load library: local dist first, fallback to modern CDN if dist missing -->
+    <script>
+      (function () {
+        var s = document.createElement("script");
+        s.src = "dist/ramadan-overlay.min.js";
+        s.onload = initApp;
+        s.onerror = function () {
+          var fallback = document.createElement("script");
+          fallback.src =
+            "https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js";
+          fallback.onload = initApp;
+          document.head.appendChild(fallback);
+        };
+        document.head.appendChild(s);
+      })();
+    </script>
+  </body>
+</html>

@@ -31,3 +31,5 @@ Thumbs.db
 # Lock files (keep one — remove if you commit lock files)
 # Temporary & scratch files
 scratch/
+dist-demo/
+test-results/
