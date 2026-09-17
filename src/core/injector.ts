@@ -7,6 +7,7 @@ import type {
   OverlayInstance,
   OverlayPosition,
   OverlayVariant,
+  IntensityOption,
   RamadanOverlayConfig,
   RamadanState,
   ResolvedConfig,
@@ -460,6 +461,23 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     date = isNaN(parsed.getTime()) ? undefined : parsed;
   }
 
+  let intensity: IntensityOption = "normal";
+  if (typeof userConfig.intensity === "number") {
+    intensity = Math.max(1, Math.min(10, Math.round(userConfig.intensity)));
+  } else if (
+    userConfig.intensity === "low" ||
+    userConfig.intensity === "normal" ||
+    userConfig.intensity === "high"
+  ) {
+    intensity = userConfig.intensity;
+  } else if (
+    userConfig.density === "low" ||
+    userConfig.density === "normal" ||
+    userConfig.density === "high"
+  ) {
+    intensity = userConfig.density;
+  }
+
   return {
     date,
     debug,
@@ -497,6 +515,7 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
       userConfig.hijriAdjustment
     ),
     density,
+    intensity,
     occasions,
     eidVariant: userConfig.eidVariant ?? "eid",
     liveTransition: userConfig.liveTransition ?? true,
@@ -799,8 +818,10 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
 
             const bannerChanged =
               newConfig.variant === "banner" &&
-              (newConfig.bannerTextEn !== currentConfig.bannerTextEn ||
-                newConfig.bannerTextAr !== currentConfig.bannerTextAr ||
+              (JSON.stringify(newConfig.bannerTextEn) !==
+                JSON.stringify(currentConfig.bannerTextEn) ||
+                JSON.stringify(newConfig.bannerTextAr) !==
+                  JSON.stringify(currentConfig.bannerTextAr) ||
                 newConfig.locale !== currentConfig.locale);
 
             const oldEffectivePosition =
@@ -813,6 +834,7 @@ export function init(userConfig: RamadanOverlayConfig = {}): OverlayInstance {
               newConfig.mobileSideBehavior !==
                 currentConfig.mobileSideBehavior ||
               newConfig.density !== currentConfig.density ||
+              newConfig.intensity !== currentConfig.intensity ||
               newConfig.lanternStyle !== currentConfig.lanternStyle ||
               newConfig.ropeStyle !== currentConfig.ropeStyle ||
               newConfig.ropeSag !== currentConfig.ropeSag ||

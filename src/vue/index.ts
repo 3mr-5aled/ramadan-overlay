@@ -16,6 +16,7 @@ import type {
   OverlayInstance,
   OverlayPosition,
   OverlayVariant,
+  IntensityOption,
   RamadanDateQuery,
   RamadanOverlayConfig,
   RamadanState,
@@ -175,6 +176,10 @@ export const RamadanOverlay = defineComponent({
     },
     onError: {
       type: Function as PropType<(error: unknown) => void>,
+      default: undefined,
+    },
+    intensity: {
+      type: [String, Number] as PropType<IntensityOption>,
       default: undefined,
     },
   },

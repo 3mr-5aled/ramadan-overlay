@@ -94,6 +94,22 @@ export type RopeStyle = "straight" | "u-shaped" | "dual";
  */
 export type ShadowMode = "none" | "soft" | "deep";
 
+/**
+ * Motion and density intensity for flying/floating shapes.
+ * - 'low': Calm, gentle float with minimal shapes.
+ * - 'normal': Balanced, festive ambient float (default).
+ * - 'high': Lively, abundant celebratory stream of shapes.
+ * Also supports a numeric scale from 1 to 10.
+ */
+export type IntensityMode = "low" | "normal" | "high";
+export type IntensityOption = IntensityMode | number;
+
+/**
+ * Custom banner greeting text — either a simple string (applied across occasions)
+ * or a dictionary mapping distinct messages to 'ramadan', 'eid-fitr', and 'eid-adha'.
+ */
+export type BannerTextOption = string | Partial<Record<Occasion, string>>;
+
 // ─── Visual Theme Types ──────────────────────────────────────────────────────
 
 /**
@@ -329,6 +345,15 @@ export interface RamadanOverlayConfig {
    */
   density?: "low" | "normal" | "high";
 
+  /**
+   * Motion and density intensity for flying/floating shapes.
+   * Accepts 'low' | 'normal' | 'high' or a numeric scale from 1 (serene) to 10 (festive surge).
+   * Governs both the number of concurrent ascending shapes and their floating cadence.
+   * Defaults to matching `density` if omitted, or 'normal'.
+   * @default 'normal'
+   */
+  intensity?: IntensityOption;
+
   // ─── Banner variant options ──────────────────────────────────────────────
 
   /**
@@ -345,19 +370,17 @@ export interface RamadanOverlayConfig {
 
   /**
    * Custom English greeting text shown in the banner (banner variant only).
-   * When omitted the built-in English greeting is used.
-   * If only one of `bannerTextEn` / `bannerTextAr` is provided, it is used
-   * as a fallback for the other locale.
+   * Supports either a string or an occasion-specific dictionary.
+   * When omitted the built-in occasion English greeting is used.
    */
-  bannerTextEn?: string;
+  bannerTextEn?: BannerTextOption;
 
   /**
    * Custom Arabic greeting text shown in the banner (banner variant only).
-   * When omitted the built-in Arabic greeting is used.
-   * If only one of `bannerTextEn` / `bannerTextAr` is provided, it is used
-   * as a fallback for the other locale.
+   * Supports either a string or an occasion-specific dictionary.
+   * When omitted the built-in occasion Arabic greeting is used.
    */
-  bannerTextAr?: string;
+  bannerTextAr?: BannerTextOption;
 
   /**
    * Color of the lantern icon shown beside the banner text (banner variant only).

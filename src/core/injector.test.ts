@@ -840,4 +840,67 @@ describe("init orchestration & live transition", () => {
       overlay.destroy();
     });
   });
+
+  describe("intensity and occasion-aware banner configuration", () => {
+    it("resolves default intensity to 'normal' (or matching density) when omitted", () => {
+      const overlayDefault = init({ previewMode: true });
+      expect(overlayDefault.config.intensity).toBe("normal");
+      overlayDefault.destroy();
+
+      const overlayFromDensity = init({ previewMode: true, density: "high" });
+      expect(overlayFromDensity.config.intensity).toBe("high");
+      overlayFromDensity.destroy();
+    });
+
+    it("resolves explicit intensity presets: 'low', 'normal', 'high'", () => {
+      const overlayLow = init({ previewMode: true, intensity: "low" });
+      expect(overlayLow.config.intensity).toBe("low");
+      overlayLow.destroy();
+
+      const overlayHigh = init({ previewMode: true, intensity: "high" });
+      expect(overlayHigh.config.intensity).toBe("high");
+      overlayHigh.destroy();
+    });
+
+    it("resolves numeric intensity values and clamps within 1..10", () => {
+      const overlayNum = init({ previewMode: true, intensity: 7 });
+      expect(overlayNum.config.intensity).toBe(7);
+      overlayNum.destroy();
+
+      const overlayClampedLow = init({ previewMode: true, intensity: -2 });
+      expect(overlayClampedLow.config.intensity).toBe(1);
+      overlayClampedLow.destroy();
+
+      const overlayClampedHigh = init({ previewMode: true, intensity: 99 });
+      expect(overlayClampedHigh.config.intensity).toBe(10);
+      overlayClampedHigh.destroy();
+    });
+
+    it("reactively updates intensity via overlay.update()", () => {
+      const overlay = init({ previewMode: true, intensity: "low" });
+      expect(overlay.config.intensity).toBe("low");
+
+      overlay.update({ intensity: 9 });
+      expect(overlay.config.intensity).toBe(9);
+      overlay.destroy();
+    });
+
+    it("supports occasion-specific dictionary for bannerTextEn and bannerTextAr", () => {
+      const overlay = init({
+        variant: "banner",
+        previewMode: true,
+        bannerTextEn: {
+          ramadan: "Custom Ramadan Header",
+          "eid-fitr": "Custom Fitr Header",
+          "eid-adha": "Custom Adha Header",
+        },
+      });
+      expect(overlay.config.bannerTextEn).toEqual({
+        ramadan: "Custom Ramadan Header",
+        "eid-fitr": "Custom Fitr Header",
+        "eid-adha": "Custom Adha Header",
+      });
+      overlay.destroy();
+    });
+  });
 });

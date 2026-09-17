@@ -1,4 +1,22 @@
-import type { Occasion, ResolvedConfig } from "../../types";
+import type { BannerTextOption, Occasion, ResolvedConfig } from "../../types";
+
+function extractBannerText(
+  textOption: BannerTextOption | undefined,
+  occasion: Occasion
+): string {
+  if (!textOption) return "";
+  if (typeof textOption === "string") return textOption.trim();
+  if (typeof textOption === "object") {
+    return (
+      textOption[occasion]?.trim() ||
+      textOption.ramadan?.trim() ||
+      textOption["eid-fitr"]?.trim() ||
+      textOption["eid-adha"]?.trim() ||
+      ""
+    );
+  }
+  return "";
+}
 
 /**
  * Banner variant — a 52 px bar prepended to document.body that pushes page
@@ -116,8 +134,9 @@ export function mountBannerElements(
   const iconColor = config.bannerIconColor;
   const zIndex = config.zIndex;
   const locale = config.locale ?? "en";
-  const enText = config.bannerTextEn?.trim();
-  const arText = config.bannerTextAr?.trim();
+  const effectiveOccasion: Occasion = occasion ?? "ramadan";
+  const enText = extractBannerText(config.bannerTextEn, effectiveOccasion);
+  const arText = extractBannerText(config.bannerTextAr, effectiveOccasion);
 
   const isEid = occasion === "eid-fitr" || occasion === "eid-adha";
   const defaultGreetings = isEid ? EID_GREETINGS : RAMADAN_GREETINGS;
