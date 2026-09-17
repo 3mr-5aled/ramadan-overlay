@@ -3,17 +3,66 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ramadan-overlay — Beautiful Ramadan Overlay for Any Website</title>
+    <title>
+      ramadan-overlay — Festive Visuals &amp; Iftar Countdown for Modern Web
+    </title>
     <meta
       name="description"
-      content="Interactive config generator for ramadan-overlay — pick a variant, customise colours and copy the ready-to-use code."
+      content="A lightweight, zero-dependency Ramadan &amp; Eid festive overlay library with auto Hijri detection, 8 visual variants, live Iftar countdown widget, and first-class framework support."
     />
-    <!-- <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='80'>🌙</text></svg>" /> -->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+
+    <!-- Google Fonts: Cinzel (Monumental Roman/Astronomical), Plus Jakarta Sans (Modern UI), Amiri (Sacred Arabic Calligraphy), JetBrains Mono (Code) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-      html {
-        scroll-behavior: smooth;
-        background: #0d1117;
+      :root {
+        --bg-void: #05070d;
+        --bg-base: #080c14;
+        --bg-surface: #0f1624;
+        --bg-surface-elevated: #151f33;
+        --bg-surface-translucent: rgba(15, 22, 36, 0.75);
+        --bg-card: rgba(18, 26, 42, 0.65);
+
+        --border-subtle: rgba(201, 168, 76, 0.16);
+        --border-mid: rgba(201, 168, 76, 0.32);
+        --border-active: #c9a84c;
+        --border-dark: rgba(255, 255, 255, 0.08);
+
+        --gold-100: #fef7da;
+        --gold-200: #fceea6;
+        --gold-300: #f7dd6d;
+        --gold-400: #e8c95d;
+        --gold-500: #c9a84c;
+        --gold-600: #9e7f2b;
+        --gold-700: #735a18;
+        --gold-glow: rgba(201, 168, 76, 0.22);
+        --gold-glow-strong: rgba(201, 168, 76, 0.45);
+
+        --emerald-400: #34d399;
+        --emerald-500: #10b981;
+        --lapis-400: #60a5fa;
+        --lapis-500: #3b82f6;
+
+        --text-pure: #ffffff;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #5e6f88;
+
+        --font-display: "Cinzel", Georgia, serif;
+        --font-arabic: "Amiri", "Traditional Arabic", serif;
+        --font-ui: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 18px;
+        --radius-xl: 26px;
       }
 
       *,
@@ -24,325 +73,714 @@
         padding: 0;
       }
 
+      html {
+        scroll-behavior: smooth;
+        background-color: var(--bg-void);
+        color: var(--text-primary);
+        font-family: var(--font-ui);
+      }
+
       body {
-        font-family:
-          system-ui,
-          -apple-system,
-          sans-serif;
-        background: transparent;
-        color: #e6edf3;
         min-height: 100vh;
-        padding: 0 20px 80px;
+        background-color: var(--bg-void);
+        background-image:
+          radial-gradient(
+            ellipse 90% 50% at 50% -10%,
+            rgba(201, 168, 76, 0.14) 0%,
+            transparent 65%
+          ),
+          radial-gradient(
+            circle at 10% 30%,
+            rgba(59, 130, 246, 0.05) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 90% 60%,
+            rgba(16, 185, 129, 0.05) 0%,
+            transparent 40%
+          ),
+          url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c9a84c' fill-opacity='0.025' fill-rule='evenodd'%3E%3Cpath d='M0 0h80v80H0V0zm40 40L20 20v40h40V20L40 40zm0-20l14.14 14.14L40 48.28 25.86 34.14 40 20z'/%3E%3C/g%3E%3C/svg%3E");
+        background-attachment: fixed;
+        color: var(--text-primary);
+        overflow-x: hidden;
       }
 
-      /* ── Header ── */
-      header {
-        text-align: center;
-        margin-bottom: 40px;
-      }
-      header h1 {
-        font-size: clamp(1.8rem, 5vw, 2.8rem);
-        margin-bottom: 6px;
-        letter-spacing: -0.5px;
-      }
-      header p {
-        color: #8b8f98;
-        font-size: 0.95rem;
+      /* ── Navigation ── */
+      .celestial-nav {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 66px;
+        padding: 0 clamp(16px, 4vw, 40px);
+        background: rgba(8, 12, 20, 0.82);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border-subtle);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
       }
 
-      /* ── Panel card ── */
-      .panel {
-        max-width: 860px;
-        margin: 0 auto 24px;
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 12px;
-        padding: 20px 24px;
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
       }
-      .panel-title {
-        font-size: 0.72rem;
-        color: #8b8f98;
-        text-transform: uppercase;
+      .nav-crescent-icon {
+        font-size: 1.45rem;
+        filter: drop-shadow(0 0 10px var(--gold-glow));
+        animation: subtleFloat 4s ease-in-out infinite;
+      }
+      .nav-title {
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+        font-weight: 700;
         letter-spacing: 0.8px;
-        margin-bottom: 14px;
+        background: linear-gradient(135deg, var(--gold-200), var(--gold-500));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .nav-version-badge {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        padding: 2px 7px;
+        border-radius: 20px;
+        border: 1px solid var(--border-subtle);
+        background: rgba(201, 168, 76, 0.08);
+        color: var(--gold-300);
       }
 
-      /* ── Controls grid ── */
-      .controls-grid {
+      .nav-controls {
         display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        align-items: flex-end;
+        align-items: center;
+        gap: 12px;
       }
 
-      .control-group {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-
-      label {
-        font-size: 0.72rem;
-        color: #8b8f98;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      select {
-        padding: 6px 10px;
-        border-radius: 6px;
-        border: 1px solid #30363d;
-        background: #0d1117;
-        color: #e6edf3;
-        font-size: 0.88rem;
-        cursor: pointer;
-        min-width: 140px;
-      }
-      select:focus,
-      input[type="date"]:focus,
-      input[type="time"]:focus,
-      input[type="number"]:focus,
-      input[type="text"]:focus {
-        outline: none;
-        border-color: #c9a84c;
-      }
-
-      input[type="date"],
-      input[type="time"],
-      input[type="number"],
-      input[type="text"] {
-        padding: 6px 10px;
-        border-radius: 6px;
-        border: 1px solid #30363d;
-        background: #0d1117;
-        color: #e6edf3;
-        font-size: 0.88rem;
-      }
-
-      .checkbox-label {
+      .nav-btn-pill {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        cursor: pointer;
+        padding: 6px 14px;
+        border-radius: 30px;
         font-size: 0.82rem;
-        color: #e6edf3;
-        text-transform: none;
-        user-select: none;
-      }
-
-      .checkbox-label input[type="checkbox"] {
-        width: 16px;
-        height: 16px;
-        accent-color: #c9a84c;
+        font-weight: 600;
+        text-decoration: none;
         cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+      }
+      .nav-btn-pill:hover {
+        border-color: var(--gold-400);
+        background: var(--bg-surface-elevated);
+        box-shadow: 0 0 16px var(--gold-glow);
+      }
+      .nav-btn-pill.active {
+        background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+        color: #060911;
+        border-color: var(--gold-300);
+        box-shadow: 0 0 20px var(--gold-glow-strong);
+      }
+      .nav-btn-pill.chime-btn:hover {
+        border-color: var(--emerald-400);
+        box-shadow: 0 0 16px var(--emerald-glow);
       }
 
-      input[type="range"] {
-        padding: 4px 0;
-        width: 130px;
-        accent-color: #c9a84c;
-        cursor: pointer;
+      .audio-wave {
+        display: inline-flex;
+        gap: 2px;
+        align-items: flex-end;
+        height: 12px;
+      }
+      .audio-bar {
+        width: 2.5px;
+        background: var(--gold-400);
+        border-radius: 2px;
+        animation: soundWave 1s ease-in-out infinite alternate;
+      }
+      .audio-bar:nth-child(1) {
+        height: 4px;
+        animation-delay: 0.1s;
+      }
+      .audio-bar:nth-child(2) {
+        height: 10px;
+        animation-delay: 0.25s;
+      }
+      .audio-bar:nth-child(3) {
+        height: 6px;
+        animation-delay: 0.4s;
       }
 
-      /* ── Color swatches ── */
-      .color-row {
-        display: flex;
-        gap: 8px;
+      @keyframes soundWave {
+        0% {
+          height: 3px;
+        }
+        100% {
+          height: 12px;
+        }
+      }
+      @keyframes subtleFloat {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-3px) rotate(4deg);
+        }
+      }
+
+      /* ── Canopy Stage (Hero) ── */
+      .canopy-stage {
+        position: relative;
+        text-align: center;
+        padding: 130px clamp(20px, 6vw, 80px) 70px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .canopy-badge-wrap {
+        display: inline-flex;
         align-items: center;
-        flex-wrap: wrap;
-      }
-      .color-sub-section {
-        display: flex;
-        flex-direction: column;
         gap: 8px;
+        padding: 6px 16px;
+        border-radius: 30px;
+        background: rgba(201, 168, 76, 0.08);
+        border: 1px solid var(--border-mid);
+        margin-bottom: 24px;
+        font-size: 0.82rem;
+        color: var(--gold-300);
+        letter-spacing: 0.4px;
+        box-shadow: 0 0 20px rgba(201, 168, 76, 0.08);
       }
-      .color-sub-title {
-        font-size: 0.68rem;
-        color: #8b8f98;
+      .canopy-badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--emerald-400);
+        box-shadow: 0 0 8px var(--emerald-400);
+        animation: pulseDot 2s ease-in-out infinite;
+      }
+      @keyframes pulseDot {
+        0%,
+        100% {
+          opacity: 0.4;
+          transform: scale(0.9);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.15);
+        }
+      }
+
+      .canopy-arabic-blessing {
+        font-family: var(--font-arabic);
+        font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+        color: var(--gold-300);
+        opacity: 0.92;
+        margin-bottom: 8px;
+        text-shadow: 0 0 25px rgba(201, 168, 76, 0.4);
+        direction: rtl;
+      }
+
+      .canopy-title {
+        font-family: var(--font-display);
+        font-size: clamp(2.6rem, 6.5vw, 5.2rem);
+        font-weight: 800;
+        line-height: 1.08;
+        letter-spacing: -0.5px;
+        margin-bottom: 18px;
+        background: linear-gradient(
+          135deg,
+          #ffffff 0%,
+          #fef1b8 40%,
+          #c9a84c 85%,
+          #88651c 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 45px rgba(201, 168, 76, 0.25);
+      }
+
+      .canopy-sub {
+        max-width: 680px;
+        margin: 0 auto 36px;
+        font-size: clamp(1rem, 1.3vw, 1.15rem);
+        line-height: 1.7;
+        color: var(--text-secondary);
+        font-weight: 400;
+      }
+
+      /* Quick Package Install Box */
+      .quick-install-box {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(10, 15, 26, 0.88);
+        border: 1px solid var(--border-mid);
+        border-radius: var(--radius-md);
+        padding: 6px 6px 6px 16px;
+        box-shadow:
+          0 10px 30px -10px rgba(0, 0, 0, 0.6),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        gap: 12px;
+        max-width: 90%;
+        margin-bottom: 28px;
+      }
+      .quick-install-code {
+        font-family: var(--font-mono);
+        font-size: 0.88rem;
+        color: var(--gold-300);
+      }
+      .quick-install-copy-btn {
+        padding: 7px 16px;
+        border-radius: 8px;
+        background: rgba(201, 168, 76, 0.15);
+        border: 1px solid var(--border-mid);
+        color: var(--gold-200);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .quick-install-copy-btn:hover {
+        background: var(--gold-500);
+        color: #060911;
+        box-shadow: 0 0 16px var(--gold-glow);
+      }
+
+      .canopy-framework-tags {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 48px;
+      }
+      .framework-chip {
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--border-dark);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-secondary);
+        font-size: 0.76rem;
+        font-weight: 500;
         letter-spacing: 0.3px;
       }
-      .color-divider {
-        width: 1px;
-        align-self: stretch;
-        background: #30363d;
-        margin: 0 6px;
+
+      /* ── Signature Element: Curated Atmospheric Presets Deck ── */
+      .presets-deck-wrapper {
+        max-width: 1100px;
+        margin: 0 auto 50px;
+        text-align: left;
       }
-      .color-swatch-wrap {
+      .presets-deck-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        padding: 0 4px;
+      }
+      .presets-deck-title {
+        font-family: var(--font-display);
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--gold-300);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .presets-deck-hint {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      .presets-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 12px;
+      }
+      .preset-card {
+        padding: 16px 14px;
+        border-radius: var(--radius-md);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      .preset-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at 50% 0%,
+          var(--gold-glow),
+          transparent 70%
+        );
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .preset-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--gold-400);
+        box-shadow:
+          0 12px 28px -6px rgba(0, 0, 0, 0.7),
+          0 0 20px var(--gold-glow);
+      }
+      .preset-card:hover::before {
+        opacity: 1;
+      }
+      .preset-card.active {
+        border-color: var(--gold-300);
+        background: linear-gradient(
+          180deg,
+          rgba(201, 168, 76, 0.12) 0%,
+          var(--bg-surface) 100%
+        );
+        box-shadow: 0 0 25px var(--gold-glow);
+      }
+      .preset-card-icon {
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+        display: inline-block;
+      }
+      .preset-card-name {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--text-pure);
+        margin-bottom: 4px;
+        letter-spacing: 0.2px;
+      }
+      .preset-card-desc {
+        font-size: 0.72rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
+      }
+
+      /* ── Unified Studio Workbench ── */
+      .workbench-container {
+        max-width: 1100px;
+        margin: 0 auto 60px;
+        padding: 0 clamp(16px, 3vw, 24px);
+      }
+
+      .workbench-shell {
+        background: var(--bg-surface-translucent);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-xl);
+        box-shadow:
+          0 20px 60px -15px rgba(0, 0, 0, 0.8),
+          inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+      }
+
+      /* Workbench Header / Status Bar */
+      .workbench-status-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 16px 24px;
+        background: rgba(8, 12, 20, 0.6);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .state-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.76rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-dark);
+        color: var(--text-secondary);
+      }
+      .state-pill strong {
+        color: var(--gold-300);
+        font-weight: 600;
+      }
+
+      .status-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      /* Workbench Navigation Tabs */
+      .workbench-tabs-nav {
+        display: flex;
+        overflow-x: auto;
+        background: rgba(12, 17, 28, 0.95);
+        border-bottom: 1px solid var(--border-subtle);
+        scrollbar-width: none;
+      }
+      .workbench-tabs-nav::-webkit-scrollbar {
+        display: none;
+      }
+      .workbench-tab-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 22px;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--text-muted);
+        font-family: var(--font-ui);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s;
+      }
+      .workbench-tab-btn:hover {
+        color: var(--text-primary);
+        background: rgba(201, 168, 76, 0.03);
+      }
+      .workbench-tab-btn.active {
+        color: var(--gold-300);
+        border-bottom-color: var(--gold-400);
+        background: rgba(201, 168, 76, 0.06);
+      }
+
+      /* Workbench Tab Pane Content */
+      .workbench-pane {
+        display: none;
+        padding: 28px clamp(18px, 3vw, 36px);
+      }
+      .workbench-pane.active {
+        display: block;
+        animation: fadeInPane 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes fadeInPane {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Grid for Controls */
+      .studio-controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        align-items: flex-start;
+      }
+
+      .control-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .control-field label {
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+      }
+      .control-field .field-hint {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+      }
+
+      /* Custom Modern Form Inputs */
+      select,
+      input[type="text"],
+      input[type="date"],
+      input[type="time"],
+      input[type="number"] {
+        width: 100%;
+        padding: 9px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-dark);
+        background: var(--bg-void);
+        color: var(--text-primary);
+        font-family: var(--font-ui);
+        font-size: 0.88rem;
+        transition: all 0.18s;
+        outline: none;
+      }
+      select:hover,
+      input[type="text"]:hover,
+      input[type="date"]:hover,
+      input[type="time"]:hover,
+      input[type="number"]:hover {
+        border-color: var(--border-subtle);
+      }
+      select:focus,
+      input[type="text"]:focus,
+      input[type="date"]:focus,
+      input[type="time"]:focus,
+      input[type="number"]:focus {
+        border-color: var(--gold-400);
+        box-shadow: 0 0 12px var(--gold-glow);
+      }
+
+      /* Sliders */
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--gold-400);
+        cursor: pointer;
+        padding: 4px 0;
+      }
+
+      /* Checkboxes */
+      .custom-checkbox-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+        user-select: none;
+        padding-top: 8px;
+      }
+      .custom-checkbox-wrap input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--gold-500);
+        cursor: pointer;
+      }
+
+      /* Swatch Grid */
+      .swatches-block {
+        background: rgba(8, 12, 20, 0.45);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 16px 20px;
+        margin-top: 16px;
+      }
+      .swatches-flex {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: flex-end;
+      }
+      .swatch-item {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 3px;
+        gap: 5px;
       }
-      .color-swatch-wrap span {
-        font-size: 0.65rem;
-        color: #8b8f98;
+      .swatch-item span {
+        font-size: 0.68rem;
+        color: var(--text-muted);
       }
       input[type="color"] {
         -webkit-appearance: none;
         appearance: none;
-        width: 34px;
-        height: 34px;
-        border: 2px solid #30363d;
-        border-radius: 6px;
+        width: 38px;
+        height: 38px;
+        border: 2px solid var(--border-dark);
+        border-radius: var(--radius-sm);
         padding: 2px;
-        background: #0d1117;
+        background: var(--bg-void);
         cursor: pointer;
+        transition: border-color 0.15s;
+      }
+      input[type="color"]:hover {
+        border-color: var(--gold-400);
       }
       input[type="color"]::-webkit-color-swatch-wrapper {
         padding: 0;
       }
       input[type="color"]::-webkit-color-swatch {
         border: none;
-        border-radius: 3px;
-      }
-      .btn-reset-colors {
-        padding: 5px 10px;
-        border-radius: 6px;
-        border: 1px solid #30363d;
-        background: transparent;
-        color: #8b8f98;
-        font-size: 0.75rem;
-        cursor: pointer;
-        transition:
-          border-color 0.15s,
-          color 0.15s;
-        align-self: flex-end;
-        margin-bottom: 2px;
-      }
-      .btn-reset-colors:hover {
-        border-color: #c9a84c;
-        color: #c9a84c;
+        border-radius: 4px;
       }
 
-      /* ── Action buttons ── */
-      .actions {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .btn {
-        padding: 8px 18px;
-        border-radius: 8px;
-        border: 1px solid #c9a84c;
+      /* Reset Button */
+      .btn-secondary-action {
+        padding: 7px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle);
         background: transparent;
-        color: #c9a84c;
-        font-size: 0.88rem;
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        font-weight: 500;
         cursor: pointer;
-        transition:
-          background 0.15s,
-          color 0.15s;
+        transition: all 0.15s;
       }
-      .btn:hover,
-      .btn.active {
-        background: #c9a84c;
-        color: #0d1117;
+      .btn-secondary-action:hover {
+        border-color: var(--gold-400);
+        color: var(--gold-300);
       }
 
-      /* ── Code output panel ── */
-      .code-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-        border-radius: 12px;
+      /* Code Panel Section */
+      .code-export-shell {
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
         overflow: hidden;
-        border: 1px solid #30363d;
+        background: var(--bg-void);
       }
       .code-tabs {
         display: flex;
-        background: #161b22;
-        border-bottom: 1px solid #30363d;
+        background: rgba(12, 17, 28, 0.95);
+        border-bottom: 1px solid var(--border-subtle);
+        overflow-x: auto;
       }
       .code-tab {
-        padding: 7px 14px;
-        font-size: 0.75rem;
-        color: #8b8f98;
+        padding: 10px 18px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
         cursor: pointer;
         border: none;
         background: transparent;
         letter-spacing: 0.3px;
-        transition: color 0.15s;
+        transition: all 0.15s;
       }
       .code-tab:hover {
-        color: #e6edf3;
+        color: var(--text-primary);
       }
       .code-tab.active {
-        color: #c9a84c;
-        border-bottom: 2px solid #c9a84c;
-        margin-bottom: -1px;
+        color: var(--gold-300);
+        border-bottom: 2px solid var(--gold-400);
+        background: rgba(201, 168, 76, 0.05);
       }
-      .code-actions {
-        display: flex;
-        gap: 8px;
-        padding: 8px 12px;
-        background: #161b22;
-        border-top: 1px solid #30363d;
-        justify-content: flex-end;
-      }
-      .btn-sm {
-        padding: 5px 12px;
-        border-radius: 6px;
-        border: 1px solid #30363d;
-        background: transparent;
-        color: #8b8f98;
-        font-size: 0.75rem;
-        cursor: pointer;
-        transition:
-          border-color 0.15s,
-          color 0.15s;
-      }
-      .btn-sm:hover {
-        border-color: #c9a84c;
-        color: #c9a84c;
-      }
-      .btn-sm.copied {
-        border-color: #3fb950;
-        color: #3fb950;
-      }
-
-      /* ── State & code ── */
-      .bottom-grid {
-        max-width: 860px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: 1fr 1.6fr;
-        gap: 20px;
-      }
-      @media (max-width: 600px) {
-        .bottom-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .state-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .state-item {
-        font-size: 0.88rem;
-        color: #8b8f98;
-      }
-      .state-item strong {
-        display: block;
-        color: #c9a84c;
-        font-size: 1rem;
-        margin-top: 2px;
-      }
-
       .code-box {
-        background: #0d1117;
-        border: 1px solid #30363d;
-        border-radius: 8px;
-        padding: 16px;
-        font-family: "Fira Code", "Cascadia Code", monospace;
-        font-size: 0.78rem;
-        line-height: 1.65;
-        color: #e6edf3;
+        padding: 20px;
+        font-family: var(--font-mono);
+        font-size: 0.84rem;
+        line-height: 1.7;
+        color: var(--text-primary);
         white-space: pre;
         overflow-x: auto;
         tab-size: 2;
+        background: var(--bg-void);
+        border: none;
+        margin: 0;
+        min-height: 140px;
       }
-      /* syntax tints */
+      .code-footer-bar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 10px 16px;
+        background: rgba(15, 22, 36, 0.8);
+        border-top: 1px solid var(--border-subtle);
+      }
+
+      /* Syntax tokens */
       .tok-key {
         color: #79c0ff;
       }
@@ -356,1380 +794,1146 @@
         color: #ff7b72;
       }
       .tok-cmt {
-        color: #8b949e;
+        color: #6e7681;
+        font-style: italic;
       }
 
-      /* ── Site content placeholder ── */
-      .site-content {
-        max-width: 720px;
-        margin: 48px auto 0;
-        text-align: center;
-        line-height: 1.8;
-      }
-      .site-content p {
-        color: #444d56;
-        font-size: 1rem;
-      }
-      .site-content .badge {
-        display: inline-block;
-        margin-top: 12px;
-        padding: 4px 12px;
-        border-radius: 20px;
-        border: 1px solid #30363d;
-        font-size: 0.78rem;
-        color: #8b8f98;
+      /* Diagnostic Terminal */
+      .diagnostic-terminal {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        background: #04060a;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        color: #7ee787;
+        max-height: 160px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        line-height: 1.6;
       }
 
-      /* ── Navbar ── */
-      .nav-bar {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 56px;
-        margin: 0 -20px;
-        padding: 0 28px;
-        background: rgba(13, 17, 23, 0.88);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid #30363d;
-      }
-      .nav-logo {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #c9a84c;
-        letter-spacing: -0.3px;
-        text-decoration: none;
-      }
-      .nav-links {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-      }
-      .nav-links a {
-        font-size: 0.84rem;
-        color: #8b8f98;
-        text-decoration: none;
-        transition: color 0.15s;
-      }
-      .nav-links a:hover {
-        color: #e6edf3;
-      }
-      .nav-links .nav-btn {
-        padding: 5px 14px;
-        border-radius: 6px;
-        border: 1px solid #30363d;
-        color: #e6edf3;
-        font-size: 0.82rem;
-        transition:
-          border-color 0.15s,
-          color 0.15s;
-      }
-      .nav-links .nav-btn:hover {
-        border-color: #c9a84c;
-        color: #c9a84c;
-      }
-
-      /* ── Hero ── */
-      .hero {
-        position: relative;
-        min-height: calc(100vh - 56px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 72px 20px 80px;
-        margin: 0 -20px;
-        overflow: hidden;
-      }
-      .hero::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(
-          ellipse 80% 55% at 50% -10%,
-          rgba(201, 168, 76, 0.14) 0%,
-          transparent 68%
-        );
-        pointer-events: none;
-      }
-      .hero-inner {
-        position: relative;
-        max-width: 740px;
+      /* Contact and Footer */
+      .celestial-footer {
+        max-width: 960px;
         margin: 0 auto;
-        padding: 0 16px;
-      }
-      .hero-eyebrow {
-        display: inline-block;
-        padding: 4px 14px;
-        border-radius: 20px;
-        border: 1px solid #30363d;
-        font-size: 0.74rem;
-        color: #8b8f98;
-        margin-bottom: 22px;
-        letter-spacing: 0.4px;
-      }
-      .hero-title {
-        font-size: clamp(2.4rem, 7vw, 4rem);
-        letter-spacing: -1.5px;
-        line-height: 1.08;
-        margin-bottom: 20px;
-        background: linear-gradient(
-          135deg,
-          #f0d87a 0%,
-          #c9a84c 50%,
-          #e8c96b 100%
-        );
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-      .hero-sub {
-        font-size: 1.05rem;
-        color: #8b8f98;
-        line-height: 1.75;
-        max-width: 580px;
-        margin: 0 auto 30px;
-      }
-      .install-cmd {
-        display: inline-flex;
-        align-items: center;
-        gap: 14px;
-        padding: 10px 18px;
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 10px;
-        margin-bottom: 24px;
-      }
-      .install-cmd code {
-        font-family: "Fira Code", "Cascadia Code", monospace;
-        font-size: 0.9rem;
-        color: #c9a84c;
-        white-space: nowrap;
-      }
-      .btn-copy-install {
-        padding: 3px 10px;
-        border-radius: 5px;
-        border: 1px solid #30363d;
-        background: transparent;
-        color: #8b8f98;
-        font-size: 0.74rem;
-        cursor: pointer;
-        transition:
-          border-color 0.15s,
-          color 0.15s;
-        white-space: nowrap;
-      }
-      .btn-copy-install:hover {
-        border-color: #c9a84c;
-        color: #c9a84c;
-      }
-      .hero-badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: center;
-        margin-bottom: 30px;
-      }
-      .badge-pill {
-        padding: 4px 13px;
-        border-radius: 20px;
-        font-size: 0.76rem;
-        background: rgba(201, 168, 76, 0.08);
-        border: 1px solid rgba(201, 168, 76, 0.22);
-        color: #c9a84c;
-      }
-      .hero-cta {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-bottom: 52px;
-      }
-      .btn-hero-primary {
-        padding: 11px 26px;
-        border-radius: 8px;
-        background: #c9a84c;
-        color: #0d1117;
-        font-size: 0.92rem;
-        font-weight: 700;
-        text-decoration: none;
-        transition: opacity 0.15s;
-      }
-      .btn-hero-primary:hover {
-        opacity: 0.87;
-      }
-      .btn-hero-secondary {
-        padding: 11px 26px;
-        border-radius: 8px;
-        border: 1px solid #c9a84c;
-        color: #c9a84c;
-        font-size: 0.92rem;
-        font-weight: 500;
-        text-decoration: none;
-        transition: background 0.15s;
-      }
-      .btn-hero-secondary:hover {
-        background: rgba(201, 168, 76, 0.1);
-      }
-      .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
-        gap: 16px;
-        text-align: left;
-      }
-      .feature-card {
-        padding: 18px 16px;
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 10px;
-        transition: border-color 0.2s;
-      }
-      .feature-card:hover {
-        border-color: rgba(201, 168, 76, 0.4);
-      }
-      .feature-icon {
-        font-size: 1.5rem;
-        margin-bottom: 10px;
-      }
-      .feature-label {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #e6edf3;
-        margin-bottom: 5px;
-      }
-      .feature-desc {
-        font-size: 0.76rem;
-        color: #8b8f98;
-        line-height: 1.55;
-      }
-
-      /* ── Section heading ── */
-      .section-heading {
+        padding: 40px 20px 80px;
         text-align: center;
-        max-width: 860px;
-        margin: 64px auto 28px;
-        padding: 0 4px;
+        border-top: 1px solid var(--border-subtle);
       }
-      .section-heading h2 {
-        font-size: clamp(1.4rem, 4vw, 1.9rem);
-        letter-spacing: -0.5px;
+      .footer-title {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--gold-300);
         margin-bottom: 6px;
       }
-      .section-heading p {
-        color: #8b8f98;
-        font-size: 0.9rem;
+      .footer-sub {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 24px;
       }
-
-      /* ── Contact ── */
-      .contact-section {
-        max-width: 860px;
-        margin: 60px auto 0;
-        padding: 48px 4px 40px;
-        text-align: center;
-        border-top: 1px solid #30363d;
-      }
-      .contact-title {
-        font-size: clamp(1.3rem, 4vw, 1.9rem);
-        letter-spacing: -0.5px;
-        margin-bottom: 8px;
-      }
-      .contact-sub {
-        color: #8b8f98;
-        font-size: 0.9rem;
-        margin-bottom: 32px;
-      }
-      .contact-cards {
+      .footer-contact-links {
         display: flex;
-        flex-wrap: wrap;
-        gap: 14px;
         justify-content: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 30px;
       }
       .contact-card {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 11px;
-        padding: 14px 22px;
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 10px;
-        color: #e6edf3;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
         text-decoration: none;
-        font-size: 0.86rem;
-        transition:
-          border-color 0.2s,
-          color 0.2s;
-        min-width: 210px;
-        justify-content: center;
+        font-size: 0.82rem;
+        transition: all 0.2s;
       }
       .contact-card:hover {
-        border-color: #c9a84c;
-        color: #c9a84c;
+        border-color: var(--gold-400);
+        color: var(--gold-300);
+        transform: translateY(-2px);
       }
-      .contact-card svg {
-        flex-shrink: 0;
+      .footer-credits {
+        font-size: 0.78rem;
+        color: var(--text-muted);
       }
-      .contact-footer {
-        margin-top: 40px;
-        font-size: 0.76rem;
-        color: #444d56;
-      }
-      .contact-footer a {
-        color: #8b8f98;
+      .footer-credits a {
+        color: var(--gold-400);
         text-decoration: none;
-        transition: color 0.15s;
       }
-      .contact-footer a:hover {
-        color: #c9a84c;
+      .footer-credits a:hover {
+        text-decoration: underline;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .canopy-stage {
+          padding-top: 90px;
+        }
+        .canopy-title {
+          font-size: 2.4rem;
+        }
+        .workbench-pane {
+          padding: 20px 14px;
+        }
       }
     </style>
   </head>
+
   <body>
-    <!-- ── Navbar ── -->
-    <nav class="nav-bar">
-      <a class="nav-logo" href="#">🌙 ramadan-overlay</a>
-      <div class="nav-links">
-        <a href="#config">Config Generator</a>
-        <a
-          href="https://www.npmjs.com/package/ramadan-overlay"
-          target="_blank"
-          rel="noopener"
-          >npm</a
+    <!-- ── Celestial App Header ── -->
+    <header class="celestial-nav">
+      <a href="#" class="nav-brand">
+        <span class="nav-crescent-icon">🌙</span>
+        <span class="nav-title">ramadan-overlay</span>
+        <span class="nav-version-badge">v0.1.3</span>
+      </a>
+
+      <div class="nav-controls">
+        <!-- Master Overlay Toggle Switch -->
+        <button
+          class="nav-btn-pill active"
+          id="toggleBtn"
+          title="Toggle overlay visibility"
         >
+          <span style="font-size: 0.9rem">✨</span>
+          <span>Overlay ON</span>
+        </button>
+
+        <!-- Confetti Trigger -->
+        <button
+          class="nav-btn-pill"
+          id="confettiBtn"
+          title="Trigger celebratory confetti burst"
+        >
+          <span>🎊</span>
+          <span>Confetti</span>
+        </button>
+
+        <!-- Melodic Chime Preview -->
+        <button
+          class="nav-btn-pill chime-btn"
+          id="btnTestChime"
+          title="Listen to built-in Web Audio harmonic alert chime"
+        >
+          <span class="audio-wave">
+            <span class="audio-bar"></span>
+            <span class="audio-bar"></span>
+            <span class="audio-bar"></span>
+          </span>
+          <span>Test Chime</span>
+        </button>
+
+        <!-- GitHub link -->
         <a
           href="https://github.com/3mr-5aled/ramadan-overlay"
           target="_blank"
           rel="noopener"
-          class="nav-btn"
-          >GitHub ↗</a
+          class="nav-btn-pill"
+          style="border-color: var(--border-dark)"
         >
+          <span>GitHub ↗</span>
+        </a>
       </div>
-    </nav>
+    </header>
 
-    <!-- ── Hero ── -->
-    <section class="hero">
-      <div class="hero-inner">
-        <div class="hero-eyebrow">
-          Open Source &nbsp;·&nbsp; MIT License &nbsp;·&nbsp; v0.1.3
-        </div>
+    <!-- ── Canopy Stage (The Architectural Showcase) ── -->
+    <section class="canopy-stage">
+      <div class="canopy-badge-wrap">
+        <span class="canopy-badge-dot"></span>
+        <span>Ramadan 1447 AH &amp; Eid Celebrations</span>
+      </div>
 
-        <h1 class="hero-title">🌙 ramadan-overlay</h1>
+      <div class="canopy-arabic-blessing">
+        شَهْرُ رَمَضَانَ الَّذِي أُنزِلَ فِيهِ الْقُرْآنُ
+      </div>
+      <h1 class="canopy-title">ramadan-overlay</h1>
+      <p class="canopy-sub">
+        A lightweight, framework-agnostic TypeScript library that injects
+        beautiful, culturally authentic Ramadan &amp; Eid decorations into any
+        website. Auto-detects Hijri dates with zero external dependencies.
+      </p>
 
-        <p class="hero-sub">
-          Add beautiful Ramadan and Eid celebration overlays to any website in
-          seconds. Auto-detects Ramadan, Eid Al-Fitr, and Eid Al-Adha dates,
-          dedicated visual variants, and works with every major framework — zero
-          dependencies.
-        </p>
+      <!-- Quick Install Box with Interactive Toast -->
+      <div class="quick-install-box">
+        <span style="color: var(--text-muted)">$</span>
+        <code class="quick-install-code" id="quickInstallCmd"
+          >npm install ramadan-overlay</code
+        >
+        <button class="quick-install-copy-btn" id="quickInstallCopyBtn">
+          Copy
+        </button>
+      </div>
 
-        <div class="install-cmd">
-          <code>npm install ramadan-overlay</code>
-          <button
-            class="btn-copy-install"
-            onclick="
-              this.textContent = '✓ Copied!';
-              navigator.clipboard.writeText('npm install ramadan-overlay');
-              setTimeout(() => (this.textContent = 'Copy'), 2000);
-            "
+      <!-- Framework Pills -->
+      <div class="canopy-framework-tags">
+        <span class="framework-chip">⚛️ React</span>
+        <span class="framework-chip">💚 Vue 3</span>
+        <span class="framework-chip">🔺 Angular</span>
+        <span class="framework-chip">🧡 Svelte</span>
+        <span class="framework-chip">⚡ Vanilla JS</span>
+        <span class="framework-chip">🌐 Script CDN</span>
+      </div>
+
+      <!-- ── Signature Element: Curated Atmospheric Presets Deck ── -->
+      <div class="presets-deck-wrapper">
+        <div class="presets-deck-header">
+          <div class="presets-deck-title">
+            <span>✨</span>
+            <span>Curated Atmosphere Presets</span>
+          </div>
+          <span class="presets-deck-hint"
+            >Click any preset to instantly morph the overlay</span
           >
-            Copy
-          </button>
         </div>
 
-        <div class="hero-badges">
-          <span class="badge-pill">React</span>
-          <span class="badge-pill">Vue</span>
-          <span class="badge-pill">Angular</span>
-          <span class="badge-pill">Svelte</span>
-          <span class="badge-pill">Vanilla JS</span>
-          <span class="badge-pill">CDN</span>
-        </div>
+        <div class="presets-grid">
+          <!-- Preset 1: Fanoos Nights -->
+          <div class="preset-card active" data-preset="fanoos">
+            <span class="preset-card-icon">🏮</span>
+            <div class="preset-card-name">Fanoos Nights</div>
+            <div class="preset-card-desc">
+              Handcrafted hanging lanterns with warm golden flame and scalloped
+              rope
+            </div>
+          </div>
 
-        <div class="hero-cta">
-          <a href="#config" class="btn-hero-primary">Try the configurator ↓</a>
-          <a
-            href="https://github.com/3mr-5aled/ramadan-overlay"
-            class="btn-hero-secondary"
-            target="_blank"
-            rel="noopener"
-            >View on GitHub ↗</a
-          >
-        </div>
+          <!-- Preset 2: Laylat Al-Qadr -->
+          <div class="preset-card" data-preset="laylat">
+            <span class="preset-card-icon">🌌</span>
+            <div class="preset-card-name">Laylat Al-Qadr</div>
+            <div class="preset-card-desc">
+              Sublime shimmering sparkles on deep midnight sapphire sky
+            </div>
+          </div>
 
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">🗓️</div>
-            <div class="feature-label">Auto-detection</div>
-            <div class="feature-desc">
-              Automatically activates during Ramadan, Eid Al-Fitr, and Eid
-              Al-Adha using Hijri calendar calculation — no manual dates needed.
+          <!-- Preset 3: Desert Crescent -->
+          <div class="preset-card" data-preset="crescent">
+            <span class="preset-card-icon">🌙</span>
+            <div class="preset-card-name">Desert Crescent</div>
+            <div class="preset-card-desc">
+              Crescent moons and floating stars with amber desert twilight
+              shadows
             </div>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">🎨</div>
-            <div class="feature-label">8 Variants</div>
-            <div class="feature-desc">
-              Lanterns, Sparkles, Crescent &amp; Stars, Geometric, Eid Al-Fitr,
-              Eid Al-Adha, and Banner styles to suit any site.
+
+          <!-- Preset 4: Arabesque Geometry -->
+          <div class="preset-card" data-preset="geometric">
+            <span class="preset-card-icon">🕌</span>
+            <div class="preset-card-name">Arabesque Stars</div>
+            <div class="preset-card-desc">
+              Sacred Islamic octagonal geometry in lush emerald and gold
             </div>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <div class="feature-label">Lightweight</div>
-            <div class="feature-desc">
-              Zero runtime dependencies, tree-shakeable, and works with any
-              front-end stack or plain HTML.
-            </div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🌍</div>
-            <div class="feature-label">Region-aware</div>
-            <div class="feature-desc">
-              Supports 10+ regional Ramadan start-date calendars with a
-              configurable Hijri offset.
+
+          <!-- Preset 5: Eid Celebration -->
+          <div class="preset-card" data-preset="eid">
+            <span class="preset-card-icon">🎊</span>
+            <div class="preset-card-name">Eid Festivities</div>
+            <div class="preset-card-desc">
+              Joyful Eid Al-Fitr balloons, celebratory confetti, and Iftar flare
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ── Config section heading ── -->
-    <div class="section-heading" id="config">
-      <h2>⚙️ Config Generator</h2>
-      <p>
-        Customise the overlay live and copy the ready-to-use code for your
-        project
-      </p>
-    </div>
-
-    <!-- ── Main controls ── -->
-    <div class="panel">
-      <div class="panel-title">Overlay Settings</div>
-      <div class="controls-grid">
-        <div class="control-group">
-          <label>Variant</label>
-          <select id="variantSelect">
-            <option value="lanterns" selected>Lanterns</option>
-            <option value="sparkles">Sparkles</option>
-            <option value="crescent-stars">Crescent &amp; Stars</option>
-            <option value="geometric">Geometric</option>
-            <option value="eid">Eid (Auto: Fitr / Adha)</option>
-            <option value="eid-fitr">Eid Al-Fitr (Balloons &amp; Gifts)</option>
-            <option value="eid-adha">Eid Al-Adha (Sheep &amp; Kaaba)</option>
-            <option value="banner">Banner</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label>Occasions</label>
-          <select id="occasionsSelect">
-            <option value="all" selected>All (Ramadan + Eids)</option>
-            <option value="ramadan">Ramadan Only</option>
-            <option value="eid">Eids Only</option>
-            <option value="eid-fitr">Eid Al-Fitr Only</option>
-            <option value="eid-adha">Eid Al-Adha Only</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label>Detection Mode</label>
-          <select id="calendarModeSelect">
-            <option value="auto">Auto-detect (Current Date)</option>
-            <option value="preview" selected>
-              Preview Mode (Force Display)
-            </option>
-            <option value="simulate">Simulate Calendar Date</option>
-          </select>
-        </div>
-
-        <div class="control-group" id="simDateGroup" style="display: none">
-          <label>Simulated Date</label>
-          <input type="date" id="simulatedDatePicker" value="2026-02-25" />
-        </div>
-
-        <div class="control-group" id="simPresetGroup" style="display: none">
-          <label>Quick Presets (1447 AH)</label>
-          <select id="occasionPreviewSelect">
-            <option value="ramadan" selected>
-              Ramadan 1447 (Feb 25, 2026)
-            </option>
-            <option value="eid-fitr">Eid Al-Fitr 1447 (Mar 21, 2026)</option>
-            <option value="eid-adha">Eid Al-Adha 1447 (May 28, 2026)</option>
-            <option value="none">Normal Day (Aug 15, 2026)</option>
-          </select>
-        </div>
-
-        <div class="control-group" id="eidVariantGroup">
-          <label>Eid Variant</label>
-          <select id="eidVariantSelect">
-            <option value="eid" selected>Auto (Fitr / Adha)</option>
-            <option value="eid-fitr">Eid Al-Fitr (Balloons &amp; Gifts)</option>
-            <option value="eid-adha">Eid Al-Adha (Sheep &amp; Kaaba)</option>
-            <option value="lanterns">Lanterns</option>
-            <option value="sparkles">Sparkles</option>
-            <option value="crescent-stars">Crescent &amp; Stars</option>
-            <option value="geometric">Geometric</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label>Position</label>
-          <select id="positionSelect">
-            <option value="both" selected>Both (Top &amp; Bottom)</option>
-            <option value="top">Top</option>
-            <option value="bottom">Bottom</option>
-            <option value="left">Left (Vertical Side)</option>
-            <option value="right">Right (Vertical Side)</option>
-            <option value="sides">Sides (Dual Margins)</option>
-            <option value="full">Full</option>
-          </select>
-        </div>
-
-        <div class="control-group" id="mobileSideGroup" style="display: none">
-          <label>Mobile Side Behavior</label>
-          <select id="mobileSideBehaviorSelect">
-            <option value="hide" selected>Hide on Mobile (&lt;768px)</option>
-            <option value="show">Show on Mobile</option>
-            <option value="minimal">Minimal (Fewer Motifs)</option>
-          </select>
-        </div>
-
-        <div class="control-group" id="clearanceGroup" style="display: none">
-          <label>Motif Clearance</label>
-          <select id="clearanceSelect">
-            <option value="edges" selected>Edges (Safe Zone)</option>
-            <option value="full">Full Screen (Scatter)</option>
-          </select>
-        </div>
-
-        <div class="control-group" id="layerGroup">
-          <label>Layer Stacking</label>
-          <select id="layerSelect">
-            <option value="foreground" selected>Foreground (On Top)</option>
-            <option value="background">Background (Behind Content)</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label>Theme</label>
-          <select id="themeSelect">
-            <option value="classic" selected>Classic (Gold)</option>
-            <option value="midnight">Midnight (Sapphire)</option>
-            <option value="emerald">Emerald (Jade &amp; Gold)</option>
-            <option value="royal">Royal (Amethyst)</option>
-            <option value="desert-dusk">Desert Dusk (Amber)</option>
-            <option value="platinum-minimal">
-              Platinum Minimal (Silver &amp; Slate)
-            </option>
-            <option value="rose-sahara">
-              Rose Sahara (Rose Gold &amp; Sand)
-            </option>
-            <option value="custom">Custom (Manual)</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label>Shadows</label>
-          <select id="shadowsSelect">
-            <option value="soft" selected>Soft (Default)</option>
-            <option value="deep">Deep (Dramatic)</option>
-            <option value="none">None (Flat)</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label>Locale</label>
-          <select id="localeSelect">
-            <option value="en" selected>English (en)</option>
-            <option value="ar">Arabic (ar)</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label
-            >Opacity &nbsp;<span
-              id="opacityVal"
-              style="color: #c9a84c; font-size: 0.85rem"
-              >0.85</span
-            ></label
-          >
-          <input
-            type="range"
-            id="opacityRange"
-            min="0.1"
-            max="1"
-            step="0.05"
-            value="0.85"
-          />
-        </div>
-
-        <div class="control-group">
-          <label>Confetti</label>
-          <select id="confettiSelect">
-            <option value="on" selected>🎊 Enabled</option>
-            <option value="off">Disabled</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label>Region / Calendar</label>
-          <select id="regionSelect">
-            <option value="standard" selected>Standard (Umm al-Qura)</option>
-            <option value="saudi">Saudi Arabia</option>
-            <option value="uae">UAE</option>
-            <option value="malaysia">Malaysia</option>
-            <option value="egypt">Egypt (+1 day)</option>
-            <option value="turkey">Turkey (+1 day)</option>
-            <option value="pakistan">Pakistan (+1 day)</option>
-            <option value="indonesia">Indonesia (+1 day)</option>
-            <option value="morocco">Morocco (+1 day)</option>
-            <option value="us">USA / ISNA (+1 day)</option>
-            <option value="uk">UK (+1 day)</option>
-            <option value="custom">Custom offset…</option>
-          </select>
-        </div>
-
-        <div class="control-group" id="hijriAdjGroup" style="display: none">
-          <label>Hijri Offset (days)</label>
-          <input
-            type="number"
-            id="hijriAdjustment"
-            value="0"
-            min="-3"
-            max="3"
-            step="1"
-            style="
-              width: 70px;
-              padding: 6px 10px;
-              border-radius: 6px;
-              border: 1px solid #30363d;
-              background: #0d1117;
-              color: #e6edf3;
-              font-size: 0.88rem;
-            "
-          />
-        </div>
-
-        <div class="control-group" id="lanternStyleGroup">
-          <label>Lantern Style</label>
-          <select id="lanternStyleSelect">
-            <option value="0" selected>All (cycle)</option>
-            <option value="1">Style 1</option>
-            <option value="2">Style 2</option>
-            <option value="3">Style 3</option>
-            <option value="4">Style 4</option>
-            <option value="5">Style 5</option>
-            <option value="6">Style 6</option>
-            <option value="7">Style 7</option>
-            <option value="8">Style 8</option>
-            <option value="9">Style 9</option>
-            <option value="10">Style 10</option>
-            <option value="11">Style 11</option>
-            <option value="12">Style 12</option>
-          </select>
-        </div>
-
-        <div class="control-group" id="ropeStyleGroup">
-          <label>Rope Style</label>
-          <select id="ropeStyleSelect">
-            <option value="straight" selected>Straight Ceiling</option>
-            <option value="u-shaped">U-Shaped Scallop</option>
-            <option value="dual">Dual Suspended Ropes</option>
-          </select>
-        </div>
-
-        <div class="control-group" id="ropeSagGroup">
-          <label
-            >Rope Sag &nbsp;<span
-              id="ropeSagVal"
-              style="color: #c9a84c; font-size: 0.85rem"
-              >20px</span
-            ></label
-          >
-          <input
-            type="range"
-            id="ropeSagRange"
-            min="6"
-            max="60"
-            step="2"
-            value="20"
-          />
-        </div>
-
-        <div class="control-group">
-          <label>Density</label>
-          <select id="densitySelect">
-            <option value="auto" selected>Auto</option>
-            <option value="low">Low</option>
-            <option value="normal">Normal</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label>Z-Index</label>
-          <input
-            type="number"
-            id="zIndexInput"
-            value="9999"
-            min="0"
-            max="2147483647"
-            style="
-              width: 90px;
-              padding: 6px 10px;
-              border-radius: 6px;
-              border: 1px solid #30363d;
-              background: #0d1117;
-              color: #e6edf3;
-              font-size: 0.88rem;
-            "
-          />
-        </div>
-
-        <div
-          class="control-group"
-          style="justify-content: flex-end; padding-bottom: 6px"
-        >
-          <label class="checkbox-label">
-            <input type="checkbox" id="liveTransitionCheckbox" checked />
-            <span>Live Transition (Midnight Re-check)</span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Color palette (lanterns) ── -->
-    <div class="panel" id="lanternColorPanel">
-      <div class="panel-title" style="margin-bottom: 12px">
-        Colors
-        <button
-          class="btn-reset-colors"
-          id="resetColorsBtn"
-          style="float: right; margin-top: -2px"
-        >
-          Reset defaults
-        </button>
-      </div>
-      <div
-        style="
-          display: flex;
-          gap: 16px;
-          flex-wrap: wrap;
-          align-items: flex-start;
-        "
-      >
-        <!-- per-lantern swatches -->
-        <div class="color-sub-section">
-          <div class="color-sub-title">Lanterns (1 – 12)</div>
-          <div class="color-row">
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc1" value="#c9a84c" /><span>1</span>
+    <!-- ── Unified Studio Workbench ── -->
+    <main class="workbench-container" id="config">
+      <div class="workbench-shell">
+        <!-- Workbench Top Status Bar -->
+        <div class="workbench-status-bar">
+          <div class="status-left">
+            <div class="state-pill">
+              <span>Calendar Occasion:</span>
+              <strong id="s-occasion">—</strong>
             </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc2" value="#e8c96b" /><span>2</span>
+            <div class="state-pill">
+              <span>Hijri Year:</span>
+              <strong id="s-hijriYear">—</strong>
             </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc3" value="#8b4513" /><span>3</span>
+            <div class="state-pill">
+              <span>Day:</span>
+              <strong id="s-dayNumber">—</strong>
             </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc4" value="#2d5a27" /><span>4</span>
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc5" value="#4a8a3a" /><span>5</span>
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc6" value="#8b1a1a" /><span>6</span>
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc7" value="#cc4444" /><span>7</span>
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc8" value="#1a3a6b" /><span>8</span>
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc9" value="#3a6ab8" /><span>9</span>
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc10" value="#6b2fa0" /><span>10</span>
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc11" value="#c44d8a" /><span>11</span>
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="lc12" value="#1a7a6b" /><span>12</span>
-            </div>
+            <span id="s-isRamadan" style="display: none">false</span>
+            <span id="s-isEid" style="display: none">false</span>
           </div>
-        </div>
 
-        <div class="color-divider"></div>
-
-        <!-- ceiling / rope swatches -->
-        <div class="color-sub-section">
-          <div class="color-sub-title">Ceiling &amp; Rope</div>
-          <div class="color-row">
-            <div class="color-swatch-wrap">
-              <input type="color" id="ceilingColor" value="#c9a84c" /><span
-                >Ceiling</span
-              >
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="ropeColor" value="#c9a84c" /><span
-                >String</span
-              >
-            </div>
-          </div>
-        </div>
-
-        <div class="color-divider"></div>
-
-        <!-- glow swatch (lanterns) -->
-        <div class="color-sub-section">
-          <div class="color-sub-title">Glow</div>
-          <div class="color-row">
-            <div class="color-swatch-wrap">
-              <input type="color" id="glowColorLantern" value="#c9a84c" /><span
-                >Glow</span
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Color palette (other variants) ── -->
-    <div class="panel" id="genericColorPanel" style="display: none">
-      <div class="panel-title" style="margin-bottom: 12px">
-        Colors
-        <button
-          class="btn-reset-colors"
-          id="resetColorsGenericBtn"
-          style="float: right; margin-top: -2px"
-        >
-          Reset defaults
-        </button>
-      </div>
-      <div
-        style="
-          display: flex;
-          gap: 16px;
-          flex-wrap: wrap;
-          align-items: flex-start;
-        "
-      >
-        <div class="color-sub-section">
-          <div class="color-sub-title">Colors</div>
-          <div class="color-row">
-            <div class="color-swatch-wrap">
-              <input type="color" id="gc1" value="#c9a84c" /><span
-                >Color 1</span
-              >
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="gc2" value="#e8c96b" /><span
-                >Color 2</span
-              >
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="gc3" value="#8b4513" /><span
-                >Color 3</span
-              >
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="gc4" value="#2d5a27" /><span
-                >Color 4</span
-              >
-            </div>
-            <div class="color-swatch-wrap">
-              <input type="color" id="gc5" value="#1a3a1a" /><span
-                >Color 5</span
-              >
-            </div>
-          </div>
-        </div>
-
-        <div class="color-divider"></div>
-
-        <div class="color-sub-section">
-          <div class="color-sub-title">Glow</div>
-          <div class="color-row">
-            <div class="color-swatch-wrap">
-              <input type="color" id="glowColorGeneric" value="#c9a84c" /><span
-                >Glow</span
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Color palette (banner variant) ── -->
-    <div class="panel" id="bannerColorPanel" style="display: none">
-      <div class="panel-title" style="margin-bottom: 12px">Banner Colors</div>
-      <div
-        style="
-          display: flex;
-          gap: 16px;
-          flex-wrap: wrap;
-          align-items: flex-start;
-        "
-      >
-        <div class="color-sub-section">
-          <div class="color-sub-title">Appearance</div>
-          <div class="color-row">
-            <div class="color-swatch-wrap">
-              <input type="color" id="bannerBgColor" value="#0f0f14" /><span
-                >Background</span
-              >
-            </div>
-            <div class="color-swatch-wrap">
-              <input
-                type="color"
-                id="bannerTextColorInput"
-                value="#c9a84c"
-              /><span>Text</span>
-            </div>
-            <div class="color-swatch-wrap">
-              <input
-                type="color"
-                id="bannerIconColorInput"
-                value="#c9a84c"
-              /><span>Icon</span>
-            </div>
-          </div>
-        </div>
-        <div class="color-sub-section" style="width: 100%">
-          <div class="color-sub-title">Custom Text — English</div>
-          <input
-            type="text"
-            id="bannerTextEn"
-            placeholder="Leave blank for default English greeting"
-            style="
-              width: 100%;
-              padding: 6px 10px;
-              background: #1a1a24;
-              border: 1px solid #3a3a5a;
-              border-radius: 6px;
-              color: #e0e0f0;
-              font-size: 13px;
-              box-sizing: border-box;
-            "
-          />
-        </div>
-        <div class="color-sub-section" style="width: 100%">
-          <div class="color-sub-title">Custom Text — Arabic</div>
-          <input
-            type="text"
-            id="bannerTextAr"
-            placeholder="اتركه فارغًا للتهنئة العربية الافتراضية"
-            dir="rtl"
-            style="
-              width: 100%;
-              padding: 6px 10px;
-              background: #1a1a24;
-              border: 1px solid #3a3a5a;
-              border-radius: 6px;
-              color: #e0e0f0;
-              font-size: 13px;
-              box-sizing: border-box;
-              text-align: right;
-            "
-          />
-        </div>
-        <div style="display: flex; justify-content: flex-end; padding-top: 4px">
-          <button
-            class="btn"
-            id="bannerApplyBtn"
-            style="padding: 6px 18px; font-size: 13px"
-          >
-            Apply
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Action buttons ── -->
-    <div class="panel" style="padding: 14px 24px">
-      <div class="actions">
-        <button class="btn active" id="toggleBtn">Overlay ON</button>
-        <button class="btn" id="confettiBtn">🎊 Fire Confetti</button>
-      </div>
-    </div>
-
-    <!-- ── Countdown Widget Panel ── -->
-    <div class="panel" id="countdownPanel">
-      <div class="panel-title">🌙 Iftar Countdown Widget</div>
-      <div class="controls-grid">
-        <div class="control-group">
-          <label>Countdown Target</label>
-          <select id="countdownSelect">
-            <option value="off" selected>Disabled</option>
-            <option value="auto">Auto Maghrib (18:15)</option>
-            <option value="custom">Custom Iftar Time</option>
-            <option value="1min">⏱️ 1-Minute Demo (+60s)</option>
-            <option value="demo-alert">Demo Celebration Flare (+10s)</option>
-          </select>
-        </div>
-
-        <div
-          class="control-group"
-          id="countdownIftarTimeGroup"
-          style="display: none"
-        >
-          <label>Iftar Time (HH:mm)</label>
-          <input type="time" id="countdownIftarTime" value="18:15" />
-        </div>
-
-        <div class="control-group" id="countdownPosGroup">
-          <label>Widget Position</label>
-          <select id="countdownPosSelect">
-            <option value="bottom-right" selected>Bottom Right</option>
-            <option value="bottom-left">Bottom Left</option>
-            <option value="top-right">Top Right</option>
-            <option value="top-left">Top Left</option>
-          </select>
-        </div>
-
-        <div class="control-group" id="countdownAudioGroup">
-          <label>Alert Audio</label>
-          <div
-            style="display: flex; gap: 8px; align-items: center; width: 100%"
-          >
-            <select id="countdownAudioSelect" style="flex: 1">
-              <option value="muted" selected>Muted by Default</option>
-              <option value="unmuted">Unmuted (Play Alert Sound)</option>
-            </select>
-            <button
-              type="button"
-              id="btnTestChime"
-              class="btn btn-secondary btn-sm"
-              title="Test the Ramadan alert chime"
-              style="
-                white-space: nowrap;
-                padding: 4px 8px;
-                font-size: 11px;
-                flex-shrink: 0;
-              "
-            >
-              🔊 Test Chime
+          <div class="status-actions">
+            <button class="btn-secondary-action" id="shareBtn">
+              🔗 Share Link
+            </button>
+            <button class="btn-secondary-action" id="copyBtn">
+              📋 Copy Code
             </button>
           </div>
         </div>
 
-        <div class="control-group" id="countdownSoundSourceGroup">
-          <label>Chime Sound</label>
-          <select id="countdownSoundSelect">
-            <option value="default" selected>
-              Built-in Melodic Chime (Web Audio)
-            </option>
-            <option value="custom">Custom Audio URL...</option>
-            <option value="none">Disabled (No Audio)</option>
-          </select>
+        <!-- Workbench Tab Navigation -->
+        <nav class="workbench-tabs-nav" aria-label="Studio Configuration Tabs">
+          <button class="workbench-tab-btn active" data-workbench-tab="motif">
+            <span>🎨</span>
+            <span>Motif &amp; Dynamics</span>
+          </button>
+          <button class="workbench-tab-btn" data-workbench-tab="palette">
+            <span>✨</span>
+            <span>Palette &amp; Glow</span>
+          </button>
+          <button class="workbench-tab-btn" data-workbench-tab="countdown">
+            <span>🌙</span>
+            <span>Iftar Countdown</span>
+          </button>
+          <button class="workbench-tab-btn" data-workbench-tab="safety">
+            <span>🛡️</span>
+            <span>Safety &amp; Dates</span>
+          </button>
+          <button class="workbench-tab-btn" data-workbench-tab="export">
+            <span>⚡</span>
+            <span>Code &amp; AI Export</span>
+          </button>
+        </nav>
+
+        <!-- ── TAB 1: Motif & Dynamics ── -->
+        <div class="workbench-pane active" id="pane-motif">
+          <div class="studio-controls-grid">
+            <div class="control-field">
+              <label for="variantSelect">Visual Variant</label>
+              <select id="variantSelect">
+                <option value="lanterns" selected>Lanterns (Fanoos)</option>
+                <option value="sparkles">Sparkles</option>
+                <option value="crescent-stars">Crescent &amp; Stars</option>
+                <option value="geometric">Geometric (Arabesque)</option>
+                <option value="eid">Eid (Auto: Fitr / Adha)</option>
+                <option value="eid-fitr">
+                  Eid Al-Fitr (Balloons &amp; Gifts)
+                </option>
+                <option value="eid-adha">
+                  Eid Al-Adha (Sheep &amp; Kaaba)
+                </option>
+                <option value="banner">Banner (Greeting Header)</option>
+              </select>
+              <span class="field-hint">Primary decorative theme</span>
+            </div>
+
+            <div class="control-field">
+              <label for="occasionsSelect">Occasion Triggers</label>
+              <select id="occasionsSelect">
+                <option value="all" selected>All (Ramadan + Eids)</option>
+                <option value="ramadan">Ramadan Only</option>
+                <option value="eid">Eids Only</option>
+                <option value="eid-fitr">Eid Al-Fitr Only</option>
+                <option value="eid-adha">Eid Al-Adha Only</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="positionSelect">Viewport Placement</label>
+              <select id="positionSelect">
+                <option value="both" selected>Both (Top &amp; Bottom)</option>
+                <option value="top">Top Ceiling</option>
+                <option value="bottom">Bottom Margin</option>
+                <option value="left">Left Margin</option>
+                <option value="right">Right Margin</option>
+                <option value="sides">Both Sides (Margins)</option>
+                <option value="full">Full Screen Dispersion</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="ropeStyleGroup">
+              <label for="ropeStyleSelect">Ceiling Suspension Style</label>
+              <select id="ropeStyleSelect">
+                <option value="straight" selected>Straight Ceiling Wire</option>
+                <option value="u-shaped">Scalloped Catenary Curves</option>
+                <option value="dual">Dual Suspended Ropes</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="ropeSagGroup">
+              <label for="ropeSagRange">
+                Rope Sag:
+                <span id="ropeSagVal" style="color: var(--gold-300)">20px</span>
+              </label>
+              <input
+                type="range"
+                id="ropeSagRange"
+                min="6"
+                max="60"
+                step="2"
+                value="20"
+              />
+            </div>
+
+            <div class="control-field" id="lanternStyleGroup">
+              <label for="lanternStyleSelect">Lantern Motif Style</label>
+              <select id="lanternStyleSelect">
+                <option value="0" selected>Cycle All 12 Styles</option>
+                <option value="1">Style 1 (Traditional)</option>
+                <option value="2">Style 2 (Octagonal)</option>
+                <option value="3">Style 3 (Minaret)</option>
+                <option value="4">Style 4 (Jeweled)</option>
+                <option value="5">Style 5 (Filigree)</option>
+                <option value="6">Style 6 (Hexagonal)</option>
+                <option value="7">Style 7 (Moroccan)</option>
+                <option value="8">Style 8 (Crescent Top)</option>
+                <option value="9">Style 9 (Palace)</option>
+                <option value="10">Style 10 (Ottoman)</option>
+                <option value="11">Style 11 (Khyameya)</option>
+                <option value="12">Style 12 (Modern Slim)</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="eidVariantGroup">
+              <label for="eidVariantSelect">Eid Variant Style</label>
+              <select id="eidVariantSelect">
+                <option value="eid" selected>Auto (Fitr / Adha)</option>
+                <option value="eid-fitr">
+                  Eid Al-Fitr (Balloons &amp; Gifts)
+                </option>
+                <option value="eid-adha">
+                  Eid Al-Adha (Sheep &amp; Kaaba)
+                </option>
+                <option value="lanterns">Lanterns</option>
+                <option value="sparkles">Sparkles</option>
+                <option value="crescent-stars">Crescent &amp; Stars</option>
+                <option value="geometric">Geometric</option>
+              </select>
+            </div>
+
+            <div
+              class="control-field"
+              id="clearanceGroup"
+              style="display: none"
+            >
+              <label for="clearanceSelect">Motif Safe Clearance</label>
+              <select id="clearanceSelect">
+                <option value="edges" selected>
+                  Edges (Protected Safe Zone)
+                </option>
+                <option value="full">Full Viewport Scatter</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="layerGroup">
+              <label for="layerSelect">Layer Stacking Depth</label>
+              <select id="layerSelect">
+                <option value="foreground" selected>
+                  Foreground (Overlay on top)
+                </option>
+                <option value="background">Background (Behind content)</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="densitySelect">Motif Quantity</label>
+              <select id="densitySelect">
+                <option value="auto" selected>
+                  Auto (Responsive to screen)
+                </option>
+                <option value="low">Low (Minimal &amp; Quiet)</option>
+                <option value="normal">Normal</option>
+                <option value="high">High (Festive Rich)</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="zIndexInput">Layer Z-Index</label>
+              <input
+                type="number"
+                id="zIndexInput"
+                value="9999"
+                min="0"
+                max="2147483647"
+              />
+            </div>
+
+            <div class="control-field" style="justify-content: flex-end">
+              <label class="custom-checkbox-wrap">
+                <input type="checkbox" id="liveTransitionCheckbox" checked />
+                <span>Midnight Auto-Transition</span>
+              </label>
+            </div>
+          </div>
         </div>
 
-        <div
-          class="control-group"
-          id="countdownSoundUrlGroup"
-          style="display: none"
-        >
-          <label>Audio URL</label>
-          <input
-            type="text"
-            id="countdownSoundUrlInput"
-            placeholder="https://example.com/adhan.mp3"
-          />
+        <!-- ── TAB 2: Palette & Glow ── -->
+        <div class="workbench-pane" id="pane-palette">
+          <div class="studio-controls-grid">
+            <div class="control-field">
+              <label for="themeSelect">Harmonious Theme Preset</label>
+              <select id="themeSelect">
+                <option value="classic" selected>Classic Imperial Gold</option>
+                <option value="midnight">Midnight Sapphire</option>
+                <option value="emerald">Emerald Oasis &amp; Gold</option>
+                <option value="royal">Royal Amethyst &amp; Amber</option>
+                <option value="desert-dusk">Desert Dusk Twilight</option>
+                <option value="platinum-minimal">Platinum Minimal Slate</option>
+                <option value="rose-sahara">Rose Sahara Sand</option>
+                <option value="custom">Custom Artisanal Palette</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="shadowsSelect">Elevation Shadows</label>
+              <select id="shadowsSelect">
+                <option value="soft" selected>Soft Atmospheric Drop</option>
+                <option value="deep">Deep Dramatic Shadow</option>
+                <option value="none">Flat (No Drop Shadows)</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="opacityRange">
+                Overlay Opacity:
+                <span id="opacityVal" style="color: var(--gold-300)">0.85</span>
+              </label>
+              <input
+                type="range"
+                id="opacityRange"
+                min="0.1"
+                max="1"
+                step="0.05"
+                value="0.85"
+              />
+            </div>
+
+            <div class="control-field">
+              <label for="confettiSelect">Festive Confetti</label>
+              <select id="confettiSelect">
+                <option value="on" selected>🎊 Enabled on Occasion</option>
+                <option value="off">Disabled</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="localeSelect">Greeting Language</label>
+              <select id="localeSelect">
+                <option value="en" selected>English (en)</option>
+                <option value="ar">Arabic (العربية)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Color Swatches: Lanterns -->
+          <div class="swatches-block" id="lanternColorPanel">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+              "
+            >
+              <span
+                style="
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  color: var(--gold-300);
+                  text-transform: uppercase;
+                "
+                >Lantern Swatches (1–12)</span
+              >
+              <button class="btn-secondary-action" id="resetColorsBtn">
+                Reset Defaults
+              </button>
+            </div>
+
+            <div class="swatches-flex">
+              <div class="swatch-item">
+                <input type="color" id="lc1" value="#c9a84c" /><span>L1</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc2" value="#e8c96b" /><span>L2</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc3" value="#8b4513" /><span>L3</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc4" value="#2d5a27" /><span>L4</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc5" value="#4a8a3a" /><span>L5</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc6" value="#8b1a1a" /><span>L6</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc7" value="#cc4444" /><span>L7</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc8" value="#1a3a6b" /><span>L8</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc9" value="#3a6ab8" /><span>L9</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc10" value="#6b2fa0" /><span>L10</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc11" value="#c44d8a" /><span>L11</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="lc12" value="#1a7a6b" /><span>L12</span>
+              </div>
+
+              <div
+                style="
+                  width: 1px;
+                  height: 38px;
+                  background: var(--border-subtle);
+                  margin: 0 4px;
+                "
+              ></div>
+
+              <div class="swatch-item">
+                <input type="color" id="ceilingColor" value="#c9a84c" /><span
+                  >Ceiling</span
+                >
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="ropeColor" value="#c9a84c" /><span
+                  >Rope</span
+                >
+              </div>
+              <div class="swatch-item">
+                <input
+                  type="color"
+                  id="glowColorLantern"
+                  value="#c9a84c"
+                /><span>Flame</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Color Swatches: Generic (Sparkles, Crescent, Geometric) -->
+          <div
+            class="swatches-block"
+            id="genericColorPanel"
+            style="display: none"
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+              "
+            >
+              <span
+                style="
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  color: var(--gold-300);
+                  text-transform: uppercase;
+                "
+                >Motif Color Palette</span
+              >
+              <button class="btn-secondary-action" id="resetColorsGenericBtn">
+                Reset Defaults
+              </button>
+            </div>
+            <div class="swatches-flex">
+              <div class="swatch-item">
+                <input type="color" id="gc1" value="#c9a84c" /><span>C1</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="gc2" value="#e8c96b" /><span>C2</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="gc3" value="#8b4513" /><span>C3</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="gc4" value="#2d5a27" /><span>C4</span>
+              </div>
+              <div class="swatch-item">
+                <input type="color" id="gc5" value="#1a3a1a" /><span>C5</span>
+              </div>
+              <div
+                style="
+                  width: 1px;
+                  height: 38px;
+                  background: var(--border-subtle);
+                  margin: 0 4px;
+                "
+              ></div>
+              <div class="swatch-item">
+                <input
+                  type="color"
+                  id="glowColorGeneric"
+                  value="#c9a84c"
+                /><span>Ambient Glow</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Color Swatches: Banner Variant -->
+          <div
+            class="swatches-block"
+            id="bannerColorPanel"
+            style="display: none"
+          >
+            <div style="margin-bottom: 12px">
+              <span
+                style="
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  color: var(--gold-300);
+                  text-transform: uppercase;
+                "
+                >Banner Appearance &amp; Copy</span
+              >
+            </div>
+            <div class="swatches-flex" style="margin-bottom: 16px">
+              <div class="swatch-item">
+                <input type="color" id="bannerBgColor" value="#0f0f14" /><span
+                  >Background</span
+                >
+              </div>
+              <div class="swatch-item">
+                <input
+                  type="color"
+                  id="bannerTextColorInput"
+                  value="#c9a84c"
+                /><span>Text Color</span>
+              </div>
+              <div class="swatch-item">
+                <input
+                  type="color"
+                  id="bannerIconColorInput"
+                  value="#c9a84c"
+                /><span>Icon Accent</span>
+              </div>
+            </div>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px"
+            >
+              <div class="control-field">
+                <label for="bannerTextEn">English Custom Greeting</label>
+                <input
+                  type="text"
+                  id="bannerTextEn"
+                  placeholder="Ramadan Mubarak! May peace and blessings..."
+                />
+              </div>
+              <div class="control-field">
+                <label for="bannerTextAr">Arabic Custom Greeting</label>
+                <input
+                  type="text"
+                  id="bannerTextAr"
+                  dir="rtl"
+                  placeholder="رمضان مبارك وكل عام وأنتم بخير"
+                />
+              </div>
+            </div>
+            <div
+              style="display: flex; justify-content: flex-end; margin-top: 12px"
+            >
+              <button class="nav-btn-pill active" id="bannerApplyBtn">
+                Apply Banner Copy
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="control-group" id="countdownAlertWindowGroup">
-          <label>Alert Window (mins)</label>
-          <input
-            type="number"
-            id="countdownAlertWindowMinutes"
-            value="30"
-            min="1"
-            max="120"
-            style="width: 80px"
-          />
-        </div>
+        <!-- ── TAB 3: Iftar Countdown ── -->
+        <div class="workbench-pane" id="pane-countdown">
+          <div class="studio-controls-grid">
+            <div class="control-field">
+              <label for="countdownSelect">Countdown Target Mode</label>
+              <select id="countdownSelect">
+                <option value="off" selected>Disabled</option>
+                <option value="auto">Auto Maghrib (18:15)</option>
+                <option value="custom">Custom Iftar Time</option>
+                <option value="1min">⏱️ Quick 1-Min Demo (+60s)</option>
+                <option value="demo-alert">Celebration Flare (+10s)</option>
+              </select>
+            </div>
 
-        <div class="control-group" id="countdownAutoDismissGroup">
-          <label>Auto-Dismiss (mins)</label>
-          <input
-            type="number"
-            id="countdownAutoDismissMinutes"
-            value="10"
-            min="0"
-            max="60"
-            style="width: 80px"
-          />
-        </div>
+            <div
+              class="control-field"
+              id="countdownIftarTimeGroup"
+              style="display: none"
+            >
+              <label for="countdownIftarTime">Iftar Maghrib Time (HH:mm)</label>
+              <input type="time" id="countdownIftarTime" value="18:15" />
+            </div>
 
-        <div
-          class="control-group"
-          style="justify-content: flex-end; padding-bottom: 6px"
-        >
-          <label class="checkbox-label">
-            <input type="checkbox" id="countdownMinimizable" checked />
-            <span>Minimizable (Dock to pill)</span>
-          </label>
-        </div>
+            <div class="control-field" id="countdownPosGroup">
+              <label for="countdownPosSelect">Floating Card Placement</label>
+              <select id="countdownPosSelect">
+                <option value="bottom-right" selected>Bottom Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="top-left">Top Left</option>
+              </select>
+            </div>
 
-        <div
-          class="control-group"
-          style="justify-content: flex-end; padding-bottom: 6px"
-        >
-          <label class="checkbox-label">
-            <input type="checkbox" id="countdownInitiallyMinimized" />
-            <span>Initially Docked</span>
-          </label>
-        </div>
-      </div>
+            <div class="control-field" id="countdownAudioGroup">
+              <label for="countdownAudioSelect">Initial Audio State</label>
+              <select id="countdownAudioSelect">
+                <option value="muted" selected>
+                  Muted by Default (Browser Compliant)
+                </option>
+                <option value="unmuted">Unmuted (Audible)</option>
+              </select>
+            </div>
 
-      <div
-        style="
-          margin-top: 16px;
-          border-top: 1px solid #30363d;
-          padding-top: 12px;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          align-items: center;
-          justify-content: space-between;
-        "
-      >
-        <div class="actions">
-          <button
-            class="btn"
-            id="btnCountdown1Min"
+            <div class="control-field">
+              <label for="countdownSoundSelect">Chime Alert Audio</label>
+              <select id="countdownSoundSelect">
+                <option value="default" selected>
+                  Web Audio Harmonic Chime (Offline)
+                </option>
+                <option value="custom">Custom Audio URL...</option>
+                <option value="none">Disabled (No Audio Alert)</option>
+              </select>
+            </div>
+
+            <div
+              class="control-field"
+              id="countdownSoundUrlGroup"
+              style="display: none"
+            >
+              <label for="countdownSoundUrlInput">Custom MP3 Audio URL</label>
+              <input
+                type="text"
+                id="countdownSoundUrlInput"
+                placeholder="https://example.com/audio/iftar.mp3"
+              />
+            </div>
+
+            <div class="control-field">
+              <label for="countdownAlertWindowMinutes">Alert Window</label>
+              <select id="countdownAlertWindowMinutes">
+                <option value="30" selected>30 Minutes Prior</option>
+                <option value="15">15 Minutes Prior</option>
+                <option value="60">60 Minutes Prior</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="countdownAutoDismissMinutes"
+                >Celebration Auto-Dismiss</label
+              >
+              <select id="countdownAutoDismissMinutes">
+                <option value="10" selected>10 Minutes After</option>
+                <option value="5">5 Minutes After</option>
+                <option value="30">30 Minutes After</option>
+              </select>
+            </div>
+
+            <div class="control-field" style="justify-content: flex-end">
+              <label class="custom-checkbox-wrap">
+                <input type="checkbox" id="countdownMinimizable" checked />
+                <span>Allow Card Minimization</span>
+              </label>
+            </div>
+
+            <div class="control-field" style="justify-content: flex-end">
+              <label class="custom-checkbox-wrap">
+                <input type="checkbox" id="countdownInitiallyMinimized" />
+                <span>Mount Initially Minimized</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Controller Seams Testing Row -->
+          <div
             style="
-              background: rgba(201, 168, 76, 0.15);
-              border-color: #c9a84c;
-              color: #f5d061;
+              margin-top: 24px;
+              padding-top: 16px;
+              border-top: 1px solid var(--border-subtle);
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              flex-wrap: wrap;
+              gap: 12px;
             "
           >
-            ⏱️ Quick 1-Min Demo
-          </button>
+            <div style="display: flex; gap: 8px; align-items: center">
+              <button
+                class="nav-btn-pill"
+                id="btnCountdown1Min"
+                style="border-color: var(--gold-400); color: var(--gold-300)"
+              >
+                ⏱️ Quick 1-Min Test
+              </button>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                flex-wrap: wrap;
+              "
+            >
+              <span
+                style="
+                  font-size: 0.72rem;
+                  color: var(--text-muted);
+                  text-transform: uppercase;
+                "
+                >Controller API:</span
+              >
+              <button class="btn-secondary-action" id="btnCtrlMinimize">
+                🔽 Minimize
+              </button>
+              <button class="btn-secondary-action" id="btnCtrlExpand">
+                🔼 Expand
+              </button>
+              <button class="btn-secondary-action" id="btnCtrlDismiss">
+                ✕ Dismiss
+              </button>
+              <button class="btn-secondary-action" id="btnCtrlShow">
+                👁️ Show
+              </button>
+            </div>
+          </div>
         </div>
-        <div
-          style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"
-        >
-          <span
+
+        <!-- ── TAB 4: Safety & Dates ── -->
+        <div class="workbench-pane" id="pane-safety">
+          <div class="studio-controls-grid">
+            <div class="control-field">
+              <label for="calendarModeSelect">Calendar Detection Mode</label>
+              <select id="calendarModeSelect">
+                <option value="auto">Auto-detect (Current Date)</option>
+                <option value="preview" selected>
+                  Preview Mode (Force Display)
+                </option>
+                <option value="simulate">Simulate Calendar Date</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="simDateGroup" style="display: none">
+              <label for="simulatedDatePicker">Simulated Calendar Date</label>
+              <input type="date" id="simulatedDatePicker" value="2026-02-25" />
+            </div>
+
+            <div
+              class="control-field"
+              id="simPresetGroup"
+              style="display: none"
+            >
+              <label for="occasionPreviewSelect">Hijri 1447 AH Presets</label>
+              <select id="occasionPreviewSelect">
+                <option value="ramadan" selected>
+                  Ramadan 1447 (Feb 25, 2026)
+                </option>
+                <option value="eid-fitr">
+                  Eid Al-Fitr 1447 (Mar 21, 2026)
+                </option>
+                <option value="eid-adha">
+                  Eid Al-Adha 1447 (May 28, 2026)
+                </option>
+                <option value="none">Normal Non-Festive Day</option>
+              </select>
+            </div>
+
+            <div class="control-field">
+              <label for="regionSelect">Regional Sighting Authority</label>
+              <select id="regionSelect">
+                <option value="standard" selected>
+                  Standard (Umm al-Qura)
+                </option>
+                <option value="saudi">Saudi Arabia</option>
+                <option value="uae">United Arab Emirates</option>
+                <option value="malaysia">Malaysia</option>
+                <option value="egypt">Egypt (+1 day)</option>
+                <option value="turkey">Turkey (+1 day)</option>
+                <option value="pakistan">Pakistan (+1 day)</option>
+                <option value="indonesia">Indonesia (+1 day)</option>
+                <option value="morocco">Morocco (+1 day)</option>
+                <option value="us">USA / ISNA (+1 day)</option>
+                <option value="uk">United Kingdom (+1 day)</option>
+                <option value="custom">Custom Offset…</option>
+              </select>
+            </div>
+
+            <div class="control-field" id="hijriAdjGroup" style="display: none">
+              <label for="hijriAdjustment">Hijri Day Offset (-3 to +3)</label>
+              <input
+                type="number"
+                id="hijriAdjustment"
+                value="0"
+                min="-3"
+                max="3"
+                step="1"
+              />
+            </div>
+
+            <div
+              class="control-field"
+              id="mobileSideGroup"
+              style="display: none"
+            >
+              <label for="mobileSideBehaviorSelect"
+                >Mobile Viewport Sides</label
+              >
+              <select id="mobileSideBehaviorSelect">
+                <option value="hide" selected>
+                  Hide on Mobile (&lt;768px)
+                </option>
+                <option value="show">Show on Mobile</option>
+                <option value="minimal">Minimal (Fewer Motifs)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Error Containment Sandbox -->
+          <div
             style="
-              font-size: 0.72rem;
-              color: #8b8f98;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
+              margin-top: 24px;
+              padding-top: 16px;
+              border-top: 1px solid var(--border-subtle);
             "
-            >Controller Seam:</span
           >
-          <button
-            class="btn-sm"
-            id="btnCtrlMinimize"
-            title="controller.minimize()"
-          >
-            🔽 Minimize
-          </button>
-          <button class="btn-sm" id="btnCtrlExpand" title="controller.expand()">
-            🔼 Expand
-          </button>
-          <button
-            class="btn-sm"
-            id="btnCtrlDismiss"
-            title="controller.dismiss()"
-          >
-            ✕ Dismiss
-          </button>
-          <button class="btn-sm" id="btnCtrlShow" title="controller.show()">
-            👁️ Show
-          </button>
+            <div
+              style="
+                font-size: 0.8rem;
+                font-weight: 700;
+                color: var(--gold-300);
+                text-transform: uppercase;
+                margin-bottom: 8px;
+              "
+            >
+              🛡️ Zero-Crash Error Containment Boundary
+            </div>
+            <p
+              style="
+                font-size: 0.78rem;
+                color: var(--text-muted);
+                margin-bottom: 14px;
+              "
+            >
+              Test how the library gracefully contains errors, safely clamps
+              out-of-bounds configurations, isolates customer telemetry
+              callbacks, and logs diagnostics without crashing the host
+              application.
+            </p>
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-bottom: 14px;
+              "
+            >
+              <button class="btn-secondary-action" id="btnTestClamping">
+                Clamp Extreme Config
+              </button>
+              <button class="btn-secondary-action" id="btnTestInvalidDate">
+                Test Invalid Date (NaN)
+              </button>
+              <button class="btn-secondary-action" id="btnTestCrash">
+                Trigger Mount Crash &amp; Rollback
+              </button>
+              <button class="btn-secondary-action" id="btnTestOnError">
+                Test Telemetry onError
+              </button>
+              <button class="btn-secondary-action" id="btnToggleDebug">
+                Toggle Debug (ON)
+              </button>
+            </div>
+            <div class="diagnostic-terminal" id="safetyConsole">
+              [ramadan-overlay] Ready. Diagnostic logs and safety verification
+              results stream here...
+            </div>
+          </div>
+        </div>
+
+        <!-- ── TAB 5: Code & AI Export ── -->
+        <div class="workbench-pane" id="pane-export">
+          <div class="code-export-shell">
+            <div class="code-tabs">
+              <button class="code-tab active" data-tab="esm">ESM Module</button>
+              <button class="code-tab" data-tab="react">React Component</button>
+              <button class="code-tab" data-tab="vue">Vue 3 Adapter</button>
+              <button class="code-tab" data-tab="angular">
+                Angular Directive
+              </button>
+              <button class="code-tab" data-tab="svelte">Svelte Action</button>
+              <button class="code-tab" data-tab="cdn">Script Tag (CDN)</button>
+              <button class="code-tab" data-tab="ai">🤖 AI Agent Prompt</button>
+            </div>
+
+            <pre class="code-box" id="codeBox"></pre>
+
+            <div class="code-footer-bar">
+              <span
+                style="
+                  font-size: 0.72rem;
+                  color: var(--text-muted);
+                  margin-right: auto;
+                "
+              >
+                Synchronized live with all workbench controls
+              </span>
+              <button class="nav-btn-pill active" id="codeCopyFooterBtn">
+                📋 Copy Code Snippet
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </main>
 
-    <!-- ── Error Safety & Diagnostic Suite ── -->
-    <div class="panel" id="safetyPanel">
-      <div class="panel-title">
-        🛡️ Error Containment &amp; Diagnostic Safety Suite
-      </div>
-      <p
-        style="
-          font-size: 0.82rem;
-          color: #8b8f98;
-          margin-bottom: 12px;
-          line-height: 1.5;
-        "
-      >
-        Test how the library gracefully contains errors, clamps out-of-bounds
-        configurations, isolates customer telemetry callbacks, and logs
-        diagnostics without crashing the host application.
+    <!-- ── Developer Credits & Social Footer ── -->
+    <footer class="celestial-footer">
+      <div class="footer-title">ramadan-overlay</div>
+      <p class="footer-sub">
+        Handcrafted with care for the global Muslim community and web developers
+        everywhere.
       </p>
-      <div class="actions" style="margin-bottom: 12px">
-        <button class="btn" id="btnTestClamping">Clamp Extreme Config</button>
-        <button class="btn" id="btnTestInvalidDate">
-          Test Invalid Date (NaN)
-        </button>
-        <button class="btn" id="btnTestCrash">
-          Trigger Mount Crash &amp; Rollback
-        </button>
-        <button class="btn" id="btnTestOnError">Test Telemetry onError</button>
-        <button class="btn" id="btnToggleDebug">Toggle Debug (ON)</button>
-      </div>
-      <div
-        id="safetyConsole"
-        style="
-          font-family: Consolas, Monaco, monospace;
-          font-size: 0.8rem;
-          background: #0d1117;
-          padding: 12px;
-          border-radius: 8px;
-          border: 1px solid #30363d;
-          color: #7ee787;
-          max-height: 160px;
-          overflow-y: auto;
-          white-space: pre-wrap;
-        "
-      >
-        [ramadan-overlay] Ready. Diagnostic logs and safety verification results
-        will stream here...
-      </div>
-    </div>
 
-    <!-- ── State + code ── -->
-    <div class="bottom-grid">
-      <div class="panel" style="margin: 0">
-        <div class="panel-title">Occasion &amp; Calendar State</div>
-        <div class="state-grid">
-          <div class="state-item">
-            occasion<strong id="s-occasion">—</strong>
-          </div>
-          <div class="state-item">
-            isRamadan<strong id="s-isRamadan">—</strong>
-          </div>
-          <div class="state-item">isEid<strong id="s-isEid">—</strong></div>
-          <div class="state-item">
-            hijriYear<strong id="s-hijriYear">—</strong>
-          </div>
-          <div class="state-item">
-            dayNumber<strong id="s-dayNumber">—</strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel" style="margin: 0">
-        <div class="code-tabs">
-          <button class="code-tab active" data-tab="esm">ESM</button>
-          <button class="code-tab" data-tab="react">React</button>
-          <button class="code-tab" data-tab="vue">Vue</button>
-          <button class="code-tab" data-tab="angular">Angular</button>
-          <button class="code-tab" data-tab="svelte">Svelte</button>
-          <button class="code-tab" data-tab="cdn">Script tag</button>
-          <button class="code-tab" data-tab="ai">🤖 AI Prompt</button>
-        </div>
-        <pre
-          class="code-box"
-          id="codeBox"
-          style="border: none; border-radius: 0; margin: 0; min-height: 120px"
-        ></pre>
-        <div class="code-actions">
-          <button class="btn-sm" id="shareBtn">🔗 Share link</button>
-          <button class="btn-sm" id="copyBtn">📋 Copy code</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Contact ── -->
-    <section class="contact-section">
-      <h2 class="contact-title">Get in Touch</h2>
-      <p class="contact-sub">
-        Have questions, ideas, or want to contribute? Reach out!
-      </p>
-      <div class="contact-cards">
-        <!-- GitHub -->
+      <div class="footer-contact-links">
         <a
           href="https://github.com/3mr-5aled/"
           class="contact-card"
           target="_blank"
           rel="noopener"
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.184 6.839 9.505.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.112-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.254-.446-1.273.098-2.653 0 0 .84-.269 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.338c1.909-1.295 2.748-1.026 2.748-1.026.546 1.38.202 2.399.1 2.653.64.7 1.028 1.595 1.028 2.688 0 3.848-2.338 4.695-4.566 4.944.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.578.688.48C19.138 20.2 22 16.447 22 12.021 22 6.484 17.523 2 12 2z"
-            />
-          </svg>
-          <span>3mr-5aled</span>
+          <span>GitHub: @3mr-5aled</span>
         </a>
-
-        <!-- LinkedIn -->
         <a
           href="https://www.linkedin.com/in/3mr5aled/"
           class="contact-card"
           target="_blank"
           rel="noopener"
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
-            />
-          </svg>
-          <span>3mr5aled</span>
+          <span>LinkedIn: Amr Khaled</span>
         </a>
-
-        <!-- Email -->
         <a href="mailto:3mr5aled.contact@gmail.com" class="contact-card">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <rect x="2" y="4" width="20" height="16" rx="2" />
-            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-          </svg>
-          <span>3mr5aled.contact@gmail.com</span>
+          <span>Email: 3mr5aled.contact@gmail.com</span>
+        </a>
+        <a
+          href="https://www.npmjs.com/package/ramadan-overlay"
+          class="contact-card"
+          target="_blank"
+          rel="noopener"
+        >
+          <span>npm: ramadan-overlay</span>
         </a>
       </div>
 
-      <p class="contact-footer">
-        Built with ❤️ by
-        <a href="https://github.com/3mr-5aled/" target="_blank" rel="noopener"
-          >3mr-5aled</a
-        >
-        &nbsp;·&nbsp;
+      <div class="footer-credits">
+        Released under the
         <a
-          href="https://github.com/3mr-5aled/ramadan-overlay"
+          href="https://github.com/3mr-5aled/ramadan-overlay/blob/main/LICENSE"
           target="_blank"
           rel="noopener"
-          >View source on GitHub</a
-        >
-        &nbsp;·&nbsp;
-        <a
-          href="https://www.npmjs.com/package/ramadan-overlay"
-          target="_blank"
-          rel="noopener"
-          >npm package</a
-        >
-      </p>
-    </section>
+          >MIT License</a
+        >. Zero dependencies · Accessible · Responsive
+      </div>
+    </footer>
 
-    <!-- initApp must be defined before the script tag's onload fires -->
+    <!-- ── Application Script ── -->
     <script>
       function initApp() {
         const { init, getRamadanState, getOccasionState } = RamadanOverlay;
@@ -1949,7 +2153,6 @@
           const ropeStyleEl = document.getElementById("ropeStyleGroup");
           if (ropeStyleEl) ropeStyleEl.style.display = isLanterns ? "" : "none";
 
-          // Only show rope sag when variant is lanterns AND rope style is not straight
           const ropeSagEl = document.getElementById("ropeSagGroup");
           const rStyleVal = document.getElementById("ropeStyleSelect")?.value;
           if (ropeSagEl) {
@@ -1961,7 +2164,6 @@
           if (clearanceGroup)
             clearanceGroup.style.display = isMotif ? "" : "none";
 
-          // Mobile side behavior group is only relevant for left/right/sides positions
           const posVal = document.getElementById("positionSelect")?.value;
           const mobSideEl = document.getElementById("mobileSideGroup");
           if (mobSideEl) {
@@ -1972,7 +2174,6 @@
               : "none";
           }
 
-          // Calendar mode: show simulated date picker & presets only when simulate mode is chosen
           const calMode = document.getElementById("calendarModeSelect")?.value;
           const isSim = calMode === "simulate";
           const simDateEl = document.getElementById("simDateGroup");
@@ -1980,13 +2181,11 @@
           const simPresetEl = document.getElementById("simPresetGroup");
           if (simPresetEl) simPresetEl.style.display = isSim ? "" : "none";
 
-          // Countdown custom iftar time group
           const cdVal = document.getElementById("countdownSelect")?.value;
           const cdIftarEl = document.getElementById("countdownIftarTimeGroup");
           if (cdIftarEl)
             cdIftarEl.style.display = cdVal === "custom" ? "" : "none";
 
-          // Countdown custom sound URL input visibility
           const soundMode = document.getElementById(
             "countdownSoundSelect"
           )?.value;
@@ -2004,10 +2203,6 @@
           document.getElementById("hijriAdjGroup").style.display = isCustom
             ? ""
             : "none";
-        }
-
-        function syncLanternStyleVisibility() {
-          syncColorPanels();
         }
 
         let isDebugMode = true;
@@ -2046,7 +2241,6 @@
               console.log("Occasion changed:", occ, state),
           };
 
-          // Mobile side behavior
           if (["left", "right", "sides"].includes(posVal)) {
             const mobSide = document.getElementById(
               "mobileSideBehaviorSelect"
@@ -2054,24 +2248,20 @@
             if (mobSide) cfg.mobileSideBehavior = mobSide;
           }
 
-          // Z-index
           const zVal = parseInt(
             document.getElementById("zIndexInput")?.value,
             10
           );
           if (!isNaN(zVal)) cfg.zIndex = zVal;
 
-          // Live transition
           const liveTrans = document.getElementById(
             "liveTransitionCheckbox"
           )?.checked;
           if (liveTrans !== undefined) cfg.liveTransition = liveTrans;
 
-          // Eid variant
           const eidVar = document.getElementById("eidVariantSelect")?.value;
           if (eidVar) cfg.eidVariant = eidVar;
 
-          // Simulated date
           if (calMode === "simulate") {
             const simDateVal = document.getElementById(
               "simulatedDatePicker"
@@ -2079,7 +2269,6 @@
             if (simDateVal) cfg.date = simDateVal;
           }
 
-          // Theme & colors
           const themeVal = document.getElementById("themeSelect")?.value;
           if (themeVal && themeVal !== "custom") {
             cfg.theme = themeVal;
@@ -2100,7 +2289,6 @@
             if (!isNaN(rSag)) cfg.ropeSag = rSag;
           }
 
-          // Countdown
           const cdVal = document.getElementById("countdownSelect")?.value;
           if (cdVal && cdVal !== "off") {
             const is10sDemo = cdVal === "demo-alert";
@@ -2179,7 +2367,6 @@
             cfg.bannerIconColor = document.getElementById(
               "bannerIconColorInput"
             ).value;
-            // Pass both texts; banner.ts picks by locale with fallback
             const _enText = document
               .getElementById("bannerTextEn")
               .value.trim();
@@ -2189,6 +2376,7 @@
             if (_enText) cfg.bannerTextEn = _enText;
             if (_arText) cfg.bannerTextAr = _arText;
           }
+
           const regionVal = document.getElementById("regionSelect").value;
           if (regionVal === "custom") {
             cfg.hijriAdjustment =
@@ -2197,6 +2385,7 @@
           } else {
             cfg.region = regionVal;
           }
+
           if (variant === "lanterns") {
             cfg.lanternStyle = parseInt(
               document.getElementById("lanternStyleSelect").value,
@@ -2216,25 +2405,23 @@
             state.occasion ||
             (state.isRamadan ? "ramadan" : state.isEid ? "eid" : "none");
           const sOcc = document.getElementById("s-occasion");
-          if (sOcc) sOcc.textContent = occ;
+          if (sOcc) sOcc.textContent = occ.toUpperCase();
           const sRamadan = document.getElementById("s-isRamadan");
           if (sRamadan) sRamadan.textContent = String(Boolean(state.isRamadan));
           const sEid = document.getElementById("s-isEid");
           if (sEid) sEid.textContent = String(Boolean(state.isEid));
-          document.getElementById("s-hijriYear").textContent =
-            state.hijriYear || "—";
-          document.getElementById("s-dayNumber").textContent =
-            state.dayNumber != null ? String(state.dayNumber) : "—";
+          const sYear = document.getElementById("s-hijriYear");
+          if (sYear) sYear.textContent = state.hijriYear || "1447 AH";
+          const sDay = document.getElementById("s-dayNumber");
+          if (sDay)
+            sDay.textContent =
+              state.dayNumber != null ? String(state.dayNumber) : "—";
         }
 
         // ── Code generation ────────────────────────────────────────────────
-
         let activeTab = "esm";
 
         function syntaxHighlight(code) {
-          // IMPORTANT: strings and comments must be replaced BEFORE keywords so
-          // that the injected class="tok-key" attribute values are never
-          // re-matched by the string regex (which would corrupt the HTML).
           return code
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -2326,8 +2513,7 @@
           }
           if (activeTab === "ai") {
             return `Install and integrate \`ramadan-overlay\` into this project.
-
-Here is the desired configuration:
+\nHere is the desired configuration:
 \`\`\`ts
 import { init } from 'ramadan-overlay';
 
@@ -2368,8 +2554,6 @@ Instructions for the Agent:
           updateCodeBox(cfg);
           saveHash(cfg);
           try {
-            // Pass cfg.confetti only when explicitly requested (confetti select changed).
-            // All other re-mounts (color, variant, opacity...) stay silent.
             currentInstance = init({
               ...cfg,
               confetti: withConfetti ? cfg.confetti : "off",
@@ -2503,6 +2687,26 @@ Instructions for the Agent:
               document.getElementById("bannerTextEn").value = cfg.bannerTextEn;
             if (cfg.bannerTextAr)
               document.getElementById("bannerTextAr").value = cfg.bannerTextAr;
+            if (cfg.occasions) {
+              const arr = cfg.occasions;
+              let occ = "all";
+              if (arr.length === 1 && arr[0] === "ramadan") occ = "ramadan";
+              else if (
+                arr.length === 2 &&
+                arr.includes("eid-fitr") &&
+                arr.includes("eid-adha")
+              )
+                occ = "eid";
+              else if (arr.length === 1 && arr[0] === "eid-fitr")
+                occ = "eid-fitr";
+              else if (arr.length === 1 && arr[0] === "eid-adha")
+                occ = "eid-adha";
+              document.getElementById("occasionsSelect").value = occ;
+            }
+            if (cfg.shadows) {
+              const el = document.getElementById("shadowsSelect");
+              if (el) el.value = cfg.shadows;
+            }
             if (cfg.clearance) {
               const el = document.getElementById("clearanceSelect");
               if (el) el.value = cfg.clearance;
@@ -2511,184 +2715,452 @@ Instructions for the Agent:
               const el = document.getElementById("layerSelect");
               if (el) el.value = cfg.layer;
             }
-            if (cfg.shadows) {
-              const el = document.getElementById("shadowsSelect");
-              if (el) el.value = cfg.shadows;
-            }
-            if (cfg.occasions) {
-              const occStr = Array.isArray(cfg.occasions)
-                ? cfg.occasions.join(",")
-                : cfg.occasions;
-              if (occStr === "ramadan")
-                document.getElementById("occasionsSelect").value = "ramadan";
-              else if (occStr === "eid-fitr,eid-adha")
-                document.getElementById("occasionsSelect").value = "eid";
-              else if (occStr === "eid-fitr")
-                document.getElementById("occasionsSelect").value = "eid-fitr";
-              else if (occStr === "eid-adha")
-                document.getElementById("occasionsSelect").value = "eid-adha";
-            }
             if (cfg.countdown) {
-              const cdSel = document.getElementById("countdownSelect");
-              if (cdSel)
-                cdSel.value = cfg.countdown.iftarTime ? "custom" : "auto";
-              if (cfg.countdown.iftarTime) {
+              const cd = cfg.countdown;
+              const cdSelect = document.getElementById("countdownSelect");
+              if (cd.maghribTime) {
+                cdSelect.value = "auto";
                 const iftarEl = document.getElementById("countdownIftarTime");
-                if (iftarEl) iftarEl.value = cfg.countdown.iftarTime;
+                if (iftarEl) iftarEl.value = cd.maghribTime;
               }
-              if (cfg.countdown.position) {
+              if (cd.position) {
                 const posEl = document.getElementById("countdownPosSelect");
-                if (posEl) posEl.value = cfg.countdown.position;
+                if (posEl) posEl.value = cd.position;
               }
-              if (cfg.countdown.defaultMuted != null) {
+              if (cd.defaultMuted !== undefined) {
                 const audEl = document.getElementById("countdownAudioSelect");
-                if (audEl)
-                  audEl.value = cfg.countdown.defaultMuted
-                    ? "muted"
-                    : "unmuted";
+                if (audEl) audEl.value = cd.defaultMuted ? "muted" : "unmuted";
               }
-              if (cfg.countdown.minimizable != null) {
+              if (cd.minimizable !== undefined) {
                 const minEl = document.getElementById("countdownMinimizable");
-                if (minEl) minEl.checked = Boolean(cfg.countdown.minimizable);
+                if (minEl) minEl.checked = Boolean(cd.minimizable);
               }
-              if (cfg.countdown.initiallyMinimized != null) {
+              if (cd.initiallyMinimized !== undefined) {
                 const initMinEl = document.getElementById(
                   "countdownInitiallyMinimized"
                 );
                 if (initMinEl)
-                  initMinEl.checked = Boolean(cfg.countdown.initiallyMinimized);
+                  initMinEl.checked = Boolean(cd.initiallyMinimized);
               }
-              if (cfg.countdown.alertWindowMinutes != null) {
-                const alertEl = document.getElementById(
+              if (cd.alertWindowMinutes != null) {
+                const winEl = document.getElementById(
                   "countdownAlertWindowMinutes"
                 );
-                if (alertEl) alertEl.value = cfg.countdown.alertWindowMinutes;
+                if (winEl) winEl.value = String(cd.alertWindowMinutes);
               }
-              if (cfg.countdown.autoDismissAfterMinutes != null) {
-                const autoDisEl = document.getElementById(
+              if (cd.autoDismissAfterMinutes != null) {
+                const disEl = document.getElementById(
                   "countdownAutoDismissMinutes"
                 );
-                if (autoDisEl)
-                  autoDisEl.value = cfg.countdown.autoDismissAfterMinutes;
+                if (disEl) disEl.value = String(cd.autoDismissAfterMinutes);
               }
-              if (
-                cfg.countdown.sound === false ||
-                cfg.countdown.soundUrl === false ||
-                cfg.countdown.soundUrl === "none"
-              ) {
-                const sndSel = document.getElementById("countdownSoundSelect");
-                if (sndSel) sndSel.value = "none";
-              } else if (
-                cfg.countdown.soundUrl &&
-                typeof cfg.countdown.soundUrl === "string"
-              ) {
-                const sndSel = document.getElementById("countdownSoundSelect");
-                if (sndSel) sndSel.value = "custom";
-                const sndUrl = document.getElementById(
-                  "countdownSoundUrlInput"
-                );
-                if (sndUrl) sndUrl.value = cfg.countdown.soundUrl;
+              if (cd.sound === false || cd.soundUrl === false) {
+                const sndEl = document.getElementById("countdownSoundSelect");
+                if (sndEl) sndEl.value = "none";
+              } else if (typeof cd.soundUrl === "string" && cd.soundUrl) {
+                const sndEl = document.getElementById("countdownSoundSelect");
+                if (sndEl) sndEl.value = "custom";
+                const urlEl = document.getElementById("countdownSoundUrlInput");
+                if (urlEl) urlEl.value = cd.soundUrl;
               }
             }
           } catch (e) {
-            console.warn("Could not parse config from URL hash:", e);
+            console.warn("Could not load config from URL hash:", e);
           }
         }
 
-        // ── Init ──
-        loadHash();
-        syncColorPanels();
-        syncHijriAdjGroup();
-        updateStateDisplay(
-          getOccasionState ? getOccasionState() : getRamadanState()
-        );
-        mount(true);
+        // ── Workbench Tabs Logic ──
+        const tabBtns = document.querySelectorAll(".workbench-tab-btn");
+        tabBtns.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            tabBtns.forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            const targetPaneId = "pane-" + btn.dataset.workbenchTab;
+            document.querySelectorAll(".workbench-pane").forEach((pane) => {
+              pane.classList.remove("active");
+            });
+            const targetPane = document.getElementById(targetPaneId);
+            if (targetPane) targetPane.classList.add("active");
+          });
+        });
 
-        // ── 1-Minute Countdown Demo Trigger ──
+        // ── Curated Atmospheric Presets Click Handlers ──
+        const presetCards = document.querySelectorAll(".preset-card");
+        presetCards.forEach((card) => {
+          card.addEventListener("click", () => {
+            presetCards.forEach((c) => c.classList.remove("active"));
+            card.classList.add("active");
+            const presetKey = card.dataset.preset;
+
+            if (presetKey === "fanoos") {
+              document.getElementById("variantSelect").value = "lanterns";
+              document.getElementById("themeSelect").value = "classic";
+              applyThemeToSwatches("classic");
+              document.getElementById("ropeStyleSelect").value = "dual";
+              document.getElementById("shadowsSelect").value = "soft";
+              document.getElementById("countdownSelect").value = "off";
+            } else if (presetKey === "laylat") {
+              document.getElementById("variantSelect").value = "sparkles";
+              document.getElementById("themeSelect").value = "midnight";
+              applyThemeToSwatches("midnight");
+              document.getElementById("shadowsSelect").value = "deep";
+              document.getElementById("countdownSelect").value = "off";
+            } else if (presetKey === "crescent") {
+              document.getElementById("variantSelect").value = "crescent-stars";
+              document.getElementById("themeSelect").value = "desert-dusk";
+              applyThemeToSwatches("desert-dusk");
+              document.getElementById("shadowsSelect").value = "deep";
+              document.getElementById("countdownSelect").value = "off";
+            } else if (presetKey === "geometric") {
+              document.getElementById("variantSelect").value = "geometric";
+              document.getElementById("themeSelect").value = "emerald";
+              applyThemeToSwatches("emerald");
+              document.getElementById("shadowsSelect").value = "soft";
+              document.getElementById("countdownSelect").value = "off";
+            } else if (presetKey === "eid") {
+              document.getElementById("variantSelect").value = "eid-fitr";
+              document.getElementById("themeSelect").value = "classic";
+              applyThemeToSwatches("classic");
+              document.getElementById("confettiSelect").value = "on";
+              document.getElementById("countdownSelect").value = "1min";
+            }
+
+            syncColorPanels();
+            if (overlayOn) mount(presetKey === "eid");
+          });
+        });
+
+        // ── Quick Install Copy Button ──
+        const quickInstallBtn = document.getElementById("quickInstallCopyBtn");
+        quickInstallBtn?.addEventListener("click", () => {
+          navigator.clipboard
+            .writeText("npm install ramadan-overlay")
+            .then(() => {
+              quickInstallBtn.textContent = "✓ Copied!";
+              setTimeout(() => {
+                quickInstallBtn.textContent = "Copy";
+              }, 2000);
+            });
+        });
+
+        // ── Event listeners ──
+        document
+          .getElementById("variantSelect")
+          .addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("calendarModeSelect")
+          .addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("simulatedDatePicker")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("occasionPreviewSelect")
+          .addEventListener("change", (e) => {
+            const val = e.target.value;
+            const picker = document.getElementById("simulatedDatePicker");
+            if (val === "ramadan") picker.value = "2026-02-25";
+            else if (val === "eid-fitr") picker.value = "2026-03-21";
+            else if (val === "eid-adha") picker.value = "2026-05-28";
+            else if (val === "none") picker.value = "2026-08-15";
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("eidVariantSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("positionSelect")
+          .addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("mobileSideBehaviorSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("clearanceSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("layerSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("zIndexInput")
+          ?.addEventListener("input", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("liveTransitionCheckbox")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("themeSelect")
+          .addEventListener("change", (e) => {
+            if (e.target.value !== "custom") {
+              applyThemeToSwatches(e.target.value);
+            }
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("shadowsSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("localeSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("opacityRange")
+          .addEventListener("input", (e) => {
+            document.getElementById("opacityVal").textContent = e.target.value;
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("confettiSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount(true);
+          });
+
+        document
+          .getElementById("regionSelect")
+          .addEventListener("change", () => {
+            syncHijriAdjGroup();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("hijriAdjustment")
+          .addEventListener("input", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("lanternStyleSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("ropeStyleSelect")
+          .addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("ropeSagRange")
+          ?.addEventListener("input", (e) => {
+            const sagValEl = document.getElementById("ropeSagVal");
+            if (sagValEl) sagValEl.textContent = e.target.value + "px";
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("densitySelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("occasionsSelect")
+          .addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        // ── Countdown Widget listeners ──
+        document
+          .getElementById("countdownSelect")
+          ?.addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownIftarTime")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownPosSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownAudioSelect")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownSoundSelect")
+          ?.addEventListener("change", () => {
+            syncColorPanels();
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownSoundUrlInput")
+          ?.addEventListener("input", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownMinimizable")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownInitiallyMinimized")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownAlertWindowMinutes")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        document
+          .getElementById("countdownAutoDismissMinutes")
+          ?.addEventListener("change", () => {
+            if (overlayOn) mount();
+          });
+
+        // Test Chime alert button with visual soundwave animation
+        document
+          .getElementById("btnTestChime")
+          ?.addEventListener("click", async () => {
+            const wave = document.querySelector(".audio-wave");
+            wave?.classList.add("playing");
+            try {
+              if (currentInstance?.countdown?.playAlert) {
+                await currentInstance.countdown.playAlert();
+              } else if (RamadanOverlay?.playSynthesizedChime) {
+                await RamadanOverlay.playSynthesizedChime();
+              }
+            } catch (err) {
+              console.warn("Chime preview playback error:", err);
+            } finally {
+              setTimeout(() => wave?.classList.remove("playing"), 2000);
+            }
+          });
+
         document
           .getElementById("btnCountdown1Min")
           ?.addEventListener("click", () => {
-            const cdSel = document.getElementById("countdownSelect");
-            if (cdSel) cdSel.value = "1min";
+            document.getElementById("countdownSelect").value = "1min";
             syncColorPanels();
-            if (!overlayOn) {
-              overlayOn = true;
-              const toggleBtn = document.getElementById("toggleBtn");
-              if (toggleBtn) {
-                toggleBtn.textContent = "Overlay ON";
-                toggleBtn.classList.add("active");
-              }
-            }
-            mount();
-            if (typeof logSafety === "function") {
-              logSafety(
-                "⏱️ Triggered 1-minute countdown demo. Countdown card mounted with live 60s tick down!",
-                "#f5d061"
-              );
-            }
+            if (overlayOn) mount();
           });
 
-        // ── Toggle overlay ──
+        // Controller seam tests
         document
-          .getElementById("toggleBtn")
-          .addEventListener("click", function () {
-            overlayOn = !overlayOn;
-            if (overlayOn) {
-              this.textContent = "Overlay ON";
-              this.classList.add("active");
-              mount(); // no auto-confetti on toggle — use the 🎊 button
-            } else {
-              this.textContent = "Overlay OFF";
-              this.classList.remove("active");
-              currentInstance?.destroy();
-              currentInstance = null;
-            }
+          .getElementById("btnCtrlMinimize")
+          ?.addEventListener("click", () => {
+            currentInstance?.countdown?.minimize();
+          });
+        document
+          .getElementById("btnCtrlExpand")
+          ?.addEventListener("click", () => {
+            currentInstance?.countdown?.expand();
+          });
+        document
+          .getElementById("btnCtrlDismiss")
+          ?.addEventListener("click", () => {
+            currentInstance?.countdown?.dismiss();
+          });
+        document
+          .getElementById("btnCtrlShow")
+          ?.addEventListener("click", () => {
+            currentInstance?.countdown?.show();
           });
 
-        // ── Fire confetti ──
-        // Explicitly fires the animation. Respects "off" — silent if disabled.
-        document.getElementById("confettiBtn").addEventListener("click", () => {
-          const cfg = getConfig();
-          if (cfg.confetti === "off") return;
-          if (
-            currentInstance &&
-            typeof currentInstance.fireConfetti === "function"
-          ) {
-            currentInstance.fireConfetti();
-          } else {
-            currentInstance?.destroy();
-            currentInstance = init({ ...cfg, confetti: "on" });
-            updateStateDisplay(currentInstance.state);
-            updateCodeBox(cfg);
-          }
+        // Lantern color pickers
+        for (let i = 1; i <= 12; i++) {
+          document.getElementById("lc" + i).addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+        }
+        document
+          .getElementById("ceilingColor")
+          .addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+        document.getElementById("ropeColor").addEventListener("input", () => {
+          document.getElementById("themeSelect").value = "custom";
+          if (overlayOn) mount();
         });
-
-        // ── Banner apply ──
         document
-          .getElementById("bannerApplyBtn")
-          .addEventListener("click", () => {
-            // Always remount — if the overlay was off, turn it back on
-            if (!overlayOn) {
-              overlayOn = true;
-              const btn = document.getElementById("toggleBtn");
-              btn.textContent = "Overlay ON";
-              btn.classList.add("active");
-            }
-            mount();
+          .getElementById("glowColorLantern")
+          .addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
           });
 
-        // ── Reset colors (Instantly remounts overlay with defaults) ──
+        // Generic color pickers
+        for (let i = 1; i <= 5; i++) {
+          document.getElementById("gc" + i).addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+        }
+        document
+          .getElementById("glowColorGeneric")
+          .addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
+            if (overlayOn) mount();
+          });
+
+        // Reset colors
         document
           .getElementById("resetColorsBtn")
           .addEventListener("click", () => {
-            DEFAULT_LANTERN_COLORS.forEach((hex, i) => {
-              document.getElementById("lc" + (i + 1)).value = hex;
+            DEFAULT_LANTERN_COLORS.forEach((c, i) => {
+              document.getElementById("lc" + (i + 1)).value = c;
             });
+            document.getElementById("glowColorLantern").value =
+              DEFAULT_GLOW_COLOR;
             document.getElementById("ceilingColor").value =
               DEFAULT_CEILING_COLOR;
             document.getElementById("ropeColor").value = DEFAULT_ROPE_COLOR;
-            document.getElementById("glowColorLantern").value =
-              DEFAULT_GLOW_COLOR;
             document.getElementById("themeSelect").value = "custom";
             if (overlayOn) mount();
           });
@@ -2696,8 +3168,8 @@ Instructions for the Agent:
         document
           .getElementById("resetColorsGenericBtn")
           .addEventListener("click", () => {
-            DEFAULT_GENERIC_COLORS.forEach((hex, i) => {
-              document.getElementById("gc" + (i + 1)).value = hex;
+            DEFAULT_GENERIC_COLORS.forEach((c, i) => {
+              document.getElementById("gc" + (i + 1)).value = c;
             });
             document.getElementById("glowColorGeneric").value =
               DEFAULT_GLOW_COLOR;
@@ -2705,292 +3177,131 @@ Instructions for the Agent:
             if (overlayOn) mount();
           });
 
-        // ── Auto-apply on any control change ──
-        document
-          .querySelectorAll(
-            'select:not(#confettiSelect), input[type="range"], input[type="number"], input[type="date"], input[type="time"], input[type="checkbox"]'
-          )
-          .forEach((el) => {
-            el.addEventListener("change", () => {
-              syncColorPanels();
-              syncHijriAdjGroup();
-              if (overlayOn) mount();
-            });
-          });
-
-        // Theme select populates custom color swatches
-        document
-          .getElementById("themeSelect")
-          ?.addEventListener("change", function () {
-            if (this.value !== "custom") {
-              applyThemeToSwatches(this.value);
-            }
-            if (overlayOn) mount();
-          });
-
-        // Quick simulation presets set the date input and remount
-        document
-          .getElementById("occasionPreviewSelect")
-          ?.addEventListener("change", function () {
-            const dateMap = {
-              ramadan: "2026-02-25",
-              "eid-fitr": "2026-03-21",
-              "eid-adha": "2026-05-28",
-              none: "2026-08-15",
-            };
-            if (dateMap[this.value]) {
-              const picker = document.getElementById("simulatedDatePicker");
-              if (picker) picker.value = dateMap[this.value];
-              if (overlayOn) mount();
-            }
-          });
-
-        // Programmatic Countdown Controller Test Buttons
-        function getActiveController() {
-          return (
-            currentInstance?.getCountdownController?.() ||
-            currentInstance?.countdown ||
-            null
-          );
-        }
-
-        document
-          .getElementById("btnCtrlMinimize")
-          ?.addEventListener("click", () => {
-            const ctrl = getActiveController();
-            if (ctrl) {
-              ctrl.minimize();
-              logSafety(
-                "🔽 Triggered controller.minimize() -> Docked into sleek pill",
-                "#58a6ff"
-              );
-            } else {
-              logSafety(
-                "⚠️ Countdown is not active on overlay instance. Enable Countdown above first.",
-                "#e3b341"
-              );
-            }
-          });
-
-        document
-          .getElementById("btnCtrlExpand")
-          ?.addEventListener("click", () => {
-            const ctrl = getActiveController();
-            if (ctrl) {
-              ctrl.expand();
-              logSafety(
-                "🔼 Triggered controller.expand() -> Restored to full card",
-                "#58a6ff"
-              );
-            } else {
-              logSafety(
-                "⚠️ Countdown is not active on overlay instance. Enable Countdown above first.",
-                "#e3b341"
-              );
-            }
-          });
-
-        document
-          .getElementById("btnCtrlDismiss")
-          ?.addEventListener("click", () => {
-            const ctrl = getActiveController();
-            if (ctrl) {
-              ctrl.dismiss();
-              logSafety(
-                "✕ Triggered controller.dismiss() -> Widget dismissed",
-                "#e3b341"
-              );
-            } else {
-              logSafety(
-                "⚠️ Countdown is not active on overlay instance.",
-                "#e3b341"
-              );
-            }
-          });
-
-        document
-          .getElementById("btnCtrlShow")
-          ?.addEventListener("click", () => {
-            const ctrl = getActiveController();
-            if (ctrl) {
-              ctrl.show();
-              logSafety(
-                "👁️ Triggered controller.show() -> Widget re-shown",
-                "#7ee787"
-              );
-            } else {
-              logSafety(
-                "⚠️ Countdown is not active on overlay instance.",
-                "#e3b341"
-              );
-            }
-          });
-
-        document
-          .getElementById("btnTestChime")
-          ?.addEventListener("click", async () => {
-            const ctrl = getActiveController();
-            if (ctrl?.playAlert) {
-              if (ctrl.isMuted()) {
-                ctrl.toggleMute();
-                const audEl = document.getElementById("countdownAudioSelect");
-                if (audEl) audEl.value = "unmuted";
-              }
-              const played = await ctrl.playAlert();
-              if (played) {
-                logSafety(
-                  "🎵 Alert chime played successfully via countdown controller! (Unmuted)",
-                  "#7ee787"
-                );
-              } else {
-                logSafety(
-                  "⚠️ Alert chime was blocked by browser autoplay policy or audio is muted.",
-                  "#e3b341"
-                );
-              }
-            } else if (window.RamadanOverlay?.playSynthesizedChime) {
-              const played = await window.RamadanOverlay.playSynthesizedChime();
-              if (played) {
-                logSafety(
-                  "🎵 Played preview of built-in harmonic chime (Web Audio API).",
-                  "#7ee787"
-                );
-              } else {
-                logSafety(
-                  "⚠️ Could not play preview chime. Click page first to allow audio.",
-                  "#e3b341"
-                );
-              }
-            }
-          });
-
-        // Confetti select controls both code output AND live demo behaviour
-        document
-          .getElementById("confettiSelect")
-          .addEventListener("change", () => {
-            if (overlayOn) mount(true);
-            else updateCodeBox(getConfig());
-          });
-        document.querySelectorAll('input[type="color"]').forEach((el) => {
-          el.addEventListener("input", () => {
-            const themeSel = document.getElementById("themeSelect");
-            if (themeSel && themeSel.value !== "custom") {
-              themeSel.value = "custom";
-            }
+        // Banner color & text inputs
+        [
+          "bannerBgColor",
+          "bannerTextColorInput",
+          "bannerIconColorInput",
+        ].forEach((id) => {
+          document.getElementById(id).addEventListener("input", () => {
+            document.getElementById("themeSelect").value = "custom";
             if (overlayOn) mount();
           });
         });
-        // Banner text inputs & sound URL inputs — wire them up to update code box
-        ["bannerTextEn", "bannerTextAr", "countdownSoundUrlInput"].forEach(
-          (id) => {
-            document.getElementById(id)?.addEventListener("input", () => {
-              updateCodeBox(getConfig());
-            });
-          }
-        );
-        // Keep variant/region/sound selectors syncing panels immediately
         document
-          .getElementById("variantSelect")
-          .addEventListener("change", syncColorPanels);
-        document
-          .getElementById("positionSelect")
-          .addEventListener("change", syncColorPanels);
-        document
-          .getElementById("ropeStyleSelect")
-          .addEventListener("change", syncColorPanels);
-        document
-          .getElementById("calendarModeSelect")
-          .addEventListener("change", syncColorPanels);
-        document
-          .getElementById("countdownSelect")
-          .addEventListener("change", syncColorPanels);
-        document
-          .getElementById("countdownSoundSelect")
-          ?.addEventListener("change", syncColorPanels);
-        document
-          .getElementById("regionSelect")
-          .addEventListener("change", syncHijriAdjGroup);
+          .getElementById("bannerApplyBtn")
+          .addEventListener("click", () => {
+            if (overlayOn) mount();
+          });
 
-        // ── Code tabs ──
-        document.querySelectorAll(".code-tab").forEach((btn) => {
-          btn.addEventListener("click", () => {
+        // Master Toggle button
+        const toggleBtn = document.getElementById("toggleBtn");
+        toggleBtn.addEventListener("click", () => {
+          overlayOn = !overlayOn;
+          if (overlayOn) {
+            toggleBtn.classList.add("active");
+            toggleBtn.innerHTML =
+              '<span style="font-size: 0.9rem">✨</span><span>Overlay ON</span>';
+            mount();
+          } else {
+            toggleBtn.classList.remove("active");
+            toggleBtn.innerHTML =
+              '<span style="font-size: 0.9rem">💤</span><span>Overlay OFF</span>';
+            currentInstance?.destroy();
+            currentInstance = null;
+          }
+        });
+
+        // Confetti button
+        document.getElementById("confettiBtn").addEventListener("click", () => {
+          if (currentInstance?.fireConfetti) {
+            currentInstance.fireConfetti();
+          } else {
+            try {
+              if (
+                typeof confetti === "function" &&
+                RamadanOverlay?.CONFETTI_COLORS
+              ) {
+                confetti({
+                  particleCount: 80,
+                  spread: 70,
+                  origin: { y: 0.2 },
+                  colors: RamadanOverlay.CONFETTI_COLORS,
+                });
+              }
+            } catch (_) {}
+          }
+        });
+
+        // Code tabs
+        document.querySelectorAll(".code-tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
             document
               .querySelectorAll(".code-tab")
-              .forEach((b) => b.classList.remove("active"));
-            btn.classList.add("active");
-            activeTab = btn.dataset.tab;
+              .forEach((t) => t.classList.remove("active"));
+            tab.classList.add("active");
+            activeTab = tab.dataset.tab;
             updateCodeBox(getConfig());
           });
         });
 
-        // ── Copy code / prompt ──
-        document.getElementById("copyBtn").addEventListener("click", () => {
+        // Copy button handlers
+        function handleCopy() {
           const raw = document.getElementById("codeBox").dataset.raw || "";
           navigator.clipboard.writeText(raw).then(() => {
-            const btn = document.getElementById("copyBtn");
-            btn.textContent = "✅ Copied!";
-            btn.classList.add("copied");
+            const btns = [
+              document.getElementById("copyBtn"),
+              document.getElementById("codeCopyFooterBtn"),
+            ];
+            btns.forEach((btn) => {
+              if (!btn) return;
+              btn.textContent = "✓ Copied to clipboard!";
+              btn.classList.add("copied");
+            });
             setTimeout(() => {
-              btn.textContent =
-                activeTab === "ai" ? "📋 Copy prompt" : "📋 Copy code";
-              btn.classList.remove("copied");
-            }, 2000);
+              btns.forEach((btn) => {
+                if (!btn) return;
+                btn.textContent =
+                  activeTab === "ai" ? "📋 Copy prompt" : "📋 Copy code";
+                btn.classList.remove("copied");
+              });
+            }, 2200);
           });
-        });
+        }
+        document
+          .getElementById("copyBtn")
+          .addEventListener("click", handleCopy);
+        document
+          .getElementById("codeCopyFooterBtn")
+          ?.addEventListener("click", handleCopy);
 
-        // ── Share link ──
+        // Share button
         document.getElementById("shareBtn").addEventListener("click", () => {
+          saveHash(getConfig());
           navigator.clipboard.writeText(location.href).then(() => {
             const btn = document.getElementById("shareBtn");
-            btn.textContent = "✅ Link copied!";
-            btn.classList.add("copied");
+            btn.textContent = "✓ Link copied!";
             setTimeout(() => {
-              btn.textContent = "🔗 Share link";
-              btn.classList.remove("copied");
+              btn.textContent = "🔗 Share Link";
             }, 2000);
           });
         });
 
-        // ── Opacity range — update label only ──
-        document
-          .getElementById("opacityRange")
-          .addEventListener("input", function () {
-            document.getElementById("opacityVal").textContent = this.value;
-          });
-
-        // ── Rope sag range — live update label and overlay ──
-        document
-          .getElementById("ropeSagRange")
-          ?.addEventListener("input", function () {
-            document.getElementById("ropeSagVal").textContent =
-              this.value + "px";
-            if (overlayOn) mount();
-          });
-
-        // ── Error Safety & Diagnostic Suite Handlers ──
+        // ── Diagnostic Logging & Defensive Safety Testing ──
+        const safetyConsole = document.getElementById("safetyConsole");
         function logSafety(msg, color = "#7ee787") {
-          const consoleEl = document.getElementById("safetyConsole");
-          if (!consoleEl) return;
-          const time = new Date().toLocaleTimeString();
+          if (!safetyConsole) return;
+          const time = new Date().toISOString().slice(11, 19);
           const line = document.createElement("div");
           line.style.color = color;
-          line.style.marginTop = "3px";
+          line.style.margin = "2px 0";
           line.textContent = `[${time}] ${msg}`;
-          consoleEl.appendChild(line);
-          consoleEl.scrollTop = consoleEl.scrollHeight;
+          safetyConsole.appendChild(line);
+          safetyConsole.scrollTop = safetyConsole.scrollHeight;
         }
 
-        // Bridge console methods to stream [ramadan-overlay] diagnostics into the safety console
-        const origLog = console.log;
         const origWarn = console.warn;
         const origError = console.error;
-        console.log = function (...args) {
-          origLog.apply(console, args);
-          const str = args
-            .map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a)))
-            .join(" ");
-          if (str.includes("[ramadan-overlay]")) logSafety(str, "#58a6ff");
-        };
         console.warn = function (...args) {
           origWarn.apply(console, args);
           const str = args
@@ -3021,7 +3332,7 @@ Instructions for the Agent:
               previewMode: true,
             });
             logSafety(
-              "✅ Result: Extreme config was safely clamped to valid range without throwing!",
+              "✅ Result: Extreme config safely clamped to valid range without throwing!",
               "#7ee787"
             );
           });
@@ -3117,6 +3428,12 @@ Instructions for the Agent:
             );
             if (overlayOn) mount();
           });
+
+        // Initial setup
+        loadHash();
+        syncColorPanels();
+        syncHijriAdjGroup();
+        mount();
       } // end initApp
     </script>
 
@@ -3127,7 +3444,6 @@ Instructions for the Agent:
         s.src = "dist/ramadan-overlay.min.js";
         s.onload = initApp;
         s.onerror = function () {
-          // local build missing — fall back to CDN
           var fallback = document.createElement("script");
           fallback.src =
             "https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js";

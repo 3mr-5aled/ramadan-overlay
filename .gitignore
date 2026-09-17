@@ -29,6 +29,5 @@ Thumbs.db
 *.tsbuildinfo
 
 # Lock files (keep one — remove if you commit lock files)
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
+# Temporary & scratch files
+scratch/
