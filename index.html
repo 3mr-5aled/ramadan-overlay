@@ -1393,10 +1393,52 @@
 
         <div class="control-group" id="countdownAudioGroup">
           <label>Alert Audio</label>
-          <select id="countdownAudioSelect">
-            <option value="muted" selected>Muted (Default)</option>
-            <option value="unmuted">Unmuted (Play Alert Sound)</option>
+          <div
+            style="display: flex; gap: 8px; align-items: center; width: 100%"
+          >
+            <select id="countdownAudioSelect" style="flex: 1">
+              <option value="muted" selected>Muted by Default</option>
+              <option value="unmuted">Unmuted (Play Alert Sound)</option>
+            </select>
+            <button
+              type="button"
+              id="btnTestChime"
+              class="btn btn-secondary btn-sm"
+              title="Test the Ramadan alert chime"
+              style="
+                white-space: nowrap;
+                padding: 4px 8px;
+                font-size: 11px;
+                flex-shrink: 0;
+              "
+            >
+              🔊 Test Chime
+            </button>
+          </div>
+        </div>
+
+        <div class="control-group" id="countdownSoundSourceGroup">
+          <label>Chime Sound</label>
+          <select id="countdownSoundSelect">
+            <option value="default" selected>
+              Built-in Melodic Chime (Web Audio)
+            </option>
+            <option value="custom">Custom Audio URL...</option>
+            <option value="none">Disabled (No Audio)</option>
           </select>
+        </div>
+
+        <div
+          class="control-group"
+          id="countdownSoundUrlGroup"
+          style="display: none"
+        >
+          <label>Audio URL</label>
+          <input
+            type="text"
+            id="countdownSoundUrlInput"
+            placeholder="https://example.com/adhan.mp3"
+          />
         </div>
 
         <div class="control-group" id="countdownAlertWindowGroup">
@@ -1943,6 +1985,17 @@
           const cdIftarEl = document.getElementById("countdownIftarTimeGroup");
           if (cdIftarEl)
             cdIftarEl.style.display = cdVal === "custom" ? "" : "none";
+
+          // Countdown custom sound URL input visibility
+          const soundMode = document.getElementById(
+            "countdownSoundSelect"
+          )?.value;
+          const soundUrlGroup = document.getElementById(
+            "countdownSoundUrlGroup"
+          );
+          if (soundUrlGroup) {
+            soundUrlGroup.style.display = soundMode === "custom" ? "" : "none";
+          }
         }
 
         function syncHijriAdjGroup() {
@@ -2095,6 +2148,21 @@
                   10
                 ) || 10,
             };
+
+            const soundMode = document.getElementById(
+              "countdownSoundSelect"
+            )?.value;
+            if (soundMode === "none") {
+              cfg.countdown.sound = false;
+              cfg.countdown.soundUrl = false;
+            } else if (soundMode === "custom") {
+              const customUrl = document
+                .getElementById("countdownSoundUrlInput")
+                ?.value?.trim();
+              if (customUrl) {
+                cfg.countdown.soundUrl = customUrl;
+              }
+            }
           }
 
           const occVal = document.getElementById("occasionsSelect")?.value;
@@ -2503,6 +2571,24 @@ Instructions for the Agent:
                 if (autoDisEl)
                   autoDisEl.value = cfg.countdown.autoDismissAfterMinutes;
               }
+              if (
+                cfg.countdown.sound === false ||
+                cfg.countdown.soundUrl === false ||
+                cfg.countdown.soundUrl === "none"
+              ) {
+                const sndSel = document.getElementById("countdownSoundSelect");
+                if (sndSel) sndSel.value = "none";
+              } else if (
+                cfg.countdown.soundUrl &&
+                typeof cfg.countdown.soundUrl === "string"
+              ) {
+                const sndSel = document.getElementById("countdownSoundSelect");
+                if (sndSel) sndSel.value = "custom";
+                const sndUrl = document.getElementById(
+                  "countdownSoundUrlInput"
+                );
+                if (sndUrl) sndUrl.value = cfg.countdown.soundUrl;
+              }
             }
           } catch (e) {
             console.warn("Could not parse config from URL hash:", e);
@@ -2740,6 +2826,44 @@ Instructions for the Agent:
             }
           });
 
+        document
+          .getElementById("btnTestChime")
+          ?.addEventListener("click", async () => {
+            const ctrl = getActiveController();
+            if (ctrl?.playAlert) {
+              if (ctrl.isMuted()) {
+                ctrl.toggleMute();
+                const audEl = document.getElementById("countdownAudioSelect");
+                if (audEl) audEl.value = "unmuted";
+              }
+              const played = await ctrl.playAlert();
+              if (played) {
+                logSafety(
+                  "🎵 Alert chime played successfully via countdown controller! (Unmuted)",
+                  "#7ee787"
+                );
+              } else {
+                logSafety(
+                  "⚠️ Alert chime was blocked by browser autoplay policy or audio is muted.",
+                  "#e3b341"
+                );
+              }
+            } else if (window.RamadanOverlay?.playSynthesizedChime) {
+              const played = await window.RamadanOverlay.playSynthesizedChime();
+              if (played) {
+                logSafety(
+                  "🎵 Played preview of built-in harmonic chime (Web Audio API).",
+                  "#7ee787"
+                );
+              } else {
+                logSafety(
+                  "⚠️ Could not play preview chime. Click page first to allow audio.",
+                  "#e3b341"
+                );
+              }
+            }
+          });
+
         // Confetti select controls both code output AND live demo behaviour
         document
           .getElementById("confettiSelect")
@@ -2756,13 +2880,15 @@ Instructions for the Agent:
             if (overlayOn) mount();
           });
         });
-        // Banner text inputs are not color pickers — wire them up separately
-        ["bannerTextEn", "bannerTextAr"].forEach((id) => {
-          document.getElementById(id)?.addEventListener("input", () => {
-            updateCodeBox(getConfig());
-          });
-        });
-        // Keep variant/region selectors syncing panels immediately
+        // Banner text inputs & sound URL inputs — wire them up to update code box
+        ["bannerTextEn", "bannerTextAr", "countdownSoundUrlInput"].forEach(
+          (id) => {
+            document.getElementById(id)?.addEventListener("input", () => {
+              updateCodeBox(getConfig());
+            });
+          }
+        );
+        // Keep variant/region/sound selectors syncing panels immediately
         document
           .getElementById("variantSelect")
           .addEventListener("change", syncColorPanels);
@@ -2778,6 +2904,9 @@ Instructions for the Agent:
         document
           .getElementById("countdownSelect")
           .addEventListener("change", syncColorPanels);
+        document
+          .getElementById("countdownSoundSelect")
+          ?.addEventListener("change", syncColorPanels);
         document
           .getElementById("regionSelect")
           .addEventListener("change", syncHijriAdjGroup);

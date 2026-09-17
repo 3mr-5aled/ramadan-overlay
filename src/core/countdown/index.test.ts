@@ -177,4 +177,67 @@ describe("createCountdownManager", () => {
 
     manager.destroy();
   });
+
+  it("renders sound button by default and allows toggling mute state", () => {
+    const now = new Date(2026, 2, 10, 18, 30, 0);
+    vi.setSystemTime(now);
+
+    const manager = createCountdownManager({
+      iftarTime: "18:45",
+      alertWindowMinutes: 30,
+      defaultMuted: true,
+    });
+
+    manager.start();
+    const soundBtn = document.querySelector(
+      ".ro-countdown-sound-btn"
+    ) as HTMLButtonElement;
+    expect(soundBtn).not.toBeNull();
+    expect(soundBtn.getAttribute("aria-pressed")).toBe("false");
+    expect(manager.controller?.isMuted()).toBe(true);
+
+    // Toggle mute via controller
+    const nowMuted = manager.controller?.toggleMute();
+    expect(nowMuted).toBe(false);
+    expect(manager.controller?.isMuted()).toBe(false);
+    expect(soundBtn.getAttribute("aria-pressed")).toBe("true");
+
+    manager.destroy();
+  });
+
+  it("omits sound button when sound is explicitly disabled", () => {
+    const now = new Date(2026, 2, 10, 18, 30, 0);
+    vi.setSystemTime(now);
+
+    const manager = createCountdownManager({
+      iftarTime: "18:45",
+      alertWindowMinutes: 30,
+      sound: false,
+    });
+
+    manager.start();
+    const soundBtn = document.querySelector(".ro-countdown-sound-btn");
+    expect(soundBtn).toBeNull();
+
+    manager.destroy();
+  });
+
+  it("exposes playAlert on controller and resolves boolean", async () => {
+    const now = new Date(2026, 2, 10, 18, 30, 0);
+    vi.setSystemTime(now);
+
+    const manager = createCountdownManager({
+      iftarTime: "18:45",
+      alertWindowMinutes: 30,
+      defaultMuted: false,
+    });
+
+    manager.start();
+    expect(typeof manager.controller?.playAlert).toBe("function");
+
+    const res = await manager.controller?.playAlert?.();
+    expect(typeof res).toBe("boolean");
+
+    manager.destroy();
+  });
 });

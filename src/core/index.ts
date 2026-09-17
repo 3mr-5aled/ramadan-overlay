@@ -15,7 +15,7 @@
 
 export { getOccasionState, getRamadanState, init } from "./injector";
 export { fireRamadanConfetti, shouldFireConfetti } from "./confetti";
-export { createCountdownManager } from "./countdown";
+export { createCountdownManager, playSynthesizedChime } from "./countdown";
 export { THEME_PRESETS, themes, resolveTheme } from "./themes";
 
 export type {

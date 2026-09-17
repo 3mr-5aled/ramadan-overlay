@@ -159,7 +159,9 @@ export function injectCountdownStyles(): void {
 
 .ro-countdown-btn--prompt {
   color: var(--ro-countdown-gold);
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(245, 158, 11, 0.25);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+  animation: ro-countdown-pulse 1.5s infinite alternate ease-in-out;
 }
 
 .ro-countdown-digits {

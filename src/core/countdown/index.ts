@@ -96,9 +96,37 @@ export function createCountdownManager(
     },
   });
 
+  const isSoundEnabled = (cfg: IftarCountdownConfig): boolean => {
+    if (cfg.sound === false) return false;
+    if (cfg.soundUrl === false || cfg.soundUrl === "none") return false;
+    return true;
+  };
+
   let hostResult: CountdownHostResult | null = null;
   let isDestroyed = false;
   let pendingMinimized: boolean | undefined = undefined;
+
+  let removeGestureListeners: (() => void) | null = null;
+  if (typeof window !== "undefined") {
+    const onFirstUserGesture = () => {
+      audioController.prime();
+      cleanupGestureListeners();
+    };
+    const cleanupGestureListeners = () => {
+      window.removeEventListener("pointerdown", onFirstUserGesture);
+      window.removeEventListener("keydown", onFirstUserGesture);
+      removeGestureListeners = null;
+    };
+    removeGestureListeners = cleanupGestureListeners;
+    window.addEventListener("pointerdown", onFirstUserGesture, {
+      once: true,
+      passive: true,
+    });
+    window.addEventListener("keydown", onFirstUserGesture, {
+      once: true,
+      passive: true,
+    });
+  }
 
   const mountHost = (): void => {
     if (hostResult || isDestroyed) return;
@@ -107,7 +135,7 @@ export function createCountdownManager(
       targetTime: timerEngine.getTargetTime(),
       position: resolvedConfig.position ?? "bottom-right",
       isBannerTopActive: isBannerActive,
-      hasSound: Boolean(resolvedConfig.soundUrl),
+      hasSound: isSoundEnabled(resolvedConfig),
       initialMuted: audioController.isMuted(),
       minimizable: resolvedConfig.minimizable,
       initiallyMinimized:
@@ -124,7 +152,7 @@ export function createCountdownManager(
         controller.toggleMute();
       },
       onPlayAlert: () => {
-        audioController.playAlert();
+        void audioController.playAlert();
       },
     });
 
@@ -220,6 +248,7 @@ export function createCountdownManager(
       return isMuted;
     },
     isMuted: () => audioController.isMuted(),
+    playAlert: () => audioController.playAlert(),
     getTargetTime: () => timerEngine.getTargetTime(),
     updateConfig: (partial) => {
       Object.assign(resolvedConfig, partial);
@@ -269,6 +298,9 @@ export function createCountdownManager(
     },
     destroy: () => {
       isDestroyed = true;
+      if (removeGestureListeners) {
+        removeGestureListeners();
+      }
       controller.dismiss();
       timerEngine.destroy();
     },

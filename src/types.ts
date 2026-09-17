@@ -571,9 +571,18 @@ export interface IftarCountdownConfig {
   celebrationDurationMs?: number;
 
   /**
-   * Optional consumer-supplied audio chime or Adhan URL.
+   * Whether audio alerts are enabled on the countdown widget.
+   * When true, a sound toggle button is displayed and an alert chime plays at T-0 (if unmuted).
+   * @default true
    */
-  soundUrl?: string;
+  sound?: boolean;
+
+  /**
+   * Optional consumer-supplied audio chime or Adhan URL.
+   * If omitted or 'default', a built-in Web Audio API harmonic chime is used.
+   * Set to `false` or `'none'` to completely disable audio.
+   */
+  soundUrl?: string | false;
 
   /**
    * Whether audio alerts start muted by default.
@@ -625,6 +634,8 @@ export interface IftarCountdownController {
   isMinimized?: () => boolean;
   toggleMute: () => boolean;
   isMuted: () => boolean;
+  /** Programmatically play the alert chime if unmuted. Resolves true if played, false if muted or blocked. */
+  playAlert?: () => Promise<boolean>;
   getTargetTime: () => Date | null;
   updateConfig: (config: Partial<IftarCountdownConfig>) => void;
 }

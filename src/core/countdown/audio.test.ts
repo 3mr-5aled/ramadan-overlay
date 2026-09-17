@@ -1,5 +1,39 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { AmbientAudioController, safePlayAudio } from "./audio";
+import {
+  AmbientAudioController,
+  safePlayAudio,
+  playSynthesizedChime,
+} from "./audio";
+
+function createMockAudioContext(state: "running" | "suspended" = "running") {
+  const destination = {};
+  const mockGain = {
+    gain: {
+      setValueAtTime: vi.fn(),
+      exponentialRampToValueAtTime: vi.fn(),
+    },
+    connect: vi.fn(),
+  };
+  const mockOsc = {
+    type: "sine",
+    frequency: {
+      setValueAtTime: vi.fn(),
+    },
+    connect: vi.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
+  };
+
+  return {
+    state,
+    currentTime: 1.0,
+    destination,
+    createGain: vi.fn().mockReturnValue(mockGain),
+    createOscillator: vi.fn().mockReturnValue(mockOsc),
+    resume: vi.fn().mockResolvedValue(undefined),
+    close: vi.fn().mockResolvedValue(undefined),
+  } as unknown as AudioContext;
+}
 
 describe("safePlayAudio", () => {
   it("resolves true when audio.play() resolves successfully", async () => {
@@ -34,15 +68,52 @@ describe("safePlayAudio", () => {
   });
 });
 
+describe("playSynthesizedChime", () => {
+  it("creates oscillators and gain nodes when AudioContext is running", async () => {
+    const mockCtx = createMockAudioContext("running");
+    const result = await playSynthesizedChime(mockCtx);
+
+    expect(result).toBe(true);
+    expect(mockCtx.createOscillator).toHaveBeenCalled();
+    expect(mockCtx.createGain).toHaveBeenCalled();
+  });
+
+  it("resumes context when suspended", async () => {
+    const mockCtx = createMockAudioContext("suspended");
+    // After resume, state becomes running
+    (mockCtx as any).resume = vi.fn().mockImplementation(() => {
+      (mockCtx as any).state = "running";
+      return Promise.resolve();
+    });
+
+    const result = await playSynthesizedChime(mockCtx);
+    expect(result).toBe(true);
+    expect((mockCtx as any).resume).toHaveBeenCalled();
+  });
+
+  it("returns false if AudioContext remains suspended after resume rejection", async () => {
+    const mockCtx = createMockAudioContext("suspended");
+    (mockCtx as any).resume = vi
+      .fn()
+      .mockRejectedValue(new Error("Autoplay blocked"));
+
+    const result = await playSynthesizedChime(mockCtx);
+    expect(result).toBe(false);
+  });
+});
+
 describe("AmbientAudioController", () => {
   let originalAudio: typeof Audio;
+  let originalAudioContext: typeof AudioContext;
 
   beforeEach(() => {
     originalAudio = global.Audio;
+    originalAudioContext = global.AudioContext;
   });
 
   afterEach(() => {
     global.Audio = originalAudio;
+    global.AudioContext = originalAudioContext;
     vi.restoreAllMocks();
   });
 
@@ -108,6 +179,41 @@ describe("AmbientAudioController", () => {
     const played = await controller.playAlert();
     expect(played).toBe(false);
     expect(onAudioBlocked).toHaveBeenCalledTimes(1);
+
+    controller.destroy();
+  });
+
+  it("plays synthesized Web Audio chime when no soundUrl is provided and unmuted", async () => {
+    const mockCtx = createMockAudioContext("running");
+    global.AudioContext = vi
+      .fn()
+      .mockImplementation(() => mockCtx) as unknown as typeof AudioContext;
+
+    const controller = new AmbientAudioController({
+      defaultMuted: false,
+    });
+
+    const played = await controller.playAlert();
+    expect(played).toBe(true);
+    expect(mockCtx.createOscillator).toHaveBeenCalled();
+
+    controller.destroy();
+  });
+
+  it("does not play alert when soundUrl is explicitly false or 'none'", async () => {
+    const mockCtx = createMockAudioContext("running");
+    global.AudioContext = vi
+      .fn()
+      .mockImplementation(() => mockCtx) as unknown as typeof AudioContext;
+
+    const controller = new AmbientAudioController({
+      soundUrl: false,
+      defaultMuted: false,
+    });
+
+    const played = await controller.playAlert();
+    expect(played).toBe(false);
+    expect(mockCtx.createOscillator).not.toHaveBeenCalled();
 
     controller.destroy();
   });
