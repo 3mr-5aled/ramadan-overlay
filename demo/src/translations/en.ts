@@ -113,8 +113,22 @@ export const enTranslations: Translations = {
       },
       attachTo: "Attachment Mode / Target",
       attachToOptions: {
-        overlay: "Overlay Above All (Default)",
+        overlay: "Overlay Above All (Full Screen Default)",
         header: "Attach to Header (.celestial-nav)",
+        custom: "Custom CSS Selector",
+      },
+      attachToCustomPlaceholder:
+        "e.g. .site-header, #main-nav, .ro-attach-target",
+      attachEdge: "Attachment Edge (Anchor Point)",
+      attachEdgeOptions: {
+        bottom: "Bottom Edge (Dangles below header)",
+        top: "Top Edge (Hangs along top ceiling)",
+      },
+      mobileSideBehavior: "Mobile Side Decor Behavior (<768px)",
+      mobileSideBehaviorOptions: {
+        hide: "Hide on Mobile (Clean layout)",
+        top: "Relocate to Top Row",
+        show: "Keep on Sides",
       },
       autoTrigger: "Automatic Hijri Calendar Trigger",
       autoTriggerHelp:
@@ -128,7 +142,8 @@ export const enTranslations: Translations = {
       lanternStyle: "Lantern SVG Design",
       lanternCycle: "Cycle all 12 distinct designs",
       lanternCount: "Lantern Density / Count",
-      lanternCountAuto: "Auto Decorative (3–6)",
+      lanternCountAuto: "Auto Decorative (Airy 2–6)",
+      lanternZIndex: "Lantern Row Z-Index",
       ropeStyle: "Suspension String Style",
       ropeStraight: "Straight Ceiling Rail",
       ropeUshaped: "Curved U-Shaped Festoon Swag",

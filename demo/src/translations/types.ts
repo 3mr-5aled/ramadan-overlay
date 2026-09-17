@@ -53,6 +53,11 @@ export interface Translations {
       confettiOptions: Record<string, string>;
       attachTo: string;
       attachToOptions: Record<string, string>;
+      attachToCustomPlaceholder: string;
+      attachEdge: string;
+      attachEdgeOptions: Record<string, string>;
+      mobileSideBehavior: string;
+      mobileSideBehaviorOptions: Record<string, string>;
       autoTrigger: string;
       autoTriggerHelp: string;
       countdown: string;
@@ -64,6 +69,7 @@ export interface Translations {
       lanternCycle: string;
       lanternCount: string;
       lanternCountAuto: string;
+      lanternZIndex: string;
       ropeStyle: string;
       ropeStraight: string;
       ropeUshaped: string;

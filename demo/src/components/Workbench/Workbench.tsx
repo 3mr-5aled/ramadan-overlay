@@ -95,6 +95,12 @@ export const Workbench: React.FC<WorkbenchProps> = ({
             onToggleCountdown={onToggleCountdown}
             attachTo={config.attachTo}
             onChangeAttachTo={(val) => onUpdateConfig({ attachTo: val })}
+            attachEdge={config.attachEdge}
+            onChangeAttachEdge={(val) => onUpdateConfig({ attachEdge: val })}
+            mobileSideBehavior={config.mobileSideBehavior}
+            onChangeMobileSideBehavior={(val) =>
+              onUpdateConfig({ mobileSideBehavior: val })
+            }
           />
 
           {themeName === "custom" && (

@@ -5,6 +5,7 @@ import type {
   ThemePreset,
   LayerStacking,
   ShadowMode,
+  MobileSideBehavior,
 } from "ramadan-overlay";
 import type { Translations } from "../../translations/types";
 import { isOptionVisible } from "../../utils/matrix";
@@ -43,6 +44,10 @@ interface UniversalControlsProps {
   onToggleCountdown: () => void;
   attachTo?: string | HTMLElement;
   onChangeAttachTo?: (val: string | undefined) => void;
+  attachEdge?: "bottom" | "top";
+  onChangeAttachEdge?: (val: "bottom" | "top") => void;
+  mobileSideBehavior?: MobileSideBehavior;
+  onChangeMobileSideBehavior?: (val: MobileSideBehavior) => void;
 }
 
 export const UniversalControls: React.FC<UniversalControlsProps> = ({
@@ -66,8 +71,29 @@ export const UniversalControls: React.FC<UniversalControlsProps> = ({
   onToggleCountdown,
   attachTo,
   onChangeAttachTo,
+  attachEdge,
+  onChangeAttachEdge,
+  mobileSideBehavior,
+  onChangeMobileSideBehavior,
 }) => {
   const showShadows = isOptionVisible("shadows", variant);
+  const showMobileSideBehavior = isOptionVisible(
+    "mobileSideBehavior",
+    variant,
+    {
+      position,
+    }
+  );
+
+  const isHeader = attachTo === ".celestial-nav";
+  const isCustom = Boolean(
+    attachTo && typeof attachTo === "string" && !isHeader
+  );
+  const [customSelectorMode, setCustomSelectorMode] = React.useState(isCustom);
+
+  React.useEffect(() => {
+    if (isCustom) setCustomSelectorMode(true);
+  }, [isCustom]);
 
   return (
     <div className="panel-card">
@@ -148,30 +174,109 @@ export const UniversalControls: React.FC<UniversalControlsProps> = ({
           </select>
         </div>
 
-        {/* Attachment Target (Overlay Above All vs Attached to Header) */}
+        {/* Attachment Target (Overlay Above All vs Attached to Header vs Custom) */}
         <div className="form-group">
           <label className="form-label">{t.workbench.universal.attachTo}</label>
           <select
             className="form-select"
             value={
-              typeof attachTo === "string" && attachTo ? "header" : "overlay"
+              customSelectorMode || isCustom
+                ? "custom"
+                : isHeader
+                  ? "header"
+                  : "overlay"
             }
             onChange={(e) => {
-              if (onChangeAttachTo) {
-                onChangeAttachTo(
-                  e.target.value === "header" ? ".celestial-nav" : undefined
+              if (e.target.value === "overlay") {
+                setCustomSelectorMode(false);
+                onChangeAttachTo?.(undefined);
+              } else if (e.target.value === "header") {
+                setCustomSelectorMode(false);
+                onChangeAttachTo?.(".celestial-nav");
+              } else {
+                setCustomSelectorMode(true);
+                onChangeAttachTo?.(
+                  typeof attachTo === "string" &&
+                    attachTo &&
+                    attachTo !== ".celestial-nav"
+                    ? attachTo
+                    : ".ro-attach-target"
                 );
               }
             }}
           >
-            <option value="overlay">
-              {t.workbench.universal.attachToOptions.overlay}
-            </option>
             <option value="header">
               {t.workbench.universal.attachToOptions.header}
             </option>
+            <option value="overlay">
+              {t.workbench.universal.attachToOptions.overlay}
+            </option>
+            <option value="custom">
+              {t.workbench.universal.attachToOptions.custom}
+            </option>
           </select>
+          {(customSelectorMode || isCustom) && (
+            <input
+              type="text"
+              className="form-input"
+              style={{ marginTop: "8px" }}
+              placeholder={t.workbench.universal.attachToCustomPlaceholder}
+              value={typeof attachTo === "string" ? attachTo : ""}
+              onChange={(e) => onChangeAttachTo?.(e.target.value)}
+            />
+          )}
         </div>
+
+        {/* Attachment Edge (Dangle under header vs Hang along top ceiling) */}
+        {(Boolean(attachTo) || customSelectorMode) && (
+          <div className="form-group">
+            <label className="form-label">
+              {t.workbench.universal.attachEdge}
+            </label>
+            <select
+              className="form-select"
+              value={attachEdge || "bottom"}
+              onChange={(e) =>
+                onChangeAttachEdge?.(e.target.value as "bottom" | "top")
+              }
+            >
+              <option value="bottom">
+                {t.workbench.universal.attachEdgeOptions.bottom}
+              </option>
+              <option value="top">
+                {t.workbench.universal.attachEdgeOptions.top}
+              </option>
+            </select>
+          </div>
+        )}
+
+        {/* Mobile Side Behavior */}
+        {showMobileSideBehavior && (
+          <div className="form-group">
+            <label className="form-label">
+              {t.workbench.universal.mobileSideBehavior}
+            </label>
+            <select
+              className="form-select"
+              value={mobileSideBehavior || "hide"}
+              onChange={(e) =>
+                onChangeMobileSideBehavior?.(
+                  e.target.value as MobileSideBehavior
+                )
+              }
+            >
+              <option value="hide">
+                {t.workbench.universal.mobileSideBehaviorOptions.hide}
+              </option>
+              <option value="top">
+                {t.workbench.universal.mobileSideBehaviorOptions.top}
+              </option>
+              <option value="show">
+                {t.workbench.universal.mobileSideBehaviorOptions.show}
+              </option>
+            </select>
+          </div>
+        )}
 
         {/* Elevation Shadows (if applicable) */}
         {showShadows && (

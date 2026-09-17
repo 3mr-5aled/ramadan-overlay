@@ -58,6 +58,8 @@ export const App: React.FC = () => {
     previewMode: true,
     countdown: false,
     confetti: "on",
+    attachTo: ".celestial-nav",
+    attachEdge: "bottom",
     lanternStyle: 0,
     ropeStyle: "straight",
     ropeSag: 20,
@@ -264,14 +266,6 @@ export const App: React.FC = () => {
 
   return (
     <div className={`app-container ${mobileDrawerOpen ? "drawer-open" : ""}`}>
-      {/* Dogfooding the official drop-in React component */}
-      {overlayOn && (
-        <RamadanOverlay
-          config={activeOverlayConfig}
-          onInstance={setOverlayInstance}
-        />
-      )}
-
       <Navbar
         t={t}
         locale={locale}
@@ -284,6 +278,14 @@ export const App: React.FC = () => {
         onFireConfetti={handleFireConfetti}
         onToggleDrawer={() => setMobileDrawerOpen((prev) => !prev)}
       />
+
+      {/* Dogfooding the official drop-in React component */}
+      {overlayOn && (
+        <RamadanOverlay
+          config={activeOverlayConfig}
+          onInstance={setOverlayInstance}
+        />
+      )}
 
       <main>
         <HeroCanopy

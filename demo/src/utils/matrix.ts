@@ -61,6 +61,8 @@ export function isOptionVisible(
 ): boolean {
   switch (optionKey) {
     case "lanternStyle":
+    case "lanternCount":
+    case "lanternZIndex":
     case "ropeStyle":
     case "ceilingColor":
     case "ropeColor":
@@ -122,7 +124,16 @@ export function isOptionVisible(
     case "autoTrigger":
     case "countdown":
     case "confetti":
+    case "attachTo":
       return true;
+
+    case "attachEdge":
+      return Boolean(currentConfig?.attachTo);
+
+    case "mobileSideBehavior":
+      return ["left", "right", "sides", "start", "end"].includes(
+        currentConfig?.position || ""
+      );
 
     default:
       return false;

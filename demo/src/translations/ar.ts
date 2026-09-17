@@ -115,6 +115,20 @@ export const arTranslations: Translations = {
       attachToOptions: {
         overlay: "طبقة فوق كامل الصفحة (الافتراضي)",
         header: "إرفاق بالهيدر (.celestial-nav)",
+        custom: "محدد CSS مخصص",
+      },
+      attachToCustomPlaceholder:
+        "مثال: site-header. أو main-navbar# أو ro-attach-target.",
+      attachEdge: "حافة التثبيت (نقطة التعليق)",
+      attachEdgeOptions: {
+        bottom: "الحافة السفلية (تتدلى أسفل الهيدر)",
+        top: "الحافة العلوية (معلقة من أعلى السقف)",
+      },
+      mobileSideBehavior: "سلوك الزخارف الجانبية على الجوال (<768px)",
+      mobileSideBehaviorOptions: {
+        hide: "إخفاء على شاشات الجوال (الافتراضي الأنيق)",
+        top: "نقل إلى أعلى الصفحة",
+        show: "إبقاء على الجوانب",
       },
       autoTrigger: "الكشف التلقائي بالتقويم الهجري",
       autoTriggerHelp:
@@ -128,7 +142,8 @@ export const arTranslations: Translations = {
       lanternStyle: "تصميم الفانوس",
       lanternCycle: "عرض جميع التصاميم الـ 12 بالتناوب",
       lanternCount: "كثافة وعدد الفوانيس",
-      lanternCountAuto: "تلقائي هادئ (3-6)",
+      lanternCountAuto: "تلقائي انسيابي (2–6)",
+      lanternZIndex: "مستوى طبقة الفوانيس (Z-Index)",
       ropeStyle: "نمط حبل التعليق",
       ropeStraight: "حبل مستقيم أفقي",
       ropeUshaped: "حبال متدلية ومنحنية (U-Shaped Swag)",

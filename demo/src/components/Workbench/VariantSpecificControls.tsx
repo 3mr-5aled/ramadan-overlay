@@ -96,11 +96,33 @@ export const VariantSpecificControls: React.FC<
                 <option value={0}>
                   {t.workbench.variantSpecific.lanternCountAuto}
                 </option>
-                {[2, 3, 4, 5, 6, 8, 10].map((num) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, 10, 12].map((num) => (
                   <option key={num} value={num}>
                     {num}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                {t.workbench.variantSpecific.lanternZIndex}
+              </label>
+              <select
+                className="form-select"
+                value={config.lanternZIndex ?? 2}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  onUpdateConfig({
+                    lanternZIndex: val,
+                  });
+                }}
+              >
+                <option value={1}>1 (Low)</option>
+                <option value={2}>2 (Default)</option>
+                <option value={10}>10 (Elevated)</option>
+                <option value={100}>100 (High)</option>
+                <option value={9999}>9999 (Topmost)</option>
               </select>
             </div>
 

@@ -128,6 +128,40 @@ describe("Variant Capability Matrix", () => {
       expect(isOptionVisible("confetti", "lanterns")).toBe(true);
       expect(isOptionVisible("theme", "banner")).toBe(true);
       expect(isOptionVisible("position", "sparkles")).toBe(true);
+      expect(isOptionVisible("attachTo", "lanterns")).toBe(true);
+      expect(isOptionVisible("attachTo", "banner")).toBe(true);
+    });
+
+    it("flags attachEdge visible only when attachTo is configured", () => {
+      expect(isOptionVisible("attachEdge", "lanterns", {})).toBe(false);
+      expect(
+        isOptionVisible("attachEdge", "lanterns", {
+          attachTo: ".celestial-nav",
+        })
+      ).toBe(true);
+    });
+
+    it("flags mobileSideBehavior visible only when position is lateral sides", () => {
+      expect(
+        isOptionVisible("mobileSideBehavior", "lanterns", { position: "top" })
+      ).toBe(false);
+      expect(
+        isOptionVisible("mobileSideBehavior", "lanterns", {
+          position: "sides",
+        })
+      ).toBe(true);
+      expect(
+        isOptionVisible("mobileSideBehavior", "lanterns", {
+          position: "left",
+        })
+      ).toBe(true);
+    });
+
+    it("flags lanternCount and lanternZIndex visible for lanterns variant", () => {
+      expect(isOptionVisible("lanternCount", "lanterns")).toBe(true);
+      expect(isOptionVisible("lanternZIndex", "lanterns")).toBe(true);
+      expect(isOptionVisible("lanternCount", "banner")).toBe(false);
+      expect(isOptionVisible("lanternZIndex", "sparkles")).toBe(false);
     });
   });
 

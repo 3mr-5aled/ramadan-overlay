@@ -55,8 +55,17 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
     cleanConfig.autoTrigger = false;
   if (config.countdown) cleanConfig.countdown = true;
   if (config.confetti === "off") cleanConfig.confetti = "off";
-  if (config.attachTo) cleanConfig.attachTo = config.attachTo;
+  if (config.attachTo) {
+    cleanConfig.attachTo = config.attachTo;
+    if (config.attachEdge) cleanConfig.attachEdge = config.attachEdge;
+  }
+  if (config.mobileSideBehavior && config.mobileSideBehavior !== "hide") {
+    cleanConfig.mobileSideBehavior = config.mobileSideBehavior;
+  }
   if (config.lanternCount) cleanConfig.lanternCount = config.lanternCount;
+  if (config.lanternZIndex !== undefined && config.lanternZIndex !== 2) {
+    cleanConfig.lanternZIndex = config.lanternZIndex;
+  }
 
   // Check specific options through capability matrix
   const candidateKeys: Array<keyof RamadanOverlayConfig> = [
