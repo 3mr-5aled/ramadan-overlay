@@ -145,4 +145,36 @@ describe("createCountdownManager", () => {
 
     manager.destroy();
   });
+
+  it("controls minimization state via controller.minimize() and controller.expand()", () => {
+    const now = new Date(2026, 2, 10, 18, 30, 0);
+    vi.setSystemTime(now);
+    sessionStorage.clear();
+
+    const manager = createCountdownManager({
+      iftarTime: "18:45",
+      alertWindowMinutes: 30,
+    });
+
+    manager.start();
+    expect(manager.controller?.isMinimized?.()).toBe(false);
+
+    manager.controller?.minimize?.();
+    expect(manager.controller?.isMinimized?.()).toBe(true);
+    expect(
+      document
+        .getElementById("ramadan-countdown-root")
+        ?.classList.contains("ro-countdown-host--minimized")
+    ).toBe(true);
+
+    manager.controller?.expand?.();
+    expect(manager.controller?.isMinimized?.()).toBe(false);
+    expect(
+      document
+        .getElementById("ramadan-countdown-root")
+        ?.classList.contains("ro-countdown-host--minimized")
+    ).toBe(false);
+
+    manager.destroy();
+  });
 });

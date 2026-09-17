@@ -98,6 +98,7 @@ export function createCountdownManager(
 
   let hostResult: CountdownHostResult | null = null;
   let isDestroyed = false;
+  let pendingMinimized: boolean | undefined = undefined;
 
   const mountHost = (): void => {
     if (hostResult || isDestroyed) return;
@@ -108,6 +109,11 @@ export function createCountdownManager(
       isBannerTopActive: isBannerActive,
       hasSound: Boolean(resolvedConfig.soundUrl),
       initialMuted: audioController.isMuted(),
+      minimizable: resolvedConfig.minimizable,
+      initiallyMinimized:
+        pendingMinimized !== undefined
+          ? pendingMinimized
+          : resolvedConfig.initiallyMinimized,
       labels: dict,
       isRtl,
       lang,
@@ -125,9 +131,10 @@ export function createCountdownManager(
     // Prime audio on mount (or first card interaction)
     audioController.prime();
 
-    // Announce initial appearance
+    // Announce initial appearance and initialize digits
     const currentTarget = timerEngine.getTargetTime();
     const remainingMs = currentTarget.getTime() - Date.now();
+    hostResult.updateDigits(remainingMs);
     const remainingMinutes = Math.max(1, Math.floor(remainingMs / 60000));
     hostResult.announcer.announceInitial(remainingMinutes);
   };
@@ -187,6 +194,20 @@ export function createCountdownManager(
       timerEngine.stop();
       audioController.destroy();
       resolvedConfig.onDismiss?.();
+    },
+    minimize: () => {
+      pendingMinimized = true;
+      hostResult?.minimize();
+    },
+    expand: () => {
+      pendingMinimized = false;
+      hostResult?.expand();
+    },
+    isMinimized: () => {
+      if (hostResult) {
+        return hostResult.isMinimized();
+      }
+      return pendingMinimized ?? (resolvedConfig.initiallyMinimized || false);
     },
     toggleMute: () => {
       const isMuted = audioController.toggleMute();

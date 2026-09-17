@@ -133,4 +133,176 @@ describe("mountCountdownHost", () => {
 
     hostResult.destroy();
   });
+
+  it("supports collapsing into docked pill via minimize button and expanding via pill click", () => {
+    const onMinimize = vi.fn();
+    const onExpand = vi.fn();
+    sessionStorage.clear();
+
+    const hostResult = mountCountdownHost({
+      targetTime: new Date(2026, 2, 10, 18, 45, 0),
+      position: "bottom-right",
+      hasSound: false,
+      initialMuted: true,
+      labels: DEFAULT_COUNTDOWN_LABELS.en,
+      isRtl: false,
+      lang: "en",
+      onDismiss: vi.fn(),
+      onToggleSound: vi.fn(),
+      onMinimize,
+      onExpand,
+    });
+
+    const minBtn = hostResult.root.querySelector(
+      ".ro-countdown-minimize-btn"
+    ) as HTMLButtonElement;
+    expect(minBtn).not.toBeNull();
+    expect(hostResult.isMinimized()).toBe(false);
+
+    // Click minimize button
+    minBtn.click();
+    expect(hostResult.isMinimized()).toBe(true);
+    expect(
+      hostResult.root.classList.contains("ro-countdown-host--minimized")
+    ).toBe(true);
+    expect(sessionStorage.getItem("ro_countdown_minimized")).toBe("true");
+    expect(onMinimize).toHaveBeenCalledTimes(1);
+
+    // Pill element exists
+    const pill = hostResult.root.querySelector(
+      ".ro-countdown-pill"
+    ) as HTMLDivElement;
+    expect(pill).not.toBeNull();
+
+    // Click pill to expand
+    pill.click();
+    expect(hostResult.isMinimized()).toBe(false);
+    expect(
+      hostResult.root.classList.contains("ro-countdown-host--minimized")
+    ).toBe(false);
+    expect(sessionStorage.getItem("ro_countdown_minimized")).toBe("false");
+    expect(onExpand).toHaveBeenCalledTimes(1);
+
+    hostResult.destroy();
+  });
+
+  it("supports keyboard expansion on pill (Enter and Space)", () => {
+    sessionStorage.clear();
+    const hostResult = mountCountdownHost({
+      targetTime: new Date(2026, 2, 10, 18, 45, 0),
+      position: "bottom-right",
+      hasSound: false,
+      initialMuted: true,
+      initiallyMinimized: true,
+      labels: DEFAULT_COUNTDOWN_LABELS.en,
+      isRtl: false,
+      lang: "en",
+      onDismiss: vi.fn(),
+      onToggleSound: vi.fn(),
+    });
+
+    expect(hostResult.isMinimized()).toBe(true);
+    const pill = hostResult.root.querySelector(
+      ".ro-countdown-pill"
+    ) as HTMLDivElement;
+
+    // Enter key expands
+    pill.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+    );
+    expect(hostResult.isMinimized()).toBe(false);
+
+    // Minimize again
+    hostResult.minimize();
+    expect(hostResult.isMinimized()).toBe(true);
+
+    // Space key expands
+    pill.dispatchEvent(
+      new KeyboardEvent("keydown", { key: " ", bubbles: true })
+    );
+    expect(hostResult.isMinimized()).toBe(false);
+
+    hostResult.destroy();
+  });
+
+  it("respects minimizable: false by not rendering minimize button or pill", () => {
+    const hostResult = mountCountdownHost({
+      targetTime: new Date(2026, 2, 10, 18, 45, 0),
+      position: "bottom-right",
+      hasSound: false,
+      initialMuted: true,
+      minimizable: false,
+      labels: DEFAULT_COUNTDOWN_LABELS.en,
+      isRtl: false,
+      lang: "en",
+      onDismiss: vi.fn(),
+      onToggleSound: vi.fn(),
+    });
+
+    const minBtn = hostResult.root.querySelector(".ro-countdown-minimize-btn");
+    const pill = hostResult.root.querySelector(".ro-countdown-pill");
+
+    expect(minBtn).toBeNull();
+    expect(pill).toBeNull();
+    expect(hostResult.isMinimized()).toBe(false);
+
+    hostResult.minimize();
+    expect(hostResult.isMinimized()).toBe(false);
+
+    hostResult.destroy();
+  });
+
+  it("updates docked pill text during updateDigits and celebration", () => {
+    const hostResult = mountCountdownHost({
+      targetTime: new Date(2026, 2, 10, 18, 45, 0),
+      position: "bottom-right",
+      hasSound: false,
+      initialMuted: true,
+      labels: DEFAULT_COUNTDOWN_LABELS.en,
+      isRtl: false,
+      lang: "en",
+      onDismiss: vi.fn(),
+      onToggleSound: vi.fn(),
+    });
+
+    const pillTime = hostResult.root.querySelector(".ro-countdown-pill-time");
+
+    // 14 minutes, 20 seconds = (14 * 60 + 20) * 1000 = 860000ms
+    hostResult.updateDigits(860000);
+    expect(pillTime?.textContent).toBe("14m 20s");
+
+    // 2 hours, 5 minutes = (2 * 3600 + 5 * 60) * 1000 = 7500000ms
+    hostResult.updateDigits(7500000);
+    expect(pillTime?.textContent).toBe("2h 5m");
+
+    // Celebration
+    hostResult.showCelebration();
+    expect(pillTime?.textContent).toBe(DEFAULT_COUNTDOWN_LABELS.en.celebration);
+
+    hostResult.destroy();
+  });
+
+  it("restores minimized state from sessionStorage when present", () => {
+    sessionStorage.setItem("ro_countdown_minimized", "true");
+
+    const hostResult = mountCountdownHost({
+      targetTime: new Date(2026, 2, 10, 18, 45, 0),
+      position: "bottom-right",
+      hasSound: false,
+      initialMuted: true,
+      labels: DEFAULT_COUNTDOWN_LABELS.en,
+      isRtl: false,
+      lang: "en",
+      onDismiss: vi.fn(),
+      onToggleSound: vi.fn(),
+    });
+
+    expect(hostResult.isMinimized()).toBe(true);
+    expect(
+      hostResult.root.classList.contains("ro-countdown-host--minimized")
+    ).toBe(true);
+
+    hostResult.destroy();
+    sessionStorage.clear();
+  });
 });

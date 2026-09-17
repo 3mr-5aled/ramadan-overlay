@@ -784,4 +784,60 @@ describe("init orchestration & live transition", () => {
       overlay.destroy();
     });
   });
+
+  describe("elevation shadow depth configuration", () => {
+    it("resolves default shadows to 'soft' and injects soft drop-shadow", () => {
+      const overlay = init({ previewMode: true });
+      expect(overlay.config.shadows).toBe("soft");
+      expect(overlay.container?.getAttribute("data-shadows")).toBe("soft");
+      expect(overlay.container?.style.getPropertyValue("--ro-shadow")).toBe(
+        "drop-shadow(0 6px 12px rgba(0, 0, 0, 0.18))"
+      );
+      overlay.destroy();
+    });
+
+    it("resolves explicit shadows: 'deep' with dramatic depth shadow", () => {
+      const overlay = init({ previewMode: true, shadows: "deep" });
+      expect(overlay.config.shadows).toBe("deep");
+      expect(overlay.container?.getAttribute("data-shadows")).toBe("deep");
+      expect(overlay.container?.style.getPropertyValue("--ro-shadow")).toBe(
+        "drop-shadow(0 10px 22px rgba(0, 0, 0, 0.42))"
+      );
+      overlay.destroy();
+    });
+
+    it("resolves explicit shadows: 'none' with none value", () => {
+      const overlay = init({ previewMode: true, shadows: "none" });
+      expect(overlay.config.shadows).toBe("none");
+      expect(overlay.container?.getAttribute("data-shadows")).toBe("none");
+      expect(overlay.container?.style.getPropertyValue("--ro-shadow")).toBe(
+        "none"
+      );
+      overlay.destroy();
+    });
+
+    it("reactively updates shadows via overlay.update() without recreating container", () => {
+      const overlay = init({ previewMode: true, shadows: "soft" });
+      const initialContainer = overlay.container;
+
+      overlay.update({ shadows: "deep" });
+
+      expect(overlay.container).toBe(initialContainer);
+      expect(overlay.config.shadows).toBe("deep");
+      expect(overlay.container?.getAttribute("data-shadows")).toBe("deep");
+      expect(overlay.container?.style.getPropertyValue("--ro-shadow")).toBe(
+        "drop-shadow(0 10px 22px rgba(0, 0, 0, 0.42))"
+      );
+
+      overlay.destroy();
+    });
+
+    it("falls back to 'soft' when an unrecognized shadow string is provided", () => {
+      // @ts-expect-error Testing invalid runtime value
+      const overlay = init({ previewMode: true, shadows: "ultra-shadow" });
+      expect(overlay.config.shadows).toBe("soft");
+      expect(overlay.container?.getAttribute("data-shadows")).toBe("soft");
+      overlay.destroy();
+    });
+  });
 });

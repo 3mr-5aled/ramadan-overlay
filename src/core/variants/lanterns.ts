@@ -361,8 +361,9 @@ export const mountLanterns: VariantMountFn = (
 
   function buildLanternSVG(svgIndex: number, color: string): string {
     const { viewBox, gContent } = LANTERN_SVG_DATA[svgIndex];
-    const coloredG = gContent.replace(/LANTERN_COLOR/g, color);
-    return `<svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${coloredG}</svg>`;
+    const gradId = `ro-flame-${svgIndex}-${color.replace(/[^a-zA-Z0-9]/g, "")}`;
+    const coloredG = gContent.replace(/LANTERN_COLOR/g, `url(#${gradId})`);
+    return `<svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><radialGradient id="${gradId}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fffbe8" stop-opacity="0.95"/><stop offset="35%" stop-color="#fde047" stop-opacity="0.85"/><stop offset="70%" stop-color="${color}" stop-opacity="0.95"/><stop offset="100%" stop-color="${color}" stop-opacity="1"/></radialGradient></defs>${coloredG}</svg>`;
   }
 
   const sidePositions = resolveSidePositions(config.position);

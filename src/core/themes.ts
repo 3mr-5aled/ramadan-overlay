@@ -71,6 +71,32 @@ export const THEME_PRESETS: Record<ThemePreset, ThemeDefinition> = {
     countdownBorder: "rgba(249, 115, 22, 0.35)",
     countdownAccent: "#fde047",
   },
+  "platinum-minimal": {
+    name: "platinum-minimal",
+    colors: ["#e2e8f0", "#94a3b8", "#cbd5e1", "#64748b", "#f8fafc", "#334155"],
+    glowColor: "rgba(226, 232, 240, 0.45)",
+    ceilingColor: "#475569",
+    ropeColor: "#94a3b8",
+    bannerBg: "rgba(15, 23, 42, 0.95)",
+    bannerTextColor: "#f8fafc",
+    bannerIconColor: "#e2e8f0",
+    countdownBg: "rgba(15, 23, 42, 0.95)",
+    countdownBorder: "rgba(148, 163, 184, 0.35)",
+    countdownAccent: "#f8fafc",
+  },
+  "rose-sahara": {
+    name: "rose-sahara",
+    colors: ["#fb7185", "#f43f5e", "#fda4af", "#e11d48", "#fff1f2", "#be123c"],
+    glowColor: "rgba(251, 113, 133, 0.55)",
+    ceilingColor: "#881337",
+    ropeColor: "#e11d48",
+    bannerBg: "rgba(40, 10, 20, 0.95)",
+    bannerTextColor: "#fff1f2",
+    bannerIconColor: "#fb7185",
+    countdownBg: "rgba(40, 10, 20, 0.95)",
+    countdownBorder: "rgba(251, 113, 133, 0.35)",
+    countdownAccent: "#fda4af",
+  },
 };
 
 export const themes = {
@@ -79,6 +105,8 @@ export const themes = {
   emerald: THEME_PRESETS.emerald,
   royal: THEME_PRESETS.royal,
   desertDusk: THEME_PRESETS["desert-dusk"],
+  platinumMinimal: THEME_PRESETS["platinum-minimal"],
+  roseSahara: THEME_PRESETS["rose-sahara"],
 };
 
 export function resolveTheme(

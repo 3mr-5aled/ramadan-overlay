@@ -86,13 +86,27 @@ export type LayerStacking = "foreground" | "background";
  */
 export type RopeStyle = "straight" | "u-shaped" | "dual";
 
+/**
+ * Physical elevation occlusion shadow depth for lanterns, ropes, and motifs.
+ * - 'none': Emissive glow only (flat minimalist).
+ * - 'soft': Subtle realistic depth shadow (default).
+ * - 'deep': Dramatic high-contrast depth shadow.
+ */
+export type ShadowMode = "none" | "soft" | "deep";
+
 // ─── Visual Theme Types ──────────────────────────────────────────────────────
 
 /**
  * Built-in cultural theme presets.
  */
 export type ThemePreset =
-  "classic" | "midnight" | "emerald" | "royal" | "desert-dusk";
+  | "classic"
+  | "midnight"
+  | "emerald"
+  | "royal"
+  | "desert-dusk"
+  | "platinum-minimal"
+  | "rose-sahara";
 
 /**
  * Complete visual theme definition schema.
@@ -162,6 +176,15 @@ export interface RamadanOverlayConfig {
    * @default 0.85
    */
   opacity?: number;
+
+  /**
+   * Physical elevation occlusion shadow depth for lanterns, ropes, and floating motifs.
+   * - 'none': Emissive glow only (flat minimalist).
+   * - 'soft': Subtle realistic depth shadow (default).
+   * - 'deep': Dramatic high-contrast depth shadow.
+   * @default 'soft'
+   */
+  shadows?: ShadowMode;
 
   /**
    * Custom color palette (CSS color strings). Falls back to Ramadan defaults.
@@ -484,6 +507,8 @@ export interface IftarCountdownLabels {
   seconds: string;
   celebration: string;
   dismissButton: string;
+  minimizeButton: string;
+  expandButton: string;
   muteButton: string;
   unmuteButton: string;
   playButton: string;
@@ -517,6 +542,18 @@ export interface IftarCountdownConfig {
    * @default 'bottom-right'
    */
   position?: CountdownAnchorPosition;
+
+  /**
+   * Whether the countdown widget can be collapsed into a compact docked pill.
+   * @default true
+   */
+  minimizable?: boolean;
+
+  /**
+   * Whether the widget starts in the minimized docked pill state.
+   * @default false
+   */
+  initiallyMinimized?: boolean;
 
   /**
    * Number of minutes after Iftar arrives before the widget automatically dismisses and unmounts.
@@ -581,6 +618,9 @@ export interface IftarCountdownConfig {
 export interface IftarCountdownController {
   show: () => void;
   dismiss: () => void;
+  minimize?: () => void;
+  expand?: () => void;
+  isMinimized?: () => boolean;
   toggleMute: () => boolean;
   isMuted: () => boolean;
   getTargetTime: () => Date | null;

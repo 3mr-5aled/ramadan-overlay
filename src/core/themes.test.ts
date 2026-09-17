@@ -3,7 +3,7 @@ import { resolveTheme, THEME_PRESETS, themes } from "./themes";
 import type { ThemeDefinition } from "../types";
 
 describe("Theme Resolution Engine", () => {
-  it("exports THEME_PRESETS and themes dictionary with all 5 ratified presets", () => {
+  it("exports THEME_PRESETS and themes dictionary with all 7 ratified presets", () => {
     expect(THEME_PRESETS).toBeDefined();
     expect(themes).toBeDefined();
 
@@ -13,6 +13,8 @@ describe("Theme Resolution Engine", () => {
       "emerald",
       "royal",
       "desert-dusk",
+      "platinum-minimal",
+      "rose-sahara",
     ];
 
     expectedPresets.forEach((name) => {
@@ -24,6 +26,8 @@ describe("Theme Resolution Engine", () => {
     expect(themes.emerald).toBe(THEME_PRESETS.emerald);
     expect(themes.royal).toBe(THEME_PRESETS.royal);
     expect(themes.desertDusk).toBe(THEME_PRESETS["desert-dusk"]);
+    expect(themes.platinumMinimal).toBe(THEME_PRESETS["platinum-minimal"]);
+    expect(themes.roseSahara).toBe(THEME_PRESETS["rose-sahara"]);
   });
 
   it("resolves classic preset by default when themeOption is omitted", () => {
@@ -85,6 +89,18 @@ describe("Theme Resolution Engine", () => {
     expect(desertDusk.name).toBe("desert-dusk");
     expect(desertDusk.colors[0]).toBe("#f97316");
     expect(desertDusk.glowColor).toBe("rgba(249, 115, 22, 0.55)");
+
+    const platinum = resolveTheme("platinum-minimal");
+    expect(platinum.name).toBe("platinum-minimal");
+    expect(platinum.colors[0]).toBe("#e2e8f0");
+    expect(platinum.glowColor).toBe("rgba(226, 232, 240, 0.45)");
+    expect(platinum.countdownAccent).toBe("#f8fafc");
+
+    const rose = resolveTheme("rose-sahara");
+    expect(rose.name).toBe("rose-sahara");
+    expect(rose.colors[0]).toBe("#fb7185");
+    expect(rose.glowColor).toBe("rgba(251, 113, 133, 0.55)");
+    expect(rose.countdownAccent).toBe("#fda4af");
   });
 
   it("falls back to classic preset when unknown string preset is provided", () => {

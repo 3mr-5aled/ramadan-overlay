@@ -11,6 +11,7 @@ import type {
   RamadanState,
   ResolvedConfig,
   RopeStyle,
+  ShadowMode,
   ThemeOption,
   ThemePreset,
 } from "../types";
@@ -41,7 +42,11 @@ const VALID_THEMES: readonly ThemePreset[] = [
   "emerald",
   "royal",
   "desert-dusk",
+  "platinum-minimal",
+  "rose-sahara",
 ];
+
+const VALID_SHADOW_MODES: readonly ShadowMode[] = ["none", "soft", "deep"];
 
 const VALID_VARIANTS: readonly OverlayVariant[] = [
   "lanterns",
@@ -387,6 +392,14 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
   const zIndex = clampNumber(userConfig.zIndex, -2147483648, 2147483647, 9999);
   const ropeSag = clampNumber(userConfig.ropeSag, 6, 60, 20);
 
+  const shadows = sanitizeStringUnion(
+    userConfig.shadows,
+    VALID_SHADOW_MODES,
+    "soft",
+    "shadows",
+    debug
+  );
+
   const defaultClearance: ClearanceMode = [
     "crescent-stars",
     "eid",
@@ -459,6 +472,7 @@ function resolveConfig(userConfig: RamadanOverlayConfig): ResolvedConfig {
     mountTarget,
     mobileSideBehavior,
     opacity,
+    shadows,
     colors: resolvedTheme.colors,
     zIndex,
     autoTrigger: userConfig.autoTrigger ?? true,

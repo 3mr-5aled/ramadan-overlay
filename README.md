@@ -84,6 +84,34 @@ overlay.destroy();
 
 ---
 
+## 🤖 AI Agent Quick Start
+
+Building with Cursor, Claude Code, GitHub Copilot, Windsurf, or Google Antigravity? Paste this prompt into your agent to automatically integrate and configure `ramadan-overlay` in your project:
+
+> **Copy & Paste Prompt for your AI Coding Agent:**
+>
+> ```markdown
+> Install and integrate `ramadan-overlay` into this project.
+>
+> Preferred setup:
+>
+> - Auto-detect Ramadan and Eid holidays (with previewMode: true for development).
+> - Variant: 'lanterns' (or 'crescent-stars').
+> - Shadows: 'soft' (or 'deep' for dark mode / 'none' for flat minimalist).
+> - Theme: 'classic' (options: 'classic', 'midnight', 'emerald', 'royal', 'desert-dusk', 'platinum-minimal', 'rose-sahara').
+> - Optional Iftar Countdown widget with minimizable docked pill mode.
+>
+> Instructions for the Agent:
+>
+> 1. Inspect the codebase to detect the active front-end framework (React/Next.js, Vue/Nuxt, Angular, Svelte, or plain HTML).
+> 2. Install `ramadan-overlay` via the project package manager (npm, pnpm, yarn, bun).
+> 3. Mount the overlay at the root layout or main application entry point.
+> 4. Review configuration options with the developer before finalizing changes.
+> 5. Run the dev server to verify decorations render cleanly without causing layout shifts.
+> ```
+
+---
+
 ## 🎨 Variants
 
 | Variant          | Description                                                                         |
@@ -103,17 +131,33 @@ overlay.destroy();
 
 ### General
 
-| Option       | Type             | Default                               | Description                                                                                                                              |
-| ------------ | ---------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `variant`    | `OverlayVariant` | `'lanterns'`                          | Visual decoration style (`'lanterns'`, `'sparkles'`, `'crescent-stars'`, `'geometric'`, `'eid'`, `'eid-fitr'`, `'eid-adha'`, `'banner'`) |
-| `occasions`  | `Occasion[]`     | `['ramadan', 'eid-fitr', 'eid-adha']` | Filter which occasions display decorations                                                                                               |
-| `eidVariant` | `OverlayVariant` | `'eid'`                               | Visual variant to render during Eid when `variant` is Ramadan-specific                                                                   |
-| `position`   | `string`         | `'both'`                              | `'top'` \| `'bottom'` \| `'both'` \| `'full'`                                                                                            |
-| `opacity`    | `number`         | `0.85`                                | Overlay opacity `0`–`1`                                                                                                                  |
-| `colors`     | `string[]`       | Festive palette                       | Custom CSS color array                                                                                                                   |
-| `density`    | `string`         | auto                                  | `'low'` \| `'normal'` \| `'high'` — defaults to `'low'` on mobile, `'normal'` on desktop                                                 |
-| `zIndex`     | `number`         | `9999`                                | CSS z-index of the overlay                                                                                                               |
-| `locale`     | `string`         | `'en'`                                | `'en'` \| `'ar'`                                                                                                                         |
+| Option       | Type                         | Default                               | Description                                                                                                                              |
+| ------------ | ---------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `variant`    | `OverlayVariant`             | `'lanterns'`                          | Visual decoration style (`'lanterns'`, `'sparkles'`, `'crescent-stars'`, `'geometric'`, `'eid'`, `'eid-fitr'`, `'eid-adha'`, `'banner'`) |
+| `theme`      | `ThemeOption`                | `'classic'`                           | Predefined visual theme preset or custom theme object (see Theme Presets below)                                                          |
+| `shadows`    | `'none' \| 'soft' \| 'deep'` | `'soft'`                              | Physical elevation shadow depth for lanterns, ropes, and floating motifs (`'none'`, `'soft'`, `'deep'`)                                  |
+| `occasions`  | `Occasion[]`                 | `['ramadan', 'eid-fitr', 'eid-adha']` | Filter which occasions display decorations                                                                                               |
+| `eidVariant` | `OverlayVariant`             | `'eid'`                               | Visual variant to render during Eid when `variant` is Ramadan-specific                                                                   |
+| `position`   | `string`                     | `'both'`                              | `'top'` \| `'bottom'` \| `'both'` \| `'full'`                                                                                            |
+| `opacity`    | `number`                     | `0.85`                                | Overlay opacity `0`–`1`                                                                                                                  |
+| `colors`     | `string[]`                   | Festive palette                       | Custom CSS color array                                                                                                                   |
+| `density`    | `string`                     | auto                                  | `'low'` \| `'normal'` \| `'high'` — defaults to `'low'` on mobile, `'normal'` on desktop                                                 |
+| `zIndex`     | `number`                     | `9999`                                | CSS z-index of the overlay                                                                                                               |
+| `locale`     | `string`                     | `'en'`                                | `'en'` \| `'ar'`                                                                                                                         |
+
+### Theme Presets
+
+Harmonize lanterns, ropes, glowing halos, banners, and widgets with 7 designer presets:
+
+| Preset             | Accent / Glow                 | Ceiling / Rope   | Character                                         |
+| ------------------ | ----------------------------- | ---------------- | ------------------------------------------------- |
+| `classic`          | Warm Gold (`#c9a84c`)         | Classic Gold     | Traditional warm celebratory ambiance _(default)_ |
+| `midnight`         | Sapphire Blue (`#3a6ab8`)     | Deep Indigo      | Serene night-sky aesthetic                        |
+| `emerald`          | Jade Green (`#2d5a27`)        | Olive Jade       | Heritage Islamic geometric aesthetic              |
+| `royal`            | Regal Amethyst (`#6b2fa0`)    | Deep Violet      | Majestic evening celebration                      |
+| `desert-dusk`      | Sunset Amber (`#d97706`)      | Warm Terracotta  | Warm desert dusk glow                             |
+| `platinum-minimal` | Silver / Platinum (`#e2e8f0`) | Slate Grey       | Modern high-contrast clean monochrome aesthetic   |
+| `rose-sahara`      | Rose Gold (`#fb7185`)         | Warm Desert Sand | Contemporary warm sunset palette                  |
 
 ### Behaviour
 
@@ -167,6 +211,34 @@ overlay.destroy();
 | `bannerIconColor` | `string` | `colors[1]`               | Color of the icon beside the text                             |
 | `bannerTextEn`    | `string` | built-in English greeting | Custom English greeting (defaults to Ramadan or Eid Mubarak)  |
 | `bannerTextAr`    | `string` | built-in Arabic greeting  | Custom Arabic greeting (defaults to رمضان مبارك or عيد مبارك) |
+
+### Iftar Countdown Widget
+
+Display an interactive countdown card and docked pill prior to daily Iftar / Maghrib:
+
+| Option               | Type                         | Default          | Description                                                                       |
+| -------------------- | ---------------------------- | ---------------- | --------------------------------------------------------------------------------- |
+| `iftarTime`          | `string \| Date \| Function` | `'18:45'`        | Target Iftar time: `"HH:mm"`, ISO string, Date object, or dynamic resolver        |
+| `alertWindowMinutes` | `number`                     | `30`             | Number of minutes prior to Iftar when the countdown becomes visible               |
+| `minimizable`        | `boolean`                    | `true`           | Whether the widget can collapse into a compact docked pill (`🌙 18:45 · 14m 20s`) |
+| `initiallyMinimized` | `boolean`                    | `false`          | Start in the docked pill state (persisted in `sessionStorage`)                    |
+| `position`           | `string`                     | `'bottom-right'` | Anchor corner: `'bottom-right'`, `'bottom-left'`, `'top-right'`, `'top-left'`     |
+| `soundUrl`           | `string`                     | `undefined`      | Optional audio chime or Adhan URL triggered at T-0                                |
+| `defaultMuted`       | `boolean`                    | `true`           | Whether audio alerts start muted by default                                       |
+| `confetti`           | `boolean`                    | `true`           | Celebrate T-0 with celebratory confetti flare                                     |
+
+```ts
+init({
+  variant: "lanterns",
+  theme: "classic",
+  shadows: "soft",
+  countdown: {
+    iftarTime: "18:45",
+    alertWindowMinutes: 30,
+    minimizable: true,
+  },
+});
+```
 
 ### Callbacks
 

@@ -234,6 +234,67 @@ export function injectCountdownStyles(): void {
   border-width: 0;
 }
 
+.ro-countdown-pill {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: var(--ro-countdown-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--ro-countdown-border);
+  border-radius: 9999px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  padding: 8px 14px;
+  cursor: pointer;
+  color: var(--ro-countdown-text);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  user-select: none;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ro-countdown-pill:hover {
+  transform: scale(1.04);
+  border-color: var(--ro-countdown-gold);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 12px rgba(245, 158, 11, 0.2);
+}
+
+.ro-countdown-pill:focus-visible {
+  outline: 2px solid var(--ro-countdown-gold);
+  outline-offset: 2px;
+}
+
+.ro-countdown-pill-badge {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.ro-countdown-pill-target {
+  font-size: 12px;
+  color: var(--ro-countdown-muted);
+}
+
+.ro-countdown-pill-sep {
+  font-size: 12px;
+  color: var(--ro-countdown-muted);
+}
+
+.ro-countdown-pill-time {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ro-countdown-gold);
+}
+
+.ro-countdown-host--minimized .ro-countdown-card {
+  display: none;
+}
+
+.ro-countdown-host--minimized .ro-countdown-pill {
+  display: flex;
+}
+
 @media (prefers-reduced-motion: reduce) {
   #ramadan-countdown-root * {
     animation: none !important;
@@ -254,12 +315,16 @@ export interface MountCountdownHostOptions {
   isBannerTopActive?: boolean;
   hasSound: boolean;
   initialMuted: boolean;
+  minimizable?: boolean;
+  initiallyMinimized?: boolean;
   labels: IftarCountdownLabels;
   isRtl: boolean;
   lang: string;
   onDismiss: () => void;
   onToggleSound: () => void;
   onPlayAlert?: () => void;
+  onMinimize?: () => void;
+  onExpand?: () => void;
 }
 
 export interface CountdownHostResult {
@@ -269,6 +334,9 @@ export interface CountdownHostResult {
   triggerCelebrationFlare: () => void;
   endCelebration: () => void;
   updateSoundButton: (muted: boolean, isBlocked?: boolean) => void;
+  minimize: () => void;
+  expand: () => void;
+  isMinimized: () => boolean;
   announcer: MilestoneAnnouncer;
   destroy: () => void;
 }
@@ -360,6 +428,22 @@ export function mountCountdownHost(
     actions.appendChild(soundBtn);
   }
 
+  // Minimize button
+  const minimizable = options.minimizable !== false;
+  let minBtn: HTMLButtonElement | null = null;
+  if (minimizable) {
+    minBtn = document.createElement("button");
+    minBtn.type = "button";
+    minBtn.className = "ro-countdown-btn ro-countdown-minimize-btn";
+    minBtn.setAttribute("aria-label", options.labels.minimizeButton);
+    minBtn.innerHTML = '<span class="ro-countdown-icon">−</span>';
+    minBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      minimize();
+    });
+    actions.appendChild(minBtn);
+  }
+
   // Dismiss button
   const closeBtn = document.createElement("button");
   closeBtn.type = "button";
@@ -444,8 +528,105 @@ export function mountCountdownHost(
   announcerEl.setAttribute("aria-atomic", "true");
   card.appendChild(announcerEl);
 
+  // Docked Pill
+  let pill: HTMLDivElement | null = null;
+  let pillTime: HTMLSpanElement | null = null;
+  if (minimizable) {
+    pill = document.createElement("div");
+    pill.className = "ro-countdown-pill";
+    pill.setAttribute("role", "button");
+    pill.setAttribute("tabindex", "0");
+    pill.setAttribute("aria-label", options.labels.expandButton);
+
+    const pillBadge = document.createElement("span");
+    pillBadge.className = "ro-countdown-pill-badge";
+    pillBadge.textContent = "🌙";
+
+    const pillTarget = document.createElement("span");
+    pillTarget.className = "ro-countdown-pill-target";
+    pillTarget.textContent = timeString;
+
+    const pillSep = document.createElement("span");
+    pillSep.className = "ro-countdown-pill-sep";
+    pillSep.textContent = "·";
+
+    pillTime = document.createElement("span");
+    pillTime.className = "ro-countdown-pill-time";
+    pillTime.textContent = "--:--";
+
+    pill.appendChild(pillBadge);
+    pill.appendChild(pillTarget);
+    pill.appendChild(pillSep);
+    pill.appendChild(pillTime);
+
+    pill.addEventListener("click", () => {
+      expand();
+    });
+
+    pill.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        expand();
+      }
+    });
+
+    root.appendChild(pill);
+  }
+
   root.appendChild(card);
   document.body.appendChild(root);
+
+  let isMinimizedState = false;
+
+  const minimize = (): void => {
+    if (!minimizable) return;
+    isMinimizedState = true;
+    root.classList.add("ro-countdown-host--minimized");
+    try {
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem("ro_countdown_minimized", "true");
+      }
+    } catch {
+      // Ignore storage errors
+    }
+    options.onMinimize?.();
+  };
+
+  const expand = (): void => {
+    if (!minimizable) return;
+    isMinimizedState = false;
+    root.classList.remove("ro-countdown-host--minimized");
+    try {
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem("ro_countdown_minimized", "false");
+      }
+    } catch {
+      // Ignore storage errors
+    }
+    options.onExpand?.();
+  };
+
+  const isMinimized = (): boolean => isMinimizedState;
+
+  if (minimizable) {
+    let shouldMinimize = options.initiallyMinimized ?? false;
+    try {
+      if (typeof sessionStorage !== "undefined") {
+        const stored = sessionStorage.getItem("ro_countdown_minimized");
+        if (stored === "true") {
+          shouldMinimize = true;
+        } else if (stored === "false") {
+          shouldMinimize = false;
+        }
+      }
+    } catch {
+      // Ignore storage errors
+    }
+
+    if (shouldMinimize) {
+      minimize();
+    }
+  }
 
   const cleanupKeyboard = attachKeyboardNavigation(root, options.onDismiss);
   const announcer = new MilestoneAnnouncer(announcerEl, options.labels);
@@ -460,11 +641,25 @@ export function mountCountdownHost(
     mVal.textContent = String(minutes).padStart(2, "0");
     sVal.textContent = String(seconds).padStart(2, "0");
 
+    if (pillTime && !card.classList.contains("ro-countdown--celebrating")) {
+      if (hours > 0) {
+        pillTime.textContent = `${hours}h ${minutes}m`;
+      } else {
+        pillTime.textContent = `${minutes}m ${String(seconds).padStart(2, "0")}s`;
+      }
+    }
+
     announcer.checkMilestone(remainingMs);
   };
 
   const triggerCelebrationFlare = (): void => {
     card.classList.add("ro-countdown--celebrating");
+    if (pill) {
+      pill.classList.add("ro-countdown--celebrating");
+      if (pillTime) {
+        pillTime.textContent = options.labels.celebration;
+      }
+    }
     digits.style.display = "none";
     celebration.style.display = "flex";
     announcer.checkMilestone(0);
@@ -472,6 +667,9 @@ export function mountCountdownHost(
 
   const endCelebration = (): void => {
     card.classList.remove("ro-countdown--celebrating");
+    if (pill) {
+      pill.classList.remove("ro-countdown--celebrating");
+    }
     celebration.style.display = "none";
     digits.style.display = "flex";
   };
@@ -508,6 +706,9 @@ export function mountCountdownHost(
     triggerCelebrationFlare,
     endCelebration,
     updateSoundButton,
+    minimize,
+    expand,
+    isMinimized,
     announcer,
     destroy,
   };

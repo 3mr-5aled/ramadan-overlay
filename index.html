@@ -845,7 +845,22 @@
             <option value="emerald">Emerald (Jade &amp; Gold)</option>
             <option value="royal">Royal (Amethyst)</option>
             <option value="desert-dusk">Desert Dusk (Amber)</option>
+            <option value="platinum-minimal">
+              Platinum Minimal (Silver &amp; Slate)
+            </option>
+            <option value="rose-sahara">
+              Rose Sahara (Rose Gold &amp; Sand)
+            </option>
             <option value="custom">Custom (Manual)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Shadows</label>
+          <select id="shadowsSelect">
+            <option value="soft" selected>Soft (Default)</option>
+            <option value="deep">Deep (Dramatic)</option>
+            <option value="none">None (Flat)</option>
           </select>
         </div>
 
@@ -1361,6 +1376,7 @@
           <button class="code-tab" data-tab="angular">Angular</button>
           <button class="code-tab" data-tab="svelte">Svelte</button>
           <button class="code-tab" data-tab="cdn">Script tag</button>
+          <button class="code-tab" data-tab="ai">🤖 AI Prompt</button>
         </div>
         <pre
           class="code-box"
@@ -1572,6 +1588,7 @@
             opacity: parseFloat(document.getElementById("opacityRange").value),
             confetti: document.getElementById("confettiSelect").value,
             locale: document.getElementById("localeSelect").value,
+            shadows: document.getElementById("shadowsSelect")?.value || "soft",
             clearance:
               document.getElementById("clearanceSelect")?.value || "edges",
             layer:
@@ -1793,13 +1810,42 @@
           if (activeTab === "cdn") {
             return `<script src="https://cdn.jsdelivr.net/npm/ramadan-overlay/dist/ramadan-overlay.min.js"><\/script>\n<script>\n  RamadanOverlay.init(${obj});\n<\/script>`;
           }
+          if (activeTab === "ai") {
+            return `Install and integrate \`ramadan-overlay\` into this project.
+
+Here is the desired configuration:
+\`\`\`ts
+import { init } from 'ramadan-overlay';
+
+const overlay = init(${obj});
+\`\`\`
+
+Instructions for the Agent:
+1. Inspect this codebase to identify the front-end framework (React, Next.js, Vue, Nuxt, Angular, Svelte, or plain HTML/JS).
+2. Install \`ramadan-overlay\` using the project's package manager (npm, pnpm, yarn, or bun).
+3. Mount the component or call \`init()\` at the root layout or main application entry point.
+4. Review configuration options (such as theme presets, elevation shadows, and the Iftar countdown widget) with the developer.
+5. Run the dev server or test suite to verify visual decorations appear cleanly without layout shift.`;
+          }
           return "";
         }
 
         function updateCodeBox(cfg) {
           const raw = buildCode(cfg);
-          document.getElementById("codeBox").innerHTML = syntaxHighlight(raw);
+          if (activeTab === "ai") {
+            document.getElementById("codeBox").innerHTML = raw
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;");
+          } else {
+            document.getElementById("codeBox").innerHTML = syntaxHighlight(raw);
+          }
           document.getElementById("codeBox").dataset.raw = raw;
+          const copyBtn = document.getElementById("copyBtn");
+          if (copyBtn && !copyBtn.classList.contains("copied")) {
+            copyBtn.textContent =
+              activeTab === "ai" ? "📋 Copy prompt" : "📋 Copy code";
+          }
         }
 
         function mount(withConfetti = false) {
@@ -1908,6 +1954,10 @@
             if (cfg.layer) {
               const el = document.getElementById("layerSelect");
               if (el) el.value = cfg.layer;
+            }
+            if (cfg.shadows) {
+              const el = document.getElementById("shadowsSelect");
+              if (el) el.value = cfg.shadows;
             }
             if (cfg.occasions) {
               const occStr = Array.isArray(cfg.occasions)
@@ -2083,7 +2133,7 @@
           });
         });
 
-        // ── Copy code ──
+        // ── Copy code / prompt ──
         document.getElementById("copyBtn").addEventListener("click", () => {
           const raw = document.getElementById("codeBox").dataset.raw || "";
           navigator.clipboard.writeText(raw).then(() => {
@@ -2091,7 +2141,8 @@
             btn.textContent = "✅ Copied!";
             btn.classList.add("copied");
             setTimeout(() => {
-              btn.textContent = "📋 Copy code";
+              btn.textContent =
+                activeTab === "ai" ? "📋 Copy prompt" : "📋 Copy code";
               btn.classList.remove("copied");
             }, 2000);
           });
