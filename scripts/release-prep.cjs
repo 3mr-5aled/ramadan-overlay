@@ -92,6 +92,19 @@ function calculateNextVersion(currentVersion, bumpType) {
 }
 
 /**
+ * Remove GIT_* environment variables that may leak from git hooks or parent git processes.
+ */
+function getCleanGitEnv() {
+  const cleanEnv = { ...process.env };
+  for (const key of Object.keys(cleanEnv)) {
+    if (key.startsWith("GIT_")) {
+      delete cleanEnv[key];
+    }
+  }
+  return cleanEnv;
+}
+
+/**
  * Check if the git working tree is clean.
  * @param {string} [dir]
  * @returns {boolean}
@@ -101,6 +114,7 @@ function checkGitClean(dir = ROOT_DIR) {
     const status = execSync("git status --porcelain", {
       cwd: dir,
       encoding: "utf-8",
+      env: getCleanGitEnv(),
     });
     return status.trim().length === 0;
   } catch {

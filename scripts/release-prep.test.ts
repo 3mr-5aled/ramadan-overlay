@@ -67,15 +67,23 @@ describe("release-prep utility", () => {
   describe("checkGitClean", () => {
     it("detects dirty state when uncommitted files exist in a git repository", () => {
       const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "git-clean-test-"));
+      const cleanEnv = { ...process.env };
+      for (const key of Object.keys(cleanEnv)) {
+        if (key.startsWith("GIT_")) {
+          delete cleanEnv[key];
+        }
+      }
       try {
-        execSync("git init", { cwd: tempDir, stdio: "ignore" });
+        execSync("git init", { cwd: tempDir, stdio: "ignore", env: cleanEnv });
         execSync("git config user.name 'Test'", {
           cwd: tempDir,
           stdio: "ignore",
+          env: cleanEnv,
         });
         execSync("git config user.email 'test@test.com'", {
           cwd: tempDir,
           stdio: "ignore",
+          env: cleanEnv,
         });
 
         // Initially clean
@@ -89,6 +97,7 @@ describe("release-prep utility", () => {
         execSync("git add . && git commit -m 'initial'", {
           cwd: tempDir,
           stdio: "ignore",
+          env: cleanEnv,
         });
         expect(checkGitClean(tempDir)).toBe(true);
       } finally {

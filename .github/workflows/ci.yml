@@ -42,14 +42,14 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Run test suite
-        run: npm run test
-
       - name: Build library bundles
         run: npm run build
 
       - name: Build demo showcase
         run: npm run build:demo
+
+      - name: Run test suite
+        run: npm run test
 
       - name: Verify build artifacts
         run: |
