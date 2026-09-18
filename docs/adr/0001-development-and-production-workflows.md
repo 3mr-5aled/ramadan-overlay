@@ -22,5 +22,5 @@ We establish three dedicated, modular GitHub Actions workflows alongside a local
 ## Consequences
 
 - GitHub Pages must be configured to source from "GitHub Actions".
-- npm publishing requires an `NPM_TOKEN` secret configured in repository secrets with publication permissions.
+- npm publishing uses npm Trusted Publishing via OIDC (`id-token: write`), eliminating static secret tokens and interactive 2FA friction.
 - Staged Git commits will no longer track compiled demo bundles in the root.

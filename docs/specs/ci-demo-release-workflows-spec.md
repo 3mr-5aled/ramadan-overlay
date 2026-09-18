@@ -41,8 +41,7 @@ Establish a modular, least-privilege GitHub Actions CI/CD infrastructure paired 
 - **Modular Workflow Architecture**: Three independent workflow files (`.github/workflows/ci.yml`, `.github/workflows/deploy-demo.yml`, `.github/workflows/release.yml`) rather than a monolithic workflow, upholding the principle of least privilege.
 - **Fail-Fast Tag Synchronization**: The release pipeline enforces that `refs/tags/v${VERSION}` strictly equals the `"version"` field in `package.json` before building or publishing.
 - **Pure Artifact Demo Build**: `package.json` script `"build:demo"` is modified from `"vite build demo && node demo/sync-to-root.cjs"` to `"vite build demo"`. `demo/sync-to-root.cjs` is deleted.
-- **GitHub Pages Configuration**: Deployment relies on GitHub Pages set to "GitHub Actions" source with environment name `github-pages`.
-- **npm Publishing Configuration**: Uses `npm publish --provenance --access public` with `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}` and `id-token: write` permission.
+- **npm Publishing Configuration**: Uses npm Trusted Publishing with OIDC (`npm publish --provenance --access public`, `id-token: write`, and Node 22), removing the need for static tokens and eliminating 2FA/OTP failures in CI.
 - **Local Release Script**: `scripts/release-prep.cjs` provides an interactive/CLI workflow supporting `--dry-run`, ensuring uncommitted changes prevent tagging.
 
 ## Testing Decisions
@@ -60,5 +59,4 @@ Establish a modular, least-privilege GitHub Actions CI/CD infrastructure paired 
 
 ## Further Notes
 
-- Maintains alignment with ADR 0001 (`docs/adr/0001-development-and-production-workflows.md`).
-- Maintainers must add `NPM_TOKEN` to repository secrets and configure repository Settings -> Pages -> Source to "GitHub Actions".
+- Maintainers configure npm Trusted Publishing on npmjs.com targeting repository `3mr-5aled/ramadan-overlay` and workflow `release.yml`, and configure repository Settings -> Pages -> Source to "GitHub Actions".
