@@ -63,11 +63,12 @@
     "build:watch": "tsup --watch",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx,.svelte",
+    "lint": "npx prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
     "demo": "vite demo",
-    "build:demo": "vite build demo && node demo/sync-to-root.cjs",
+    "build:demo": "vite build demo",
+    "release:prep": "node scripts/release-prep.cjs",
     "prepare": "husky"
   },
   "dependencies": {

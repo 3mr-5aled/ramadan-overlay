@@ -1,0 +1,61 @@
+name: Release & Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish to npm & GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Validate tag matches package.json version
+        run: node scripts/release-prep.cjs --validate-tag "${GITHUB_REF_NAME}"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint source
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run test suite
+        run: npm run test
+
+      - name: Build production bundles
+        run: npm run build
+
+      - name: Publish to npmjs with provenance
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ramadan-overlay.min.js
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
