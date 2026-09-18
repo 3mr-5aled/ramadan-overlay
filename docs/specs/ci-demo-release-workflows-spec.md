@@ -23,7 +23,7 @@ Establish a modular, least-privilege GitHub Actions CI/CD infrastructure paired 
 
 ## User Stories
 
-1. As a maintainer, I want every pull request automatically tested against Node.js 18, 20, and 22, so that regressions across supported runtimes are caught before merge.
+1. As a maintainer, I want every pull request automatically tested against Node.js 20 and 22, so that regressions across supported runtimes are caught before merge.
 2. As a maintainer, I want stale in-progress CI runs automatically cancelled when new commits are pushed, so that GitHub Actions concurrency minutes are conserved.
 3. As a developer, I want `npx prettier --check .`, `npm run lint`, and `npm run typecheck` run in CI, so that style and typing rules are strictly enforced.
 4. As a developer, I want both the core library (`npm run build`) and demo showcase (`npm run build:demo`) compiled in CI, so that build failures are identified before release.

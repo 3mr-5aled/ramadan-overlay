@@ -58,6 +58,9 @@
     "assets/previews"
   ],
   "sideEffects": false,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "build": "tsup",
     "build:watch": "tsup --watch",
