@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-09-18
+
+### Added
+
+- **Multi-LTS Continuous Integration (CI)**: Automated GitHub Actions CI workflow running linting, typechecking, test suites, and bundle compilation on pull requests and pushes to `main` across Node.js 20 and 22.
+- **Automated GitHub Pages Showcase Deployment**: Direct artifact deployment (`dist-demo/`) to GitHub Pages on every merge to `main` via official Actions artifacts.
+- **Cryptographic Release Pipeline**: Tag-triggered automated npm publishing with cryptographic build provenance (`--provenance --access public`) and GitHub Release creation attaching the standalone CDN bundle (`ramadan-overlay.min.js`).
+- **Release Preparation Utility**: Interactive CLI tool (`scripts/release-prep.cjs`, `npm run release:prep`) ensuring clean Git trees, semantic version validation, pre-flight gates, and matching tag creation.
+- **Node Engine Specifications**: Added `"engines": { "node": ">=20.0.0" }` in `package.json` aligning with active LTS runtimes and `jsdom@28.1.0`.
+
+### Changed
+
+- **Pure Artifact Demo Build**: Modified `npm run build:demo` to output cleanly to `dist-demo/` without root Git working tree pollution, removing legacy `demo/sync-to-root.cjs`.
+- **Vitest Source Resolution**: Added source module aliases in `vitest.config.ts` so tests can execute against TypeScript sources in clean checkouts without requiring a pre-built `dist/` folder.
+
+### Fixed
+
+- **Module Resolution in Clean Clones**: Resolved `ramadan-overlay/react` import failure in `demo/src/App.test.tsx` when running tests prior to bundle generation.
+- **Git Hook Environment Isolation**: Prevented `GIT_*` environment variables from leaking into test subshells during pre-commit execution.
+
 ## [0.7.0] - 2026-09-17
 
 ### Added
@@ -50,5 +70,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Framework wrappers for React, Vue 3, Angular, and Svelte.
 - Standalone zero-dependency browser bundle (`dist/ramadan-overlay.min.js`).
 
+[0.8.0]: https://github.com/3mr-5aled/ramadan-overlay/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/3mr-5aled/ramadan-overlay/compare/v0.1.0...v0.7.0
 [0.1.0]: https://github.com/3mr-5aled/ramadan-overlay/releases/tag/v0.1.0
